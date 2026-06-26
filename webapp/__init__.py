@@ -1,0 +1,1 @@
+"""FARI web application package."""

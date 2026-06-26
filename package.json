@@ -1,0 +1,10 @@
+{
+  "name": "fari-web-ui",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i webapp/static/tailwind-input.css -o webapp/static/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}

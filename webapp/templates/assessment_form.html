@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_macros.html" import phase_timeline %}
+{% macro help_text(text, example='') -%}
+<p class="mt-2 text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0">{{ text }}{% if example %} Example: <span class="font-semibold">{{ example }}</span>{% endif %}</p>
+{%- endmacro %}
+{% block title %}Create Frame | FARI{% endblock %}
+{% block content %}
+<div id="frame" class="mb-8 scroll-mt-24">
+  <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Step 1 · Frame</p>
+  <h1 class="mt-2 text-4xl font-black tracking-tight">Create an assessment Frame</h1>
+  <p class="mt-3 max-w-3xl text-latte-subtext0 dark:text-mocha-subtext0">Define the client, mission context, and boundaries that give every later conclusion meaning. A strong Frame reads like a defensible assessment brief, not just an internal note.</p>
+</div>
+{{ phase_timeline(phases) }}
+
+<form method="post" class="space-y-5">
+  <section class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle sm:p-8">
+    <h2 class="text-xl font-black">Client and assessment</h2>
+    <div class="mt-5 grid gap-5 md:grid-cols-2">
+      <div>
+        <label class="text-xs font-bold uppercase tracking-wide">Client name <input name="client_name" required value="{{ form_value('client_name') }}" placeholder="Orbital Dynamics S.A. de C.V." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue"></label>
+        {{ help_text('Use the exact organization or mission-owner name that should appear in the final report.', 'Constellation Operations Program Office') }}
+      </div>
+      <div>
+        <label class="text-xs font-bold uppercase tracking-wide">Assessment title <input name="title" required value="{{ form_value('title') }}" placeholder="Ground telemetry API and mission ops workflow assessment" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue"></label>
+        {{ help_text('Keep it short but specific about the system and focus area.', 'SpaceCAN replay resistance review') }}
+      </div>
+    </div>
+    <div class="mt-5">
+      <label class="block text-xs font-bold uppercase tracking-wide">Mission or infrastructure context<textarea name="mission_context" rows="4" placeholder="Describe what the assessed system supports, where it operates, and why the result matters." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">{{ form_value('mission_context') }}</textarea></label>
+      {{ help_text('Mention mission role, operational environment, and consequence of failure. This is the field that tells an executive why the assessment exists.', 'Pre-launch validation of the hosted telemetry API used by mission operations during spacecraft bus integration.') }}
+    </div>
+    <div class="mt-5">
+      <label class="block text-xs font-bold uppercase tracking-wide">Scope<textarea name="scope" rows="4" placeholder="List exact assets, environments, interfaces, data paths, and known access limits included in this assessment." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">{{ form_value('scope') }}</textarea></label>
+      {{ help_text('Be concrete. A good scope says what was touched and under what limits, so conclusions cannot be overstated later.', 'Hosted telemetry API, operator web console, and backend broker in staging; excludes production spacecraft commanding and RF uplink.') }}
+    </div>
+  </section>
+  <section class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle sm:p-8">
+    <h2 class="text-xl font-black">Boundaries and authorization</h2>
+    <div class="mt-5">
+      <label class="block text-xs font-bold uppercase tracking-wide">Authorization and safety constraints<textarea name="authorization" rows="4" placeholder="Record approvals, rules of engagement, stop conditions, prohibited actions, and safety limits." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">{{ form_value('authorization') }}</textarea></label>
+      {{ help_text('Capture what made the work legitimate and what conditions would have stopped or constrained it.', 'Authorized staging-only testing approved by mission IT; no RF transmission, no credential reset, and stop if operator workflows are disrupted.') }}
+    </div>
+    <div class="mt-5">
+      <label class="block text-xs font-bold uppercase tracking-wide">Explicit exclusions<textarea name="exclusions" rows="4" placeholder="State what this assessment must not be interpreted as covering." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">{{ form_value('exclusions') }}</textarea></label>
+      {{ help_text('Use this to prevent a reader from treating the report as broader proof than the evidence supports.', 'No on-orbit behavior, no actuator response validation, and no supplier internal network assessment.') }}
+    </div>
+  </section>
+  <div class="flex justify-end gap-3"><a class="rounded-sm border border-latte-surface1 px-5 py-3 text-sm font-bold dark:border-mocha-surface1" href="{{ url_for('index') }}">Cancel</a><button class="rounded-sm bg-latte-blue px-5 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust" type="submit">Create Frame</button></div>
+</form>
+{% endblock %}

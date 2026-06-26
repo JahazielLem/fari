@@ -1,0 +1,198 @@
+{
+  "assessment": {
+    "id": "ASM-2026-002",
+    "title": "QEMU Flight Software Assessment",
+    "status": "closed",
+    "conclusion_id": "CON-ASM-002",
+    "framework_profiles": [
+      {
+        "name": "SPARTA",
+        "version": "live",
+        "accessed": "2026-06-07"
+      }
+    ],
+    "roles": {
+      "evidence_producers": ["Example technical assessor"],
+      "report_author": "Example FARI report author",
+      "mission_owner": "Not supplied",
+      "risk_authority": "Not supplied"
+    },
+    "scope_summary": "Flight-software build and command parser in QEMU.",
+    "limitations": [
+      "Physical hardware, RF delivery, and on-orbit behavior were not assessed."
+    ]
+  },
+  "mission_objectives": [
+    {
+      "id": "OBJ-001",
+      "statement": "Maintain authorized commandability and recoverability."
+    }
+  ],
+  "assets": [
+    {
+      "id": "AST-SV-FSW-001",
+      "name": "Flight-software command-and-data-handling image",
+      "segment": "space",
+      "access_model": "white_box",
+      "coverage": "tested",
+      "mission_objectives": ["OBJ-001"]
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLM-004",
+      "statement": "Invalid telecommands cannot interrupt command processing.",
+      "gating": true,
+      "conclusion": "does_not_meet",
+      "asset_ids": ["AST-SV-FSW-001"]
+    }
+  ],
+  "source_materials": [
+    {
+      "id": "SRC-012",
+      "description": "Minimized crashing input and debugger trace supplied by the assessor.",
+      "source": "Example technical assessor",
+      "received_date": "2026-06-07",
+      "original_format": "Files and assessor notes",
+      "controlled_reference": "evidence/SRC-012",
+      "integrity": "sha256:example"
+    }
+  ],
+  "investigations": [
+    {
+      "id": "INV-QEMU-001",
+      "title": "Malformed telecommand command-task interruption",
+      "claim_ids": ["CLM-004"],
+      "source_material_ids": ["SRC-012"],
+      "finding_ids": ["FND-004"],
+      "conclusion_id": "CON-INV-004",
+      "report_reference": "reports/example-qemu-investigation.md"
+    }
+  ],
+  "method_runs": [
+    {
+      "id": "RUN-QEMU-001",
+      "method": "QEMU emulation and parser fuzzing",
+      "environment": "QEMU with virtual UART bridge",
+      "status": "complete",
+      "source_material_ids": ["SRC-012"],
+      "limitations": [
+        "Hardware timing and physical interfaces were not represented."
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "EVD-012",
+      "description": "Minimized crashing telecommand input and debugger trace.",
+      "method_run_id": "RUN-QEMU-001",
+      "source_material_id": "SRC-012",
+      "integrity": "sha256:example",
+      "controlled_reference": "evidence/EVD-012"
+    }
+  ],
+  "evidence_intake_reviews": [
+    {
+      "id": "EIR-004",
+      "method_run_ids": ["RUN-QEMU-001"],
+      "source_material_ids": ["SRC-012"],
+      "review_date": "2026-06-07",
+      "technical_condition_sufficiency": "sufficient",
+      "reachability_sufficiency": "insufficient",
+      "mission_consequence_sufficiency": "partial",
+      "evidence_backed_facts": [
+        "A minimized input terminates the command task in QEMU."
+      ],
+      "producer_assertions": [],
+      "report_author_inferences": [
+        "Repeated accepted inputs may interrupt authorized commanding."
+      ],
+      "assumptions": [
+        "The emulated command task is representative of the integrated flight image."
+      ],
+      "contradictions": [],
+      "evidence_gaps": [
+        "RF reachability and target-hardware behavior were not assessed."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "FND-004",
+      "title": "Malformed telecommand terminates command task",
+      "state": "confirmed",
+      "asset_ids": ["AST-SV-FSW-001"],
+      "evidence_ids": ["EVD-012"],
+      "risk_id": "RSK-004",
+      "confidence": "medium",
+      "fari_conclusion": "does_not_meet",
+      "required_action": "remediate",
+      "mappings": [
+        {
+          "framework": "SPARTA",
+          "external_id": "EX-0009",
+          "name": "Exploit Code Flaws",
+          "state": "confirmed",
+          "rationale": "The code flaw and execution effect were reproduced in the emulated flight image.",
+          "version": "live",
+          "accessed": "2026-06-07",
+          "source_url": "https://sparta.aerospace.org/technique/EX-0009/"
+        }
+      ],
+      "limitations": [
+        "RF reachability and target-hardware behavior were not assessed."
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "RSK-004",
+      "profile": "Example organizational 5x5 risk profile",
+      "scenario": "A malformed accepted frame can terminate command processing and delay authorized commanding.",
+      "confidence": "medium",
+      "rationale": "Automatic task restart limits duration, but repeated input can retrigger the condition.",
+      "values": {
+        "inherent_likelihood": 3,
+        "inherent_consequence": 4,
+        "residual_likelihood": 3,
+        "residual_consequence": 3
+      }
+    }
+  ],
+  "conclusions": [
+    {
+      "id": "CON-INV-004",
+      "level": "investigation",
+      "value": "does_not_meet",
+      "confidence": "medium",
+      "required_action": "remediate",
+      "priority": "immediate",
+      "scope_boundary": "Integrated software image in the documented QEMU environment; RF delivery and physical hardware excluded.",
+      "rationale": "Malformed input reproducibly interrupts command processing in the tested environment.",
+      "gating_claim_ids": ["CLM-004"]
+    },
+    {
+      "id": "CON-ASM-002",
+      "level": "assessment",
+      "value": "does_not_meet",
+      "confidence": "medium",
+      "required_action": "retest",
+      "priority": "immediate",
+      "scope_boundary": "The single declared QEMU assessment claim.",
+      "rationale": "The only gating claim Does Not Meet.",
+      "gating_claim_ids": ["CLM-004"],
+      "aggregation_rule": "Does Not Meet when any gating claim Does Not Meet."
+    }
+  ],
+  "assurance": [
+    {
+      "id": "ASR-004",
+      "claim_id": "CLM-004",
+      "conclusion": "does_not_meet",
+      "confidence": "medium",
+      "limitations": [
+        "No conclusion is made about RF delivery or on-orbit behavior."
+      ]
+    }
+  ]
+}

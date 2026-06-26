@@ -1,0 +1,127 @@
+{% macro conclusion_badge(value) -%}
+  {% set styles = {
+    'meets': 'bg-latte-blue/20 text-latte-blue dark:bg-mocha-blue/20 dark:text-mocha-blue',
+    'does_not_meet': 'bg-latte-red/20 text-latte-red dark:bg-mocha-red/20 dark:text-mocha-red',
+    'inconclusive': 'bg-latte-yellow/25 text-latte-yellow dark:bg-mocha-yellow/20 dark:text-mocha-yellow',
+    'not_assessed': 'bg-latte-overlay0/20 text-latte-overlay0 dark:bg-mocha-overlay0/20 dark:text-mocha-overlay0'
+  } %}
+  <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider {{ styles.get(value, styles.not_assessed) }}">{{ value|human }}</span>
+{%- endmacro %}
+
+{% macro scenario_badge(value) -%}
+  {% set styles = {
+    'demonstrated': 'bg-latte-red/20 text-latte-red dark:bg-mocha-red/20 dark:text-mocha-red',
+    'plausible': 'bg-latte-yellow/25 text-latte-yellow dark:bg-mocha-yellow/20 dark:text-mocha-yellow',
+    'not_demonstrated': 'bg-latte-blue/20 text-latte-blue dark:bg-mocha-blue/20 dark:text-mocha-blue',
+    'not_evaluated': 'bg-latte-overlay0/20 text-latte-overlay0 dark:bg-mocha-overlay0/20 dark:text-mocha-overlay0'
+  } %}
+  <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider {{ styles.get(value, styles.not_evaluated) }}">Scenario: {{ value|human }}</span>
+{%- endmacro %}
+
+{% macro lifecycle_badge(value) -%}
+  {% set styles = {
+    'closed': 'bg-latte-green/20 text-latte-green dark:bg-mocha-green/20 dark:text-mocha-green',
+    'ready': 'bg-latte-blue/20 text-latte-blue dark:bg-mocha-blue/20 dark:text-mocha-blue',
+    'draft': 'bg-latte-overlay0/20 text-latte-overlay0 dark:bg-mocha-overlay0/20 dark:text-mocha-overlay0'
+  } %}
+  <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider {{ styles.get(value, styles.draft) }}">{{ value|human }}</span>
+{%- endmacro %}
+
+{% macro inventory_status_badge(value) -%}
+  {% set styles = {
+    'tracked': 'bg-latte-blue/20 text-latte-blue dark:bg-mocha-blue/20 dark:text-mocha-blue',
+    'vulnerable': 'bg-latte-red/20 text-latte-red dark:bg-mocha-red/20 dark:text-mocha-red',
+    'update_in_progress': 'bg-latte-yellow/25 text-latte-yellow dark:bg-mocha-yellow/20 dark:text-mocha-yellow',
+    'fixed': 'bg-latte-green/20 text-latte-green dark:bg-mocha-green/20 dark:text-mocha-green',
+    'accepted': 'bg-latte-sky/20 text-latte-sky dark:bg-mocha-sky/20 dark:text-mocha-sky',
+    'not_affected': 'bg-latte-overlay0/20 text-latte-overlay0 dark:bg-mocha-overlay0/20 dark:text-mocha-overlay0'
+  } %}
+  <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider {{ styles.get(value, styles.tracked) }}">{{ value|human }}</span>
+{%- endmacro %}
+
+{% macro traceability_badge(value) -%}
+  {% set styles = {
+    'manual_snapshot': 'bg-latte-blue/20 text-latte-blue dark:bg-mocha-blue/20 dark:text-mocha-blue',
+    'assessment_closed': 'bg-latte-green/20 text-latte-green dark:bg-mocha-green/20 dark:text-mocha-green',
+    'live_state': 'bg-latte-overlay0/20 text-latte-overlay0 dark:bg-mocha-overlay0/20 dark:text-mocha-overlay0'
+  } %}
+  <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider {{ styles.get(value, styles.live_state) }}">{{ value|human }}</span>
+{%- endmacro %}
+
+{% macro compliance_posture_badge(value) -%}
+  {% set styles = {
+    'aligned': 'bg-latte-green/20 text-latte-green dark:bg-mocha-green/20 dark:text-mocha-green',
+    'partially_aligned': 'bg-latte-yellow/25 text-latte-yellow dark:bg-mocha-yellow/20 dark:text-mocha-yellow',
+    'gap_identified': 'bg-latte-red/20 text-latte-red dark:bg-mocha-red/20 dark:text-mocha-red',
+    'inconclusive': 'bg-latte-blue/20 text-latte-blue dark:bg-mocha-blue/20 dark:text-mocha-blue',
+    'not_started': 'bg-latte-overlay0/20 text-latte-overlay0 dark:bg-mocha-overlay0/20 dark:text-mocha-overlay0'
+  } %}
+  <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider {{ styles.get(value, styles.not_started) }}">{{ value|human }}</span>
+{%- endmacro %}
+
+{% macro compliance_status_badge(value) -%}
+  {% set styles = {
+    'implemented': 'bg-latte-green/20 text-latte-green dark:bg-mocha-green/20 dark:text-mocha-green',
+    'partially_implemented': 'bg-latte-yellow/25 text-latte-yellow dark:bg-mocha-yellow/20 dark:text-mocha-yellow',
+    'planned': 'bg-latte-sky/20 text-latte-sky dark:bg-mocha-sky/20 dark:text-mocha-sky',
+    'not_implemented': 'bg-latte-red/20 text-latte-red dark:bg-mocha-red/20 dark:text-mocha-red',
+    'not_applicable': 'bg-latte-overlay0/20 text-latte-overlay0 dark:bg-mocha-overlay0/20 dark:text-mocha-overlay0',
+    'not_verified': 'bg-latte-blue/20 text-latte-blue dark:bg-mocha-blue/20 dark:text-mocha-blue'
+  } %}
+  <span class="inline-flex rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider {{ styles.get(value, styles.not_verified) }}">{{ value|human }}</span>
+{%- endmacro %}
+
+{% macro check_list(checks) -%}
+  <ul class="space-y-2">
+    {% for check in checks %}
+      <li class="flex items-center gap-3 text-sm {% if check.done %}text-latte-green dark:text-mocha-green{% else %}text-latte-subtext0 dark:text-mocha-subtext0{% endif %}">
+        <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full {% if check.done %}bg-latte-green/15 dark:bg-mocha-green/15{% else %}bg-latte-surface0 dark:bg-mocha-surface0{% endif %}">{{ '✓' if check.done else '·' }}</span>
+        <span>{{ check.label|human }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+{%- endmacro %}
+
+{% macro phase_timeline(phases) -%}
+  <nav aria-label="FARI workflow" class="mt-6 overflow-x-auto rounded-sm border border-latte-surface0 bg-latte-mantle dark:border-mocha-surface0 dark:bg-mocha-mantle">
+    <div class="flex min-w-max items-stretch">
+      <div class="border-r border-latte-surface0 px-5 py-4 dark:border-mocha-surface0">
+        <p class="text-[10px] font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-blue">Assessment workflow</p>
+        <p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">Static executive progress view</p>
+      </div>
+      <ol class="flex min-w-max flex-1">
+        {% for phase in phases %}
+        <li class="min-w-[220px] border-r border-latte-surface0 last:border-r-0 dark:border-mocha-surface0">
+          {% set state_classes = 'text-latte-subtext0 dark:text-mocha-subtext0 opacity-55' %}
+          {% set circle_classes = 'bg-latte-surface1 text-latte-subtext0 dark:bg-mocha-surface1 dark:text-mocha-subtext0' %}
+          {% if phase.state == 'complete' %}
+            {% set state_classes = 'text-latte-green dark:text-mocha-green' %}
+            {% set circle_classes = 'bg-latte-green text-white dark:bg-mocha-green dark:text-mocha-crust' %}
+          {% elif phase.state == 'current' %}
+            {% set state_classes = 'text-latte-blue dark:text-mocha-blue' %}
+            {% set circle_classes = 'bg-latte-blue text-white dark:bg-mocha-blue dark:text-mocha-crust' %}
+          {% endif %}
+          {% if phase.state == 'pending' %}
+          <div class="block h-full px-5 py-4">
+          {% else %}
+          <a href="{{ phase.href }}" class="block h-full px-5 py-4 transition hover:bg-latte-base/70 dark:hover:bg-mocha-base/50">
+          {% endif %}
+            <div class="flex items-start gap-4">
+              <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-black {{ circle_classes }}">{{ '✓' if phase.state == 'complete' else phase.number }}</span>
+              <div class="min-w-0">
+                <span class="text-[10px] font-black uppercase tracking-[.18em] {{ state_classes }}">{{ phase.state|human }}</span>
+                <strong class="mt-2 block text-sm">{{ phase.name }}</strong>
+                <span class="mt-2 block text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0">{{ phase.detail }}</span>
+              </div>
+            </div>
+          {% if phase.state == 'pending' %}
+          </div>
+          {% else %}
+          </a>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </nav>
+{%- endmacro %}

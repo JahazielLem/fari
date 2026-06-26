@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .fari-shell {
+    background-image:
+      radial-gradient(circle at top left, rgba(30, 102, 245, 0.08), transparent 24%),
+      radial-gradient(circle at 85% 12%, rgba(4, 165, 229, 0.08), transparent 18%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%);
+  }
+
+  .dark .fari-shell {
+    background-image:
+      radial-gradient(circle at 14% 12%, rgba(137, 180, 250, 0.18), transparent 24%),
+      radial-gradient(circle at 82% 8%, rgba(137, 220, 235, 0.12), transparent 20%),
+      linear-gradient(180deg, rgba(17, 17, 27, 0.82), rgba(24, 24, 37, 0.94));
+  }
+
+  .fari-sidebar {
+    position: relative;
+    overflow: hidden;
+    background-image:
+      radial-gradient(circle at 18% 16%, rgba(30, 102, 245, 0.12), transparent 20%),
+      radial-gradient(circle at 78% 10%, rgba(4, 165, 229, 0.10), transparent 18%),
+      linear-gradient(180deg, #eff1f5 0%, #e6e9ef 56%, #dce0e8 100%);
+    color: #4c4f69;
+    box-shadow: inset -1px 0 0 rgba(188, 192, 204, 0.64);
+  }
+
+  .dark .fari-sidebar {
+    background-image:
+      radial-gradient(circle at 18% 16%, rgba(137, 180, 250, 0.18), transparent 18%),
+      radial-gradient(circle at 78% 10%, rgba(137, 220, 235, 0.12), transparent 16%),
+      linear-gradient(180deg, #1f2337 0%, #181825 52%, #11111b 100%);
+    color: #cdd6f4;
+    box-shadow: inset -1px 0 0 rgba(49, 50, 68, 0.9);
+  }
+
+  .fari-sidebar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(30, 102, 245, 0.18) 0 1px, transparent 1px),
+      radial-gradient(circle at 62% 22%, rgba(4, 165, 229, 0.16) 0 1px, transparent 1px),
+      radial-gradient(circle at 84% 38%, rgba(30, 102, 245, 0.12) 0 1px, transparent 1px),
+      radial-gradient(circle at 38% 72%, rgba(4, 165, 229, 0.14) 0 1px, transparent 1px);
+    opacity: 0.9;
+  }
+
+  .dark .fari-sidebar::before {
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px),
+      radial-gradient(circle at 62% 22%, rgba(255, 255, 255, 0.28) 0 1px, transparent 1px),
+      radial-gradient(circle at 84% 38%, rgba(255, 255, 255, 0.22) 0 1px, transparent 1px),
+      radial-gradient(circle at 38% 72%, rgba(255, 255, 255, 0.24) 0 1px, transparent 1px);
+    opacity: 1;
+  }
+
+  .fari-profile-card {
+    background:
+      radial-gradient(circle at top right, rgba(4, 165, 229, 0.16), transparent 30%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(230, 233, 239, 0.88));
+    box-shadow: 0 18px 42px rgba(76, 79, 105, 0.12);
+  }
+
+  .dark .fari-profile-card {
+    background:
+      radial-gradient(circle at top right, rgba(137, 220, 235, 0.18), transparent 28%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(17, 17, 27, 0.18));
+    box-shadow: 0 18px 42px rgba(17, 17, 27, 0.18);
+  }
+
+  .wiki-content h1 {
+    @apply text-4xl font-black tracking-tight;
+  }
+
+  .wiki-content h2 {
+    @apply mt-10 text-2xl font-black tracking-tight text-latte-blue dark:text-mocha-blue;
+  }
+
+  .wiki-content h3 {
+    @apply mt-7 text-lg font-black;
+  }
+
+  .wiki-content p {
+    @apply mt-4 leading-7 text-latte-text dark:text-mocha-text;
+  }
+
+  .wiki-content ul,
+  .wiki-content ol {
+    @apply mt-4 space-y-2 pl-6 text-latte-text dark:text-mocha-text;
+  }
+
+  .wiki-content ul {
+    @apply list-disc;
+  }
+
+  .wiki-content ol {
+    @apply list-decimal;
+  }
+
+  .wiki-content blockquote {
+    @apply mt-4 rounded-2xl border-l-4 border-latte-blue bg-latte-base px-5 py-4 italic text-latte-subtext0 dark:border-mocha-blue dark:bg-mocha-base dark:text-mocha-subtext0;
+  }
+
+  .wiki-content pre {
+    @apply mt-4 overflow-x-auto rounded-2xl bg-mocha-crust px-5 py-4 text-sm text-mocha-text;
+  }
+
+  .wiki-content code {
+    @apply rounded bg-latte-base px-1.5 py-0.5 text-[0.92em] dark:bg-mocha-base;
+  }
+
+  .wiki-content pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .wiki-content a {
+    @apply font-semibold text-latte-blue underline decoration-latte-blue/40 underline-offset-4 dark:text-mocha-blue dark:decoration-mocha-blue/40;
+  }
+
+  .wiki-content strong {
+    @apply font-extrabold;
+  }
+}
+
+@layer utilities {
+  .rounded-3xl,
+  .rounded-2xl,
+  .rounded-xl,
+  .rounded-lg,
+  .rounded-md {
+    border-radius: 0.125rem !important;
+  }
+}

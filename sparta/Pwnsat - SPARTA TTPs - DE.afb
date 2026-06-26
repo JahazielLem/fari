@@ -1,0 +1,454 @@
+{
+    "schema": "attack_flow_v2",
+    "theme": "dark_theme",
+    "objects": [
+        {
+            "id": "flow",
+            "instance": "3c2a3a03-f957-4745-9178-2e6c20451e45",
+            "properties": [
+                [
+                    "name",
+                    "Pwnsat - SPARTA TTPs - DE"
+                ],
+                [
+                    "description",
+                    "Hacking the Final Frontier Offensive Security in Space Systems and Satellites with Pwnsat."
+                ],
+                [
+                    "author",
+                    [
+                        [
+                            "name",
+                            "Kevin Leon"
+                        ],
+                        [
+                            "identity_class",
+                            "individual"
+                        ],
+                        [
+                            "contact_information",
+                            "kevinleon.morales@gmail.com"
+                        ]
+                    ]
+                ],
+                [
+                    "scope",
+                    "attack-tree"
+                ],
+                [
+                    "external_references",
+                    []
+                ],
+                [
+                    "created",
+                    {
+                        "time": "2026-05-12T07:02:49.189-06:00",
+                        "zone": "America/Mexico_City"
+                    }
+                ]
+            ],
+            "objects": [
+                "64273d91-63bf-41e4-9f6d-af838115b37a",
+                "df52f2b3-a81e-4514-80dd-3967279a864c",
+                "4af3eef5-335c-434b-b08d-3ae124cc0b75",
+                "6f799a82-235f-4a1f-a302-bfbe531c9471",
+                "ceaf8b49-4442-4acf-8ecf-1aae44f77d79"
+            ]
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "64273d91-63bf-41e4-9f6d-af838115b37a",
+            "source": "68dc4ebd-484e-4e38-b15e-0fe88efc85c5",
+            "target": "a0d75996-3144-45db-a31d-3d3a373d6da9",
+            "handles": [
+                "a0ad8867-5af4-4e98-b597-9ba615cbfeab"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "68dc4ebd-484e-4e38-b15e-0fe88efc85c5"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "a0d75996-3144-45db-a31d-3d3a373d6da9"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "a0ad8867-5af4-4e98-b597-9ba615cbfeab"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "df52f2b3-a81e-4514-80dd-3967279a864c",
+            "source": "eb7f81c8-d30e-4339-beeb-d5b768ff881a",
+            "target": "b57a8a5f-5b3f-4296-96b6-8222452c9449",
+            "handles": [
+                "da161415-e2a9-4232-ab75-d53c9156fbfb"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "eb7f81c8-d30e-4339-beeb-d5b768ff881a"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "b57a8a5f-5b3f-4296-96b6-8222452c9449"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "da161415-e2a9-4232-ab75-d53c9156fbfb"
+        },
+        {
+            "id": "grouping",
+            "instance": "4af3eef5-335c-434b-b08d-3ae124cc0b75",
+            "properties": [
+                [
+                    "name",
+                    "Disrupt or Deceive Downlink"
+                ],
+                [
+                    "description",
+                    "Targeting ground-side telemetry reception, processing, or display to impair operator visibility into spacecraft health and activity."
+                ],
+                [
+                    "context",
+                    "Defense Evasion"
+                ]
+            ],
+            "anchors": {
+                "0": "0d704400-bc1b-40a4-b2bc-77a709833e7c",
+                "30": "d3df0341-9032-4db0-a31c-acd981b996d0",
+                "60": "d5124d8c-0036-4b9f-97cd-842c4e939596",
+                "90": "95e1fa62-7004-41da-a61b-a019cf3a3c81",
+                "120": "c7fe8aac-8d96-4d45-a36b-ab1ed1d870ca",
+                "150": "61f5506d-06cd-47f1-aceb-1b735094ec6a",
+                "180": "6f515c9e-4fbd-4dec-8c26-b3aea33b8669",
+                "210": "8b71147f-919c-4eca-b192-89439b2d136f",
+                "240": "85afaec2-e1d4-4723-9ff0-96ed45282c43",
+                "270": "85c1c076-ecc1-4d3d-b1ba-10cdf302bf19",
+                "300": "87ab801f-fe2e-4e5a-a823-0eee417f4d27",
+                "330": "a8fccd7c-d4f4-451a-aaf6-398f1674f6db"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "0d704400-bc1b-40a4-b2bc-77a709833e7c",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "d3df0341-9032-4db0-a31c-acd981b996d0",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "d5124d8c-0036-4b9f-97cd-842c4e939596",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "95e1fa62-7004-41da-a61b-a019cf3a3c81",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "c7fe8aac-8d96-4d45-a36b-ab1ed1d870ca",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "61f5506d-06cd-47f1-aceb-1b735094ec6a",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "6f515c9e-4fbd-4dec-8c26-b3aea33b8669",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8b71147f-919c-4eca-b192-89439b2d136f",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "85afaec2-e1d4-4723-9ff0-96ed45282c43",
+            "latches": [
+                "68dc4ebd-484e-4e38-b15e-0fe88efc85c5"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "85c1c076-ecc1-4d3d-b1ba-10cdf302bf19",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "87ab801f-fe2e-4e5a-a823-0eee417f4d27",
+            "latches": [
+                "eb7f81c8-d30e-4339-beeb-d5b768ff881a"
+            ]
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "a8fccd7c-d4f4-451a-aaf6-398f1674f6db",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "6f799a82-235f-4a1f-a302-bfbe531c9471",
+            "properties": [
+                [
+                    "name",
+                    "DE-0002.02 Jam Link Signal"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0006"
+                        ],
+                        [
+                            "technique",
+                            "DE-0002"
+                        ],
+                        [
+                            "subtechnique",
+                            "DE-0002.02"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Overwhelming or jamming the downlink radio frequency signal to block transmitted telemetry from reaching its ground destination."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "0ce4fa1c-c706-4149-b9dd-04a20d012546",
+                "30": "6f23bf51-89b1-4ac1-86c1-0c0c4e79fa15",
+                "60": "9e7fa299-f5e8-4cf7-8bce-0c6b57439c57",
+                "90": "bfd251d6-5380-423b-a17c-b73e8dfc04f7",
+                "120": "084c356d-e17c-4370-8600-650189be7087",
+                "150": "74c68a04-7f93-4f70-bdc1-842ade407eb7",
+                "180": "8c5cdb11-5c40-4da9-99ab-782fcb75fe43",
+                "210": "2c1b70c4-a01a-46fa-8298-3c4eb9ce2e70",
+                "240": "22c096de-383d-48c8-ad39-3c140dbc8542",
+                "270": "51c2d085-195f-4807-9984-8ccac32810e7",
+                "300": "f8ab3ed0-b6df-47ba-af32-cee6c8df9157",
+                "330": "689a9e8d-4ded-4bd2-bbb9-5e71f9c1bd90"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "0ce4fa1c-c706-4149-b9dd-04a20d012546",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "6f23bf51-89b1-4ac1-86c1-0c0c4e79fa15",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "9e7fa299-f5e8-4cf7-8bce-0c6b57439c57",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "bfd251d6-5380-423b-a17c-b73e8dfc04f7",
+            "latches": [
+                "a0d75996-3144-45db-a31d-3d3a373d6da9"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "084c356d-e17c-4370-8600-650189be7087",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "74c68a04-7f93-4f70-bdc1-842ade407eb7",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8c5cdb11-5c40-4da9-99ab-782fcb75fe43",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "2c1b70c4-a01a-46fa-8298-3c4eb9ce2e70",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "22c096de-383d-48c8-ad39-3c140dbc8542",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "51c2d085-195f-4807-9984-8ccac32810e7",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "f8ab3ed0-b6df-47ba-af32-cee6c8df9157",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "689a9e8d-4ded-4bd2-bbb9-5e71f9c1bd90",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "ceaf8b49-4442-4acf-8ecf-1aae44f77d79",
+            "properties": [
+                [
+                    "name",
+                    "DE-0002.03 Inhibit Spacecraft Functionality"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0006"
+                        ],
+                        [
+                            "technique",
+                            "DE-0002"
+                        ],
+                        [
+                            "subtechnique",
+                            "DE-0002.03"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Suppressing telemetry directly at the source by manipulating on-board software generation or transmission hardware."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "d26f0a7f-5bec-435c-9a1c-546e59a47dda",
+                "30": "b44488b9-a57a-489d-a0e4-0b2bcc516cd3",
+                "60": "3e0dbac5-bc87-44a4-9513-9534795f6253",
+                "90": "27aca79f-a620-42f5-bc6c-88698fa76dd9",
+                "120": "c1626ec7-d774-4534-90ff-e92c559e5a13",
+                "150": "1db82830-7d81-4aec-b209-3eec9b862d8b",
+                "180": "c1a6dd3b-39b1-4713-9e6b-c85fab956b96",
+                "210": "d5bdb09b-222f-410a-aa2d-f5437dd008c1",
+                "240": "23542de2-8d20-4807-ae5a-d98a1d2bb942",
+                "270": "af0f4b61-53c6-49f1-bc43-14242c3cac1d",
+                "300": "ac60a915-511c-4d84-ab1f-0afd1fb3c0d4",
+                "330": "39f17225-1a55-4513-aac9-37e5760d8eb7"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "d26f0a7f-5bec-435c-9a1c-546e59a47dda",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "b44488b9-a57a-489d-a0e4-0b2bcc516cd3",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "3e0dbac5-bc87-44a4-9513-9534795f6253",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "27aca79f-a620-42f5-bc6c-88698fa76dd9",
+            "latches": [
+                "b57a8a5f-5b3f-4296-96b6-8222452c9449"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "c1626ec7-d774-4534-90ff-e92c559e5a13",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "1db82830-7d81-4aec-b209-3eec9b862d8b",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "c1a6dd3b-39b1-4713-9e6b-c85fab956b96",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "d5bdb09b-222f-410a-aa2d-f5437dd008c1",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "23542de2-8d20-4807-ae5a-d98a1d2bb942",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "af0f4b61-53c6-49f1-bc43-14242c3cac1d",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "ac60a915-511c-4d84-ab1f-0afd1fb3c0d4",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "39f17225-1a55-4513-aac9-37e5760d8eb7",
+            "latches": []
+        }
+    ],
+    "layout": {
+        "4af3eef5-335c-434b-b08d-3ae124cc0b75": [
+            4090,
+            -1700
+        ],
+        "6f799a82-235f-4a1f-a302-bfbe531c9471": [
+            3835,
+            -1350
+        ],
+        "ceaf8b49-4442-4acf-8ecf-1aae44f77d79": [
+            4365,
+            -1340
+        ]
+    },
+    "camera": {
+        "x": 4072,
+        "y": -1547,
+        "k": 0.9195431992838472
+    }
+}

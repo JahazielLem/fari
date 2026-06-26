@@ -1,0 +1,565 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/fari/fari-assessment.schema.json",
+  "title": "FARI Assessment",
+  "description": "Minimum machine-readable contract for a FARI assessment.",
+  "type": "object",
+  "required": [
+    "assessment",
+    "mission_objectives",
+    "assets",
+    "claims",
+    "source_materials",
+    "investigations",
+    "method_runs",
+    "evidence",
+    "evidence_intake_reviews",
+    "findings",
+    "conclusions",
+    "assurance"
+  ],
+  "properties": {
+    "assessment": {
+      "type": "object",
+      "required": ["id", "title", "status", "framework_profiles", "conclusion_id"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^ASM-"},
+        "title": {"type": "string", "minLength": 1},
+        "status": {
+          "enum": ["draft", "approved", "active", "closed", "superseded"]
+        },
+        "report_maturity": {
+          "enum": ["draft", "provisional", "final", "superseded"]
+        },
+        "framework_profiles": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/frameworkProfile"}
+        },
+        "scope_summary": {"type": "string"},
+        "conclusion_id": {"type": "string", "pattern": "^CON-"},
+        "roles": {
+          "type": "object",
+          "properties": {
+            "evidence_producers": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "report_author": {"type": "string"},
+            "mission_owner": {"type": "string"},
+            "risk_authority": {"type": "string"}
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": true
+    },
+    "mission_objectives": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/missionObjective"}
+    },
+    "assets": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/asset"}
+    },
+    "claims": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/claim"}
+    },
+    "source_materials": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/sourceMaterial"}
+    },
+    "investigations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/investigation"}
+    },
+    "method_runs": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/methodRun"}
+    },
+    "evidence": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "evidence_intake_reviews": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidenceIntakeReview"}
+    },
+    "findings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding"}
+    },
+    "versions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/assessmentVersion"}
+    },
+    "sbom_documents": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/sbomDocument"}
+    },
+    "inventory_components": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/inventoryComponent"}
+    },
+    "compliance_profiles": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/complianceProfile"}
+    },
+    "risks": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/risk"}
+    },
+    "conclusions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/conclusion"}
+    },
+    "assurance": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/assurance"}
+    }
+  },
+  "$defs": {
+    "frameworkProfile": {
+      "type": "object",
+      "required": ["name", "accessed"],
+      "properties": {
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "accessed": {"type": "string", "format": "date"}
+      }
+    },
+    "missionObjective": {
+      "type": "object",
+      "required": ["id", "statement"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^OBJ-"},
+        "statement": {"type": "string", "minLength": 1}
+      }
+    },
+    "asset": {
+      "type": "object",
+      "required": ["id", "name", "segment", "coverage"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^AST-"},
+        "name": {"type": "string"},
+        "segment": {
+          "enum": ["space", "ground", "user", "link", "supply_chain", "cloud"]
+        },
+        "access_model": {
+          "enum": ["white_box", "grey_box", "black_box", "mixed"]
+        },
+        "coverage": {
+          "enum": ["tested", "reviewed", "inferred", "not_assessed", "out_of_scope"]
+        },
+        "mission_objectives": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^OBJ-"}
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": ["id", "statement", "gating", "conclusion"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^CLM-"},
+        "statement": {"type": "string"},
+        "gating": {"type": "boolean"},
+        "conclusion": {"$ref": "#/$defs/conclusionValue"},
+        "asset_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^AST-"}
+        }
+      }
+    },
+    "sourceMaterial": {
+      "type": "object",
+      "required": ["id", "description", "controlled_reference"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^SRC-"},
+        "description": {"type": "string"},
+        "source": {"type": "string"},
+        "received_date": {"type": "string", "format": "date"},
+        "original_format": {"type": "string"},
+        "controlled_reference": {"type": "string"},
+        "integrity": {"type": "string"},
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "investigation": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "claim_ids",
+        "source_material_ids",
+        "conclusion_id"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^INV-"},
+        "title": {"type": "string"},
+        "claim_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^CLM-"}
+        },
+        "source_material_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^SRC-"}
+        },
+        "finding_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^FND-"}
+        },
+        "conclusion_id": {"type": "string", "pattern": "^CON-"},
+        "report_reference": {"type": "string"}
+      }
+    },
+    "assessmentVersion": {
+      "type": "object",
+      "required": ["fari_id", "version_number", "label", "trigger", "created_at"],
+      "properties": {
+        "fari_id": {"type": "string", "pattern": "^VER-"},
+        "version_number": {"type": "integer", "minimum": 1},
+        "label": {"type": "string"},
+        "trigger": {"enum": ["manual_snapshot", "assessment_closed", "live_state"]},
+        "summary": {"type": "string"},
+        "created_at": {"type": "string"},
+        "snapshot": {"type": "object"},
+        "snapshot_json": {"type": "string"}
+      }
+    },
+    "sbomDocument": {
+      "type": "object",
+      "required": ["fari_id", "filename", "file_format", "component_count", "sha256"],
+      "properties": {
+        "fari_id": {"type": "string", "pattern": "^SBM-"},
+        "filename": {"type": "string"},
+        "file_format": {"enum": ["cyclonedx", "spdx", "package-lock", "dependency-map", "text-list", "unknown", "empty"]},
+        "component_count": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string"},
+        "asset_id": {"type": ["integer", "null"]},
+        "notes": {"type": "string"},
+        "uploaded_at": {"type": "string"}
+      }
+    },
+    "inventoryEvent": {
+      "type": "object",
+      "required": ["fari_id", "event_type", "occurred_at"],
+      "properties": {
+        "fari_id": {"type": "string", "pattern": "^SBE-"},
+        "event_type": {"enum": ["imported", "vulnerability_detected", "version_updated", "fix_verified", "status_changed", "note"]},
+        "occurred_at": {"type": "string"},
+        "from_version": {"type": "string"},
+        "to_version": {"type": "string"},
+        "vulnerability_id": {"type": "string"},
+        "severity": {"enum": ["", "critical", "high", "medium", "low", "info", "unknown"]},
+        "summary": {"type": "string"},
+        "status_after": {"enum": ["tracked", "vulnerable", "update_in_progress", "fixed", "accepted", "not_affected", ""]}
+      }
+    },
+    "inventoryComponent": {
+      "type": "object",
+      "required": ["fari_id", "name", "ecosystem", "current_version", "status"],
+      "properties": {
+        "fari_id": {"type": "string", "pattern": "^CMP-"},
+        "name": {"type": "string"},
+        "ecosystem": {"type": "string"},
+        "current_version": {"type": "string"},
+        "status": {"enum": ["tracked", "vulnerable", "update_in_progress", "fixed", "accepted", "not_affected"]},
+        "purl": {"type": "string"},
+        "component_type": {"type": "string"},
+        "license_name": {"type": "string"},
+        "notes": {"type": "string"},
+        "first_seen_at": {"type": "string"},
+        "last_seen_at": {"type": "string"},
+        "events": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/inventoryEvent"}
+        }
+      }
+    },
+    "complianceCheck": {
+      "type": "object",
+      "required": ["fari_id", "control_id", "family", "title", "status"],
+      "properties": {
+        "fari_id": {"type": "string", "pattern": "^CTL-"},
+        "control_id": {"type": "string"},
+        "family": {"type": "string"},
+        "title": {"type": "string"},
+        "control_statement": {"type": "string"},
+        "spd5_alignment": {"enum": ["direct", "supporting"]},
+        "principle_reference": {"type": "string"},
+        "recommended_artifacts": {"type": "string"},
+        "status": {
+          "enum": [
+            "not_verified",
+            "implemented",
+            "partially_implemented",
+            "planned",
+            "not_implemented",
+            "not_applicable"
+          ]
+        },
+        "evidence_refs": {"type": "string"},
+        "notes": {"type": "string"},
+        "sort_order": {"type": "integer", "minimum": 0},
+        "created_at": {"type": "string"},
+        "updated_at": {"type": "string"}
+      }
+    },
+    "complianceProfile": {
+      "type": "object",
+      "required": ["fari_id", "profile_key", "title", "posture", "scenario", "checks"],
+      "properties": {
+        "fari_id": {"type": "string", "pattern": "^CPF-"},
+        "profile_key": {"type": "string"},
+        "title": {"type": "string"},
+        "framework_name": {"type": "string"},
+        "framework_version": {"type": "string"},
+        "scenario": {
+          "enum": [
+            "evidence_backed_alignment",
+            "partial_alignment",
+            "compensating_controls",
+            "inconclusive_scope_boundary",
+            "supplier_attestation_pending",
+            "continuous_assurance"
+          ]
+        },
+        "posture": {
+          "enum": [
+            "not_started",
+            "aligned",
+            "partially_aligned",
+            "gap_identified",
+            "inconclusive"
+          ]
+        },
+        "summary": {"type": "string"},
+        "notes": {"type": "string"},
+        "created_at": {"type": "string"},
+        "updated_at": {"type": "string"},
+        "checks": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/complianceCheck"}
+        }
+      }
+    },
+    "methodRun": {
+      "type": "object",
+      "required": ["id", "method", "environment", "status"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^RUN-"},
+        "method": {"type": "string"},
+        "environment": {"type": "string"},
+        "status": {"enum": ["planned", "active", "complete", "blocked"]},
+        "source_material_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^SRC-"}
+        },
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["id", "description", "method_run_id"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^EVD-"},
+        "description": {"type": "string"},
+        "method_run_id": {"type": "string", "pattern": "^RUN-"},
+        "source_material_id": {"type": "string", "pattern": "^SRC-"},
+        "integrity": {"type": "string"},
+        "controlled_reference": {"type": "string"}
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "required": ["framework", "external_id", "name", "state", "rationale", "accessed"],
+      "properties": {
+        "framework": {"type": "string"},
+        "external_id": {"type": "string"},
+        "name": {"type": "string"},
+        "state": {"enum": ["confirmed", "candidate", "not_applicable"]},
+        "rationale": {"type": "string"},
+        "version": {"type": "string"},
+        "accessed": {"type": "string", "format": "date"},
+        "source_url": {"type": "string", "format": "uri"}
+      }
+    },
+    "evidenceIntakeReview": {
+      "type": "object",
+      "required": [
+        "id",
+        "method_run_ids",
+        "review_date",
+        "technical_condition_sufficiency",
+        "reachability_sufficiency",
+        "mission_consequence_sufficiency"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^EIR-"},
+        "method_run_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^RUN-"}
+        },
+        "source_material_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^SRC-"}
+        },
+        "review_date": {"type": "string", "format": "date"},
+        "technical_condition_sufficiency": {
+          "enum": ["sufficient", "partial", "insufficient"]
+        },
+        "reachability_sufficiency": {
+          "enum": ["sufficient", "partial", "insufficient"]
+        },
+        "mission_consequence_sufficiency": {
+          "enum": ["sufficient", "partial", "insufficient"]
+        },
+        "evidence_backed_facts": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "producer_assertions": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "report_author_inferences": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "contradictions": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "evidence_gaps": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "state",
+        "asset_ids",
+        "evidence_ids",
+        "confidence",
+        "fari_conclusion",
+        "required_action"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^FND-"},
+        "title": {"type": "string"},
+        "state": {
+          "enum": ["observation", "candidate", "confirmed", "accepted_risk", "remediated", "verified_closed"]
+        },
+        "asset_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^AST-"}
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^EVD-"}
+        },
+        "risk_id": {"type": "string", "pattern": "^RSK-"},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "fari_conclusion": {"$ref": "#/$defs/conclusionValue"},
+        "required_action": {"$ref": "#/$defs/requiredAction"},
+        "mappings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/mapping"}
+        },
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": [
+        "id",
+        "profile",
+        "scenario",
+        "rationale"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^RSK-"},
+        "profile": {"type": "string"},
+        "scenario": {"type": "string"},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "rationale": {"type": "string"},
+        "values": {"type": "object", "additionalProperties": true}
+      }
+    },
+    "conclusionValue": {
+      "enum": ["meets", "does_not_meet", "inconclusive", "not_assessed"]
+    },
+    "scenarioDisposition": {
+      "enum": ["demonstrated", "plausible", "not_demonstrated", "not_evaluated"]
+    },
+    "requiredAction": {
+      "enum": ["accept", "remediate", "extend_investigation", "retest", "no_action"]
+    },
+    "conclusion": {
+      "type": "object",
+      "required": [
+        "id",
+        "level",
+        "value",
+        "scenario_disposition",
+        "confidence",
+        "required_action",
+        "priority",
+        "scope_boundary",
+        "rationale"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^CON-"},
+        "level": {"enum": ["investigation", "assessment"]},
+        "value": {"$ref": "#/$defs/conclusionValue"},
+        "scenario_disposition": {"$ref": "#/$defs/scenarioDisposition"},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "required_action": {"$ref": "#/$defs/requiredAction"},
+        "priority": {"enum": ["immediate", "planned", "routine", "none"]},
+        "scope_boundary": {"type": "string"},
+        "rationale": {"type": "string"},
+        "gating_claim_ids": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^CLM-"}
+        },
+        "aggregation_rule": {"type": "string"}
+      }
+    },
+    "assurance": {
+      "type": "object",
+      "required": ["id", "claim_id", "conclusion", "confidence", "limitations"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^ASR-"},
+        "claim_id": {"type": "string", "pattern": "^CLM-"},
+        "conclusion": {"$ref": "#/$defs/conclusionValue"},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

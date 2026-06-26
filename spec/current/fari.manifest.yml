@@ -1,0 +1,48 @@
+framework:
+  id: fari
+  name: Framework for Aerospace Research and Investigation
+  short_name: FARI
+  version: 1.2.0
+
+canonical_sources:
+  specification: specification/FARI-SPECIFICATION.md
+  complete_specification: specification/FARI-SPECIFICATION-COMPLETE.md
+  spd5_companion: specification/FARI-SPD5-COMPANION.md
+  manual_template: templates/FARI-Manual-Template.md
+  scenario_catalog: reports/FARI-SCENARIO-TEST-CATALOG.md
+  schema: ../schema/fari-assessment.schema.json
+
+release:
+  path: ../releases/v1.2.0
+  specification_pdf: ../releases/v1.2.0/specification/FARI-Specification-v1.2.0.pdf
+  manual_template_pdf: ../releases/v1.2.0/manual-template/FARI-Manual-Template-v1.2.0.pdf
+  scenario_catalog_pdf: ../releases/v1.2.0/reports/FARI-SCENARIO-TEST_CATALOG-v1.2.0.pdf
+
+web_contract:
+  conclusions:
+    - meets
+    - does_not_meet
+    - inconclusive
+    - not_assessed
+  scenario_states:
+    - demonstrated
+    - plausible
+    - not_demonstrated
+    - not_evaluated
+  asset_segments:
+    - space
+    - ground
+    - user
+    - link
+    - supply_chain
+    - cloud
+    - other
+  access_basis:
+    - private
+    - public
+    - other
+
+implementation_notes:
+  web_app: ../../webapp
+  tools: ../../tools
+  generated_with: FARI v1.2.0

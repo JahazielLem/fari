@@ -1,0 +1,45 @@
+services:
+  fari:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      FARI_DATA_DIR: /data
+      FARI_DATABASE_URL: ${FARI_DATABASE_URL:-postgresql+psycopg://fari:toor@postgres:5432/fari}
+      FARI_SECRET_KEY: change-this-for-non-local-deployments
+    volumes:
+      - fari_data:/data
+      - ./webapp:/app/webapp
+      - ./tools:/app/tools
+      - ./spec:/app/spec
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Override the Dockerfile CMD to include the --reload flag
+    command: gunicorn --bind 0.0.0.0:8081 --workers 2 --threads 4 --timeout 120 --reload webapp.app:app
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${FARI_POSTGRES_DB:-fari}
+      POSTGRES_USER: ${FARI_POSTGRES_USER:-fari}
+      POSTGRES_PASSWORD: ${FARI_POSTGRES_PASSWORD:-toor}
+    ports:
+      - "${FARI_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - fari_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  fari_data:
+    name: fari_data
+  fari_postgres_data:
+    name: fari_postgres_data

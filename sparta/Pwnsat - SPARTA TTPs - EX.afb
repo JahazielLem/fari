@@ -1,0 +1,2417 @@
+{
+    "schema": "attack_flow_v2",
+    "theme": "dark_theme",
+    "objects": [
+        {
+            "id": "flow",
+            "instance": "3c2a3a03-f957-4745-9178-2e6c20451e45",
+            "properties": [
+                [
+                    "name",
+                    "Pwnsat - SPARTA TTPs - EX"
+                ],
+                [
+                    "description",
+                    "Hacking the Final Frontier Offensive Security in Space Systems and Satellites with Pwnsat."
+                ],
+                [
+                    "author",
+                    [
+                        [
+                            "name",
+                            "Kevin Leon"
+                        ],
+                        [
+                            "identity_class",
+                            "individual"
+                        ],
+                        [
+                            "contact_information",
+                            "kevinleon.morales@gmail.com"
+                        ]
+                    ]
+                ],
+                [
+                    "scope",
+                    "attack-tree"
+                ],
+                [
+                    "external_references",
+                    []
+                ],
+                [
+                    "created",
+                    {
+                        "time": "2026-05-12T07:02:49.189-06:00",
+                        "zone": "America/Mexico_City"
+                    }
+                ]
+            ],
+            "objects": [
+                "804e5635-97bd-4262-a5a8-a50375d5cbfc",
+                "92795745-1a51-430a-a43d-7e25f3d0890b",
+                "abe42686-cca8-4026-8ee6-0587876e0b6b",
+                "705d2267-c96e-445f-b86c-ce528a537b31",
+                "7a681636-6789-401d-883c-1c83f7a98482",
+                "91a776ef-4099-4f01-ac71-15d84c51e4f8",
+                "521afd67-3332-496d-80ab-22c3583e8b03",
+                "24eec155-97da-4ffe-b041-7b4b9f43fef9",
+                "f89c5862-137e-4fda-ba4e-f8e68a64636d",
+                "4bfab46d-f794-435e-bb51-968a90d35bf8",
+                "97015fed-020a-4290-a44f-bf95096406fd",
+                "41e68ac3-13b3-4246-a318-01d072b16ed1",
+                "96778079-503d-42b6-beda-e8426cd3fe42",
+                "2fc6be66-3528-4b9c-b568-dc6c43cc5aad",
+                "c3f97c11-dc38-400d-9bea-1d605516e9c0",
+                "1945da3d-58dc-4c22-90b8-701e39b071cf",
+                "d56c05d1-b888-418a-96da-5a4baee9f441",
+                "aa205b5e-5d09-4382-a21e-561675bde5bf",
+                "095a4f35-1180-436b-8cfa-d6dceaf71a1b",
+                "afa602e7-ae5f-4363-8426-67267710a5ec",
+                "3fd7344a-03ed-4a8d-a48b-c6e308ac5a54",
+                "593a5cf9-1803-4ecc-b76d-c7ea0919dd28",
+                "83845d18-b4de-4a5e-8e1e-f0f23f6e67ad",
+                "b93ec558-cac2-4682-882e-a65489a99bd9",
+                "bcda4e38-c25e-4358-be54-1f9eaa3d63d5",
+                "fdd4a369-42d7-45dd-85c6-08af91fb1e28",
+                "85ca9ce7-a14f-40c6-8161-4da44b1805dc",
+                "086d6b91-2a9d-4ed3-998e-5f19184ce31c",
+                "932c0f03-78f1-48f3-85ff-2e56f019a4e6",
+                "a599d102-a230-49f2-bcfa-632ae120b554"
+            ]
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "804e5635-97bd-4262-a5a8-a50375d5cbfc",
+            "source": "1a881b30-4943-4f01-8b11-e5f0b603e78d",
+            "target": "9907a8a5-5ec9-426e-90c0-560ba6ed4f45",
+            "handles": [
+                "1d5a8845-17f7-49f6-b118-a986dcd180b0"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "1a881b30-4943-4f01-8b11-e5f0b603e78d"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "9907a8a5-5ec9-426e-90c0-560ba6ed4f45"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "1d5a8845-17f7-49f6-b118-a986dcd180b0"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "92795745-1a51-430a-a43d-7e25f3d0890b",
+            "source": "07da6c04-5f0c-4377-bac9-837f1b80eb5c",
+            "target": "25dce7a9-7f3f-414f-ab5d-79bfad18a0ce",
+            "handles": [
+                "eedea996-eb34-4445-a559-fb5a58cb7889"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "07da6c04-5f0c-4377-bac9-837f1b80eb5c"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "25dce7a9-7f3f-414f-ab5d-79bfad18a0ce"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "eedea996-eb34-4445-a559-fb5a58cb7889"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "abe42686-cca8-4026-8ee6-0587876e0b6b",
+            "source": "79448f97-a7d0-4db4-9ca0-b56e73e4fe4d",
+            "target": "798e24ff-4831-4175-842f-c721912b9adb",
+            "handles": [
+                "659c6473-c0e0-4a60-ae4f-00a9450d6e51"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "79448f97-a7d0-4db4-9ca0-b56e73e4fe4d"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "798e24ff-4831-4175-842f-c721912b9adb"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "659c6473-c0e0-4a60-ae4f-00a9450d6e51"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "705d2267-c96e-445f-b86c-ce528a537b31",
+            "source": "d3b2cb9c-21eb-4504-9ee3-9f2ca0515697",
+            "target": "259449b5-87fa-464b-801d-f9f75d0f4ebb",
+            "handles": [
+                "52f3dd7c-9f6d-41f7-a9c2-3ea7be9f23de"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "d3b2cb9c-21eb-4504-9ee3-9f2ca0515697"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "259449b5-87fa-464b-801d-f9f75d0f4ebb"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "52f3dd7c-9f6d-41f7-a9c2-3ea7be9f23de"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "7a681636-6789-401d-883c-1c83f7a98482",
+            "source": "acae4919-ba35-447b-b3eb-416b7cd2cb01",
+            "target": "e677c4dc-0e62-4a91-8638-168e692632b3",
+            "handles": [
+                "cb25729d-41e8-4fb9-8fac-d9118dc55031"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "acae4919-ba35-447b-b3eb-416b7cd2cb01"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "e677c4dc-0e62-4a91-8638-168e692632b3"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "cb25729d-41e8-4fb9-8fac-d9118dc55031"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "91a776ef-4099-4f01-ac71-15d84c51e4f8",
+            "source": "4601c680-b9c3-467d-969e-049d539682af",
+            "target": "64954389-6756-46ff-963e-dfa413db85a4",
+            "handles": [
+                "f0c62c1b-7676-42d6-8a32-a9ad4ab5eace"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "4601c680-b9c3-467d-969e-049d539682af"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "64954389-6756-46ff-963e-dfa413db85a4"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "f0c62c1b-7676-42d6-8a32-a9ad4ab5eace"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "521afd67-3332-496d-80ab-22c3583e8b03",
+            "source": "413e7676-c543-482e-a375-389c3cecce4e",
+            "target": "cf9d5d56-240f-4468-b906-080879cc3612",
+            "handles": [
+                "87886c09-2b1d-4933-984a-a4e419311303"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "413e7676-c543-482e-a375-389c3cecce4e"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "cf9d5d56-240f-4468-b906-080879cc3612"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "87886c09-2b1d-4933-984a-a4e419311303"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "24eec155-97da-4ffe-b041-7b4b9f43fef9",
+            "source": "b4272132-c884-41f9-8fae-e880e06800f5",
+            "target": "6a211d7b-36cc-4b83-9fb0-2ef2c467ca12",
+            "handles": [
+                "c52108f9-d1d1-4ecd-a152-2c74dc14ca62"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "b4272132-c884-41f9-8fae-e880e06800f5"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "6a211d7b-36cc-4b83-9fb0-2ef2c467ca12"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "c52108f9-d1d1-4ecd-a152-2c74dc14ca62"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "f89c5862-137e-4fda-ba4e-f8e68a64636d",
+            "source": "5de532c1-352c-4197-9929-9104cdf31b15",
+            "target": "35da9675-9258-4262-9297-dd3744785ae6",
+            "handles": [
+                "652001ef-b0c3-47b4-8a74-5ae35c1c6e31"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "5de532c1-352c-4197-9929-9104cdf31b15"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "35da9675-9258-4262-9297-dd3744785ae6"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "652001ef-b0c3-47b4-8a74-5ae35c1c6e31"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "4bfab46d-f794-435e-bb51-968a90d35bf8",
+            "source": "610cff89-9667-4567-975b-598bcaf9e39f",
+            "target": "ac342953-8832-4135-8710-cc735dcb6f06",
+            "handles": [
+                "8f78577a-18d7-4812-b91d-0bf7d6124066"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "610cff89-9667-4567-975b-598bcaf9e39f"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "ac342953-8832-4135-8710-cc735dcb6f06"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "8f78577a-18d7-4812-b91d-0bf7d6124066"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "97015fed-020a-4290-a44f-bf95096406fd",
+            "source": "5befcef4-b450-4d97-b597-7b3d9ed73a8f",
+            "target": "7cbb23ad-fea7-49c2-a58f-cbe558a4dddf",
+            "handles": [
+                "f070f014-69d0-4d6a-a77c-ea3193f7266c"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "5befcef4-b450-4d97-b597-7b3d9ed73a8f"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "7cbb23ad-fea7-49c2-a58f-cbe558a4dddf"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "f070f014-69d0-4d6a-a77c-ea3193f7266c"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "41e68ac3-13b3-4246-a318-01d072b16ed1",
+            "source": "d3c2f4e1-edca-4e71-be7c-b970d9f1b60a",
+            "target": "54740533-ce15-4fa8-add7-e7300abd4b71",
+            "handles": [
+                "15aa46e3-5443-4699-9054-3832d6eaa55e"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "d3c2f4e1-edca-4e71-be7c-b970d9f1b60a"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "54740533-ce15-4fa8-add7-e7300abd4b71"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "15aa46e3-5443-4699-9054-3832d6eaa55e"
+        },
+        {
+            "id": "grouping",
+            "instance": "96778079-503d-42b6-beda-e8426cd3fe42",
+            "properties": [
+                [
+                    "name",
+                    "Replay"
+                ],
+                [
+                    "description",
+                    "Re-transmitting previously captured traffic over RF links, crosslinks, or internal buses within valid system acceptance windows."
+                ],
+                [
+                    "context",
+                    "Execution"
+                ]
+            ],
+            "anchors": {
+                "0": "43975ce3-40c2-4185-8f6f-5dfb5ac66f05",
+                "30": "2a7ff2a5-6d77-474c-91a0-8463006af554",
+                "60": "151dd683-d75d-4c28-a0f5-b6a0c7a0081f",
+                "90": "6f9fcecb-33f7-4066-9e21-b8def6244ac1",
+                "120": "d97ad220-a256-4189-8419-ae6bfe0017e4",
+                "150": "e5da3232-1696-4f0d-ba65-aca299b687ed",
+                "180": "8cbbc48f-8950-4f46-a480-9d064bfaa060",
+                "210": "d737a29e-c370-4f38-a186-f5874387e194",
+                "240": "ad986df6-152b-4625-b98a-9abfc6ce98e9",
+                "270": "bd76f6a4-c333-4b8a-a503-42e6cf03a873",
+                "300": "58191459-405e-4c3d-b15a-e1f94dddd562",
+                "330": "c36058b3-17f6-4a43-b913-f13cf2a4e8a7"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "43975ce3-40c2-4185-8f6f-5dfb5ac66f05",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "2a7ff2a5-6d77-474c-91a0-8463006af554",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "151dd683-d75d-4c28-a0f5-b6a0c7a0081f",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "6f9fcecb-33f7-4066-9e21-b8def6244ac1",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "d97ad220-a256-4189-8419-ae6bfe0017e4",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "e5da3232-1696-4f0d-ba65-aca299b687ed",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8cbbc48f-8950-4f46-a480-9d064bfaa060",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "d737a29e-c370-4f38-a186-f5874387e194",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "ad986df6-152b-4625-b98a-9abfc6ce98e9",
+            "latches": [
+                "1a881b30-4943-4f01-8b11-e5f0b603e78d"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "bd76f6a4-c333-4b8a-a503-42e6cf03a873",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "58191459-405e-4c3d-b15a-e1f94dddd562",
+            "latches": [
+                "07da6c04-5f0c-4377-bac9-837f1b80eb5c"
+            ]
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "c36058b3-17f6-4a43-b913-f13cf2a4e8a7",
+            "latches": []
+        },
+        {
+            "id": "grouping",
+            "instance": "2fc6be66-3528-4b9c-b568-dc6c43cc5aad",
+            "properties": [
+                [
+                    "name",
+                    "Exploit Hardware/Firmware Corruption"
+                ],
+                [
+                    "description",
+                    "Tampering with device firmware, programmable logic (FPGA bitstreams), configuration blobs, or MCU/SoC boot ROM fallbacks."
+                ],
+                [
+                    "context",
+                    "Execution"
+                ]
+            ],
+            "anchors": {
+                "0": "7bd8614c-0f34-4681-8c78-9ccc54169286",
+                "30": "6ae3d9ae-dc1c-4920-8a22-db7609a0b061",
+                "60": "a70b1e96-22b5-4084-8ac2-f1d981a4650c",
+                "90": "1170f7a3-1c87-4f13-90a3-c07bcbf72a27",
+                "120": "67b6acf9-a902-4db9-b5ca-45b6b013bb5e",
+                "150": "e0bdcc2f-07c3-4b3a-b0ba-47029e138723",
+                "180": "bdc11fa5-8b0f-41bd-a9ed-4e93a6815ec4",
+                "210": "b0953b9d-387f-4a9b-a10f-66011e92971f",
+                "240": "a3c60f74-d26c-4470-a0aa-10dfb6cd50d5",
+                "270": "13705cae-d8d8-4a48-aa5b-0fd342f347e5",
+                "300": "4aae7973-2f59-457b-92d0-35fc4ece71a5",
+                "330": "410c3740-d6d1-4fb6-8034-4a115e44ddbd"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "7bd8614c-0f34-4681-8c78-9ccc54169286",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "6ae3d9ae-dc1c-4920-8a22-db7609a0b061",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "a70b1e96-22b5-4084-8ac2-f1d981a4650c",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "1170f7a3-1c87-4f13-90a3-c07bcbf72a27",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "67b6acf9-a902-4db9-b5ca-45b6b013bb5e",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "e0bdcc2f-07c3-4b3a-b0ba-47029e138723",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "bdc11fa5-8b0f-41bd-a9ed-4e93a6815ec4",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "b0953b9d-387f-4a9b-a10f-66011e92971f",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "a3c60f74-d26c-4470-a0aa-10dfb6cd50d5",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "13705cae-d8d8-4a48-aa5b-0fd342f347e5",
+            "latches": [
+                "79448f97-a7d0-4db4-9ca0-b56e73e4fe4d"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "4aae7973-2f59-457b-92d0-35fc4ece71a5",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "410c3740-d6d1-4fb6-8034-4a115e44ddbd",
+            "latches": []
+        },
+        {
+            "id": "grouping",
+            "instance": "c3f97c11-dc38-400d-9bea-1d605516e9c0",
+            "properties": [
+                [
+                    "name",
+                    "Modify On-Board Values"
+                ],
+                [
+                    "description",
+                    "Altering live or persistent configuration data, including control registers, limit tables, FDIR rules, timelines, and setpoints."
+                ],
+                [
+                    "context",
+                    "Execution"
+                ]
+            ],
+            "anchors": {
+                "0": "438ca578-3efe-4451-98b3-913b8617121e",
+                "30": "6d71bc54-10da-4d83-bbd5-5e2abb0ac671",
+                "60": "f1e45b82-c6f6-4f41-9409-0e758a172842",
+                "90": "4333c840-4dba-40bd-a9f2-1f6320417afa",
+                "120": "f09972a7-61fb-4d4a-900d-1689377b48f1",
+                "150": "033438fa-ff56-40b4-8b89-23d673806a8f",
+                "180": "9b1d05dd-47ff-4114-a8c7-4d68b10d0058",
+                "210": "6cb4a3d6-52de-4b50-9801-63bed4f80c79",
+                "240": "d4d8f9bc-99a4-4c05-bb1a-3cc60495a1a6",
+                "270": "83ce93ae-4779-43fa-8fc7-5189704d6b27",
+                "300": "358b8792-89ae-472d-9b8f-7ee89fbbb9b4",
+                "330": "6df95484-b9b7-4b7d-aeb2-5ff7c4ce8536"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "438ca578-3efe-4451-98b3-913b8617121e",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "6d71bc54-10da-4d83-bbd5-5e2abb0ac671",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "f1e45b82-c6f6-4f41-9409-0e758a172842",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "4333c840-4dba-40bd-a9f2-1f6320417afa",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "f09972a7-61fb-4d4a-900d-1689377b48f1",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "033438fa-ff56-40b4-8b89-23d673806a8f",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "9b1d05dd-47ff-4114-a8c7-4d68b10d0058",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "6cb4a3d6-52de-4b50-9801-63bed4f80c79",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "d4d8f9bc-99a4-4c05-bb1a-3cc60495a1a6",
+            "latches": [
+                "d3b2cb9c-21eb-4504-9ee3-9f2ca0515697",
+                "acae4919-ba35-447b-b3eb-416b7cd2cb01"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "83ce93ae-4779-43fa-8fc7-5189704d6b27",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "358b8792-89ae-472d-9b8f-7ee89fbbb9b4",
+            "latches": [
+                "4601c680-b9c3-467d-969e-049d539682af",
+                "413e7676-c543-482e-a375-389c3cecce4e"
+            ]
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "6df95484-b9b7-4b7d-aeb2-5ff7c4ce8536",
+            "latches": []
+        },
+        {
+            "id": "grouping",
+            "instance": "1945da3d-58dc-4c22-90b8-701e39b071cf",
+            "properties": [
+                [
+                    "name",
+                    "Flooding"
+                ],
+                [
+                    "description",
+                    "Overwhelming a communications link, application parser, or internal data bus by injecting an unsustainable volume of traffic."
+                ],
+                [
+                    "context",
+                    "Execution"
+                ]
+            ],
+            "anchors": {
+                "0": "cf03ba59-a9b2-4f77-9895-7a3291cf625d",
+                "30": "1ff00872-d751-4925-9bcc-fa58e95ebe92",
+                "60": "ad0fbd4a-9dc0-49ba-bec4-bdece691b614",
+                "90": "5ee6fd9e-c462-4380-8974-e0dc1a9b85b2",
+                "120": "1ac00227-8f57-4c3a-87a1-d7b4abb54091",
+                "150": "d8965b8f-4a41-4974-adfb-1f8e10eeb260",
+                "180": "dba50425-4b0e-4efa-948d-edb4807892d9",
+                "210": "a8b4b261-b3cb-4280-970b-2604d88ba0da",
+                "240": "b946191b-8714-471f-9089-7816f18e6d1d",
+                "270": "c25e0ea3-b872-4612-b1e6-8d7410518602",
+                "300": "36feb466-179c-4284-a6a5-7d582476aef6",
+                "330": "32841a7b-3c95-4356-b189-569db48c973f"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "cf03ba59-a9b2-4f77-9895-7a3291cf625d",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "1ff00872-d751-4925-9bcc-fa58e95ebe92",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "ad0fbd4a-9dc0-49ba-bec4-bdece691b614",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "5ee6fd9e-c462-4380-8974-e0dc1a9b85b2",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "1ac00227-8f57-4c3a-87a1-d7b4abb54091",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "d8965b8f-4a41-4974-adfb-1f8e10eeb260",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "dba50425-4b0e-4efa-948d-edb4807892d9",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "a8b4b261-b3cb-4280-970b-2604d88ba0da",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "b946191b-8714-471f-9089-7816f18e6d1d",
+            "latches": [
+                "b4272132-c884-41f9-8fae-e880e06800f5"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "c25e0ea3-b872-4612-b1e6-8d7410518602",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "36feb466-179c-4284-a6a5-7d582476aef6",
+            "latches": [
+                "5de532c1-352c-4197-9929-9104cdf31b15"
+            ]
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "32841a7b-3c95-4356-b189-569db48c973f",
+            "latches": []
+        },
+        {
+            "id": "grouping",
+            "instance": "d56c05d1-b888-418a-96da-5a4baee9f441",
+            "properties": [
+                [
+                    "name",
+                    "Spoofing"
+                ],
+                [
+                    "description",
+                    "Forging data inputs (e.g., GNSS signals, crosslink beacons, sensor telemetry) that onboard logic relies upon as ground truth."
+                ],
+                [
+                    "context",
+                    "Execution"
+                ]
+            ],
+            "anchors": {
+                "0": "20a62c58-5e0d-491d-b6fe-e64e0bae9c93",
+                "30": "9e90d953-1091-47d2-b0ab-7ca787949090",
+                "60": "b72c939b-340a-4881-ae9d-e21dee1d2731",
+                "90": "0338948e-fb66-47b0-8d05-86f2f392b8ca",
+                "120": "328ed666-a669-4b2c-a2d3-ca8802ac21c2",
+                "150": "bd360f7f-6610-49da-9e38-d17116e4034b",
+                "180": "ca8a0946-c46e-45f5-81a3-5e86a63a63f7",
+                "210": "7cf9c3e3-bc68-4e33-95ff-df17fb9a8432",
+                "240": "83fc0b1b-0b28-42d5-a823-56007afefe74",
+                "270": "ba47d244-5ec3-4117-9277-02a9a482c793",
+                "300": "a860a2d0-269c-452d-8f52-7c830d3b2d54",
+                "330": "c70ff2b5-9578-4852-81e1-c4a3e23c0181"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "20a62c58-5e0d-491d-b6fe-e64e0bae9c93",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "9e90d953-1091-47d2-b0ab-7ca787949090",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "b72c939b-340a-4881-ae9d-e21dee1d2731",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "0338948e-fb66-47b0-8d05-86f2f392b8ca",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "328ed666-a669-4b2c-a2d3-ca8802ac21c2",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "bd360f7f-6610-49da-9e38-d17116e4034b",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "ca8a0946-c46e-45f5-81a3-5e86a63a63f7",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "7cf9c3e3-bc68-4e33-95ff-df17fb9a8432",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "83fc0b1b-0b28-42d5-a823-56007afefe74",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "ba47d244-5ec3-4117-9277-02a9a482c793",
+            "latches": [
+                "610cff89-9667-4567-975b-598bcaf9e39f"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "a860a2d0-269c-452d-8f52-7c830d3b2d54",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "c70ff2b5-9578-4852-81e1-c4a3e23c0181",
+            "latches": []
+        },
+        {
+            "id": "grouping",
+            "instance": "aa205b5e-5d09-4382-a21e-561675bde5bf",
+            "properties": [
+                [
+                    "name",
+                    "Jamming"
+                ],
+                [
+                    "description",
+                    "Using radio frequency (RF) signals within a target antenna's frequency band and field of view to intentionally degrade or block communications."
+                ],
+                [
+                    "context",
+                    "Execution"
+                ]
+            ],
+            "anchors": {
+                "0": "058e7dc2-bf5e-45c1-9b37-abfc0e2af35b",
+                "30": "c433fa17-737e-4e4b-a007-5b1a9f3b4291",
+                "60": "51a4dfd2-c21f-47d2-9039-30c1bc8a1b8e",
+                "90": "d7541081-2f88-4d05-b2bc-7b59117e2e46",
+                "120": "932870e4-64af-4caf-8ab0-74685b76cc75",
+                "150": "9c5e2ee1-3ff6-401b-9687-53db5a372668",
+                "180": "adb4fefc-bc87-4cbc-885b-6af81ffd783c",
+                "210": "5c99bb08-2736-4943-8bf4-79fd43b3b5fd",
+                "240": "f348e6fc-9291-476d-a5d5-1e37b810e07a",
+                "270": "f601ec83-0ada-4b2f-84ea-d3596d042930",
+                "300": "8e64a517-ffc4-4368-bb19-23694f79011c",
+                "330": "8d04c15c-b9ac-45b4-92ef-f0435e2556e1"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "058e7dc2-bf5e-45c1-9b37-abfc0e2af35b",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "c433fa17-737e-4e4b-a007-5b1a9f3b4291",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "51a4dfd2-c21f-47d2-9039-30c1bc8a1b8e",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "d7541081-2f88-4d05-b2bc-7b59117e2e46",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "932870e4-64af-4caf-8ab0-74685b76cc75",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "9c5e2ee1-3ff6-401b-9687-53db5a372668",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "adb4fefc-bc87-4cbc-885b-6af81ffd783c",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "5c99bb08-2736-4943-8bf4-79fd43b3b5fd",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "f348e6fc-9291-476d-a5d5-1e37b810e07a",
+            "latches": [
+                "d3c2f4e1-edca-4e71-be7c-b970d9f1b60a"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "f601ec83-0ada-4b2f-84ea-d3596d042930",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "8e64a517-ffc4-4368-bb19-23694f79011c",
+            "latches": [
+                "5befcef4-b450-4d97-b597-7b3d9ed73a8f"
+            ]
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8d04c15c-b9ac-45b4-92ef-f0435e2556e1",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "095a4f35-1180-436b-8cfa-d6dceaf71a1b",
+            "properties": [
+                [
+                    "name",
+                    "EX-0001.01 Command Packets"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0001"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0001.01"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Resending authentic telecommand Protocol Data Units (PDUs) with intact framing, CRCs, counters, or timetags captured from prior exchanges."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "82f9c3f3-a1dc-47eb-a010-44590afba0bd",
+                "30": "63ca6620-7398-411d-80fa-ea2ac17974bd",
+                "60": "e4499440-feed-42bc-9729-7d8e9ee2a354",
+                "90": "9f36ad7a-12b8-40d4-bb64-3565763dafe9",
+                "120": "4f8ea64b-6457-4271-a763-2428e4fbff4a",
+                "150": "f1b92524-396e-4abd-99e0-015295ca13d4",
+                "180": "a1a19649-f9a2-4767-81bb-85a384fd6af1",
+                "210": "eda24e13-7dd7-4093-95aa-f8aee76efdb5",
+                "240": "70c819d4-963d-41d0-bf37-cd814f408229",
+                "270": "a3d605b0-bc30-4d55-ab9d-2a3b594b8419",
+                "300": "5c13f892-00d6-4bad-b449-2dd3ecca6caa",
+                "330": "01e9a01d-4e26-4d7a-a340-0b35014e0ce8"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "82f9c3f3-a1dc-47eb-a010-44590afba0bd",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "63ca6620-7398-411d-80fa-ea2ac17974bd",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "e4499440-feed-42bc-9729-7d8e9ee2a354",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "9f36ad7a-12b8-40d4-bb64-3565763dafe9",
+            "latches": [
+                "9907a8a5-5ec9-426e-90c0-560ba6ed4f45"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "4f8ea64b-6457-4271-a763-2428e4fbff4a",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "f1b92524-396e-4abd-99e0-015295ca13d4",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "a1a19649-f9a2-4767-81bb-85a384fd6af1",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "eda24e13-7dd7-4093-95aa-f8aee76efdb5",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "70c819d4-963d-41d0-bf37-cd814f408229",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "a3d605b0-bc30-4d55-ab9d-2a3b594b8419",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "5c13f892-00d6-4bad-b449-2dd3ecca6caa",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "01e9a01d-4e26-4d7a-a340-0b35014e0ce8",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "afa602e7-ae5f-4363-8426-67267710a5ec",
+            "properties": [
+                [
+                    "name",
+                    "EX-0001.02 Bus Traffic Replay"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0001"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0001.02"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Injecting or retransmitting historical, well-formed messages directly onto internal spacecraft data buses (e.g., MIL-STD-1553, SpaceWire) instead of targeting the external RF path."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "5b67225e-998e-43c5-bdb4-76452b21f240",
+                "30": "baeb3cfe-27fc-4469-98a1-9419c1d70072",
+                "60": "0d202713-2fb7-4996-873f-cebb73e648ef",
+                "90": "50f65e80-8f94-4517-b7c4-0241f899b354",
+                "120": "ac89ca49-f778-4cc8-90fd-93c3cbd0eb6d",
+                "150": "df8e6d41-d005-4c9f-8b26-0a3a428f1d24",
+                "180": "bcb5c0ea-3a16-40bc-832a-13998760c154",
+                "210": "a23d4ab9-ab9c-43d6-b803-28bdb3571148",
+                "240": "10ac4936-e279-450e-8ad6-eaae4d9d666a",
+                "270": "e22020da-58d7-479e-9eb3-aca5e2a5df45",
+                "300": "985e2ba8-33b5-4287-9943-16ee0df3900e",
+                "330": "ce19f57e-dac5-4eaa-be9e-01188d099fff"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "5b67225e-998e-43c5-bdb4-76452b21f240",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "baeb3cfe-27fc-4469-98a1-9419c1d70072",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "0d202713-2fb7-4996-873f-cebb73e648ef",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "50f65e80-8f94-4517-b7c4-0241f899b354",
+            "latches": [
+                "25dce7a9-7f3f-414f-ab5d-79bfad18a0ce"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "ac89ca49-f778-4cc8-90fd-93c3cbd0eb6d",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "df8e6d41-d005-4c9f-8b26-0a3a428f1d24",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "bcb5c0ea-3a16-40bc-832a-13998760c154",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "a23d4ab9-ab9c-43d6-b803-28bdb3571148",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "10ac4936-e279-450e-8ad6-eaae4d9d666a",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "e22020da-58d7-479e-9eb3-aca5e2a5df45",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "985e2ba8-33b5-4287-9943-16ee0df3900e",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "ce19f57e-dac5-4eaa-be9e-01188d099fff",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "3fd7344a-03ed-4a8d-a48b-c6e308ac5a54",
+            "properties": [
+                [
+                    "name",
+                    "EX-0005.02 Malicious Use of Hardware Commands"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0005"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0005.02"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Issuing low-level device, register, or maintenance commands directly to hardware components over the internal bus."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "f2b33338-ebf8-4704-8259-a31e7d3dfd78",
+                "30": "3801e166-03db-4114-ac6f-933f520152b6",
+                "60": "093f78b0-7ce6-448e-a40d-e7b98d5d1213",
+                "90": "076aa518-7cc1-4429-a68d-6b152fc96ea5",
+                "120": "6852b5ba-2689-4833-a625-8ccd54f88b88",
+                "150": "9cdad17b-a1fc-4998-8368-8c704678020c",
+                "180": "47849833-fe04-4f1e-b932-61ffa5cabad3",
+                "210": "8786f0a6-6d28-4301-8b16-0f81b3f7c685",
+                "240": "b2c67b74-b57c-45e1-8430-e22b5183f487",
+                "270": "e2644afc-e602-4941-811c-66b99c252f6c",
+                "300": "adc65126-d8a7-48f7-a423-f628bf4e3077",
+                "330": "6265fce9-7c4b-4cb0-89a6-e2f03fa6e880"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "f2b33338-ebf8-4704-8259-a31e7d3dfd78",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "3801e166-03db-4114-ac6f-933f520152b6",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "093f78b0-7ce6-448e-a40d-e7b98d5d1213",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "076aa518-7cc1-4429-a68d-6b152fc96ea5",
+            "latches": [
+                "798e24ff-4831-4175-842f-c721912b9adb"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "6852b5ba-2689-4833-a625-8ccd54f88b88",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "9cdad17b-a1fc-4998-8368-8c704678020c",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "47849833-fe04-4f1e-b932-61ffa5cabad3",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8786f0a6-6d28-4301-8b16-0f81b3f7c685",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "b2c67b74-b57c-45e1-8430-e22b5183f487",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "e2644afc-e602-4941-811c-66b99c252f6c",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "adc65126-d8a7-48f7-a423-f628bf4e3077",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "6265fce9-7c4b-4cb0-89a6-e2f03fa6e880",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "593a5cf9-1803-4ecc-b76d-c7ea0919dd28",
+            "properties": [
+                [
+                    "name",
+                    "EX-00012.05 Scheduling Algorithm"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0012"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0012.05"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Tampering with real-time scheduling parameters, task priorities, CPU budgets, deadlines, and clock sources."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "9b066dc9-f666-46d1-a98b-e15b6dad663a",
+                "30": "c8d00ae8-280e-4aae-bc95-54760df7861f",
+                "60": "91d5b246-faf5-4098-922f-0f50221a17b1",
+                "90": "5734a81b-918b-4a1f-abf2-96d2e2b0430e",
+                "120": "680c51c3-b0c1-4d51-b21a-3389839aff5a",
+                "150": "8569b55b-a2c3-4e75-b849-c61d67fa9716",
+                "180": "0f20eafa-7781-4932-ab03-a8803d29ebd0",
+                "210": "4b552408-2a74-48b8-9d3d-e4f66407e710",
+                "240": "a00d6504-3ebd-4904-a429-6aa8554ccc80",
+                "270": "36ca495b-b5e5-4cb3-b5bc-47dc464cd600",
+                "300": "6ebd0a43-4d86-4cbd-9fba-5e336d6b7ceb",
+                "330": "2cd55555-fdd7-4e70-903c-644a91cbb7ff"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "9b066dc9-f666-46d1-a98b-e15b6dad663a",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "c8d00ae8-280e-4aae-bc95-54760df7861f",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "91d5b246-faf5-4098-922f-0f50221a17b1",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "5734a81b-918b-4a1f-abf2-96d2e2b0430e",
+            "latches": [
+                "259449b5-87fa-464b-801d-f9f75d0f4ebb"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "680c51c3-b0c1-4d51-b21a-3389839aff5a",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8569b55b-a2c3-4e75-b849-c61d67fa9716",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "0f20eafa-7781-4932-ab03-a8803d29ebd0",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "4b552408-2a74-48b8-9d3d-e4f66407e710",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "a00d6504-3ebd-4904-a429-6aa8554ccc80",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "36ca495b-b5e5-4cb3-b5bc-47dc464cd600",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "6ebd0a43-4d86-4cbd-9fba-5e336d6b7ceb",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "2cd55555-fdd7-4e70-903c-644a91cbb7ff",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "83845d18-b4de-4a5e-8e1e-f0f23f6e67ad",
+            "properties": [
+                [
+                    "name",
+                    "EX-00012.06 Science/Payload Data"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0012"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0012.06"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Modifying raw detector frames, Level-0 data streams, mass memory file catalogs, or adjacent metadata (timestamps, calibration tables)."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "1cf2584c-f05f-4e10-b78b-1da292d65ccc",
+                "30": "47db8f82-bcc1-4c45-9751-b9070454f9a1",
+                "60": "baea6b52-7e80-4607-bd85-16775be90f1c",
+                "90": "2ebfc21c-b337-44fe-ba73-86a848b552f0",
+                "120": "b438f0d5-0179-4a93-80ba-75d9585e283c",
+                "150": "dba17826-fb6e-40db-99a8-0d8c989444aa",
+                "180": "29683d56-93c7-4153-b4e6-6a34e686f418",
+                "210": "0b2d29fb-20db-4e44-967c-8f2d9d71c6dc",
+                "240": "63ba7589-7805-425d-a615-af2fc3be6d71",
+                "270": "cd4ac3b6-45a2-40fc-b3a8-e18e48970297",
+                "300": "927f8a51-18d4-4ed2-9519-5279fe9c2e4e",
+                "330": "cd5fd9f7-4808-4bb5-b3d9-f96d819fcb88"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "1cf2584c-f05f-4e10-b78b-1da292d65ccc",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "47db8f82-bcc1-4c45-9751-b9070454f9a1",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "baea6b52-7e80-4607-bd85-16775be90f1c",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "2ebfc21c-b337-44fe-ba73-86a848b552f0",
+            "latches": [
+                "e677c4dc-0e62-4a91-8638-168e692632b3"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "b438f0d5-0179-4a93-80ba-75d9585e283c",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "dba17826-fb6e-40db-99a8-0d8c989444aa",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "29683d56-93c7-4153-b4e6-6a34e686f418",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "0b2d29fb-20db-4e44-967c-8f2d9d71c6dc",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "63ba7589-7805-425d-a615-af2fc3be6d71",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "cd4ac3b6-45a2-40fc-b3a8-e18e48970297",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "927f8a51-18d4-4ed2-9519-5279fe9c2e4e",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "cd5fd9f7-4808-4bb5-b3d9-f96d819fcb88",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "b93ec558-cac2-4682-882e-a65489a99bd9",
+            "properties": [
+                [
+                    "name",
+                    "EX-0012.07 Propulsion Subsystem "
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0012"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0012.07"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Editing thruster calibrations, valve timings, inhibit masks, delta-V tables, and tank pressure/temperature safety limits."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "0298ed04-a9a9-45dd-b710-54397b43445d",
+                "30": "ae3e03f4-34e2-4580-818f-2169366a7eb5",
+                "60": "461cbedc-3ad0-404c-b233-31508a7c6f57",
+                "90": "963fb320-5bc1-4f76-bcd5-58e158f7af71",
+                "120": "409e2709-0b3c-43f6-9240-c449ccf21daf",
+                "150": "b615091b-4297-40a9-ac6c-f7ced12224c8",
+                "180": "715f406b-9d08-4398-af88-d445a93a6a5b",
+                "210": "cd199308-842c-4b37-b875-4b35c3297e37",
+                "240": "1c7b2883-f41c-463c-8053-5897fb4a046d",
+                "270": "09d0ae8d-94da-4555-8e2e-1a1f4cdb9fcf",
+                "300": "d0bccf55-1d3f-4f79-bb82-4135c9f96585",
+                "330": "910ae5e2-a4ac-4e7e-9611-b586305721f2"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "0298ed04-a9a9-45dd-b710-54397b43445d",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "ae3e03f4-34e2-4580-818f-2169366a7eb5",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "461cbedc-3ad0-404c-b233-31508a7c6f57",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "963fb320-5bc1-4f76-bcd5-58e158f7af71",
+            "latches": [
+                "64954389-6756-46ff-963e-dfa413db85a4"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "409e2709-0b3c-43f6-9240-c449ccf21daf",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "b615091b-4297-40a9-ac6c-f7ced12224c8",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "715f406b-9d08-4398-af88-d445a93a6a5b",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "cd199308-842c-4b37-b875-4b35c3297e37",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "1c7b2883-f41c-463c-8053-5897fb4a046d",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "09d0ae8d-94da-4555-8e2e-1a1f4cdb9fcf",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "d0bccf55-1d3f-4f79-bb82-4135c9f96585",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "910ae5e2-a4ac-4e7e-9611-b586305721f2",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "bcda4e38-c25e-4358-be54-1f9eaa3d63d5",
+            "properties": [
+                [
+                    "name",
+                    "EX-0012.10 Command & Data Handling Subsystem"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0012"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0012.10"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Adjusting runtime variables such as opcode-to-handler maps, command queue depths, message routing tables, and event/telemetry filters."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "e96d0afc-888b-4f22-91b9-5eefd640a465",
+                "30": "237359a1-ff9d-414c-bdf4-da58f0ba2e91",
+                "60": "1a4f1857-eee0-455d-8ac8-1ae943d11b2e",
+                "90": "aa69c44a-deed-406e-8220-1bff1045b2ac",
+                "120": "11fe1d6e-5e24-43f5-a636-c41d1ca6f3f2",
+                "150": "6a950133-b53a-4ac1-8597-2a9d5fc6f0e8",
+                "180": "f259514c-d39a-43ab-b9ab-41470e4c9bec",
+                "210": "89e250e5-9fb0-412f-ba33-cc6e4cc5c1b5",
+                "240": "e47e1fb5-02f2-437c-8e57-6bc88de15ffe",
+                "270": "63790341-ffc8-4c11-9111-1a5f2dec7068",
+                "300": "dd693ff0-ed38-44da-ba61-36b07dc0bf79",
+                "330": "a0d2b426-ba1e-498e-ab73-e7e51e99e062"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "e96d0afc-888b-4f22-91b9-5eefd640a465",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "237359a1-ff9d-414c-bdf4-da58f0ba2e91",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "1a4f1857-eee0-455d-8ac8-1ae943d11b2e",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "aa69c44a-deed-406e-8220-1bff1045b2ac",
+            "latches": [
+                "cf9d5d56-240f-4468-b906-080879cc3612"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "11fe1d6e-5e24-43f5-a636-c41d1ca6f3f2",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "6a950133-b53a-4ac1-8597-2a9d5fc6f0e8",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "f259514c-d39a-43ab-b9ab-41470e4c9bec",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "89e250e5-9fb0-412f-ba33-cc6e4cc5c1b5",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "e47e1fb5-02f2-437c-8e57-6bc88de15ffe",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "63790341-ffc8-4c11-9111-1a5f2dec7068",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "dd693ff0-ed38-44da-ba61-36b07dc0bf79",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "a0d2b426-ba1e-498e-ab73-e7e51e99e062",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "fdd4a369-42d7-45dd-85c6-08af91fb1e28",
+            "properties": [
+                [
+                    "name",
+                    "EX-0013.01 Valid Commands "
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0013"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0013.01"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Saturating data paths with an excessive volume of legitimate but low-risk telecommands or bus messages (e.g., no-ops, time queries)."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "e9aa292e-13b7-4ba7-b4cd-155bf0124d4d",
+                "30": "c8b9ee22-b4d5-48b9-b17b-030efe7944be",
+                "60": "1737b1c5-5ee6-4d43-98fe-ecbd15b83764",
+                "90": "69539473-ad71-4046-b76a-d45508aa404c",
+                "120": "caa28429-dd21-4242-9994-47c8be52b673",
+                "150": "47eadaa7-cb63-4816-9f98-1b72db29d529",
+                "180": "675a7233-cda0-408b-b3cd-4598cdb5bb7f",
+                "210": "747d6f83-2887-424d-ad36-15e275238cc0",
+                "240": "2883b7af-4b36-4612-98a8-cb4ce54233a3",
+                "270": "b531af02-05ab-46fb-b4c4-572bb3502ce5",
+                "300": "66a2da94-22da-40f5-8fa4-dfefeb99b16f",
+                "330": "c48d2205-76d6-4dd6-93e6-1e74aaf552b0"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "e9aa292e-13b7-4ba7-b4cd-155bf0124d4d",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "c8b9ee22-b4d5-48b9-b17b-030efe7944be",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "1737b1c5-5ee6-4d43-98fe-ecbd15b83764",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "69539473-ad71-4046-b76a-d45508aa404c",
+            "latches": [
+                "6a211d7b-36cc-4b83-9fb0-2ef2c467ca12"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "caa28429-dd21-4242-9994-47c8be52b673",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "47eadaa7-cb63-4816-9f98-1b72db29d529",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "675a7233-cda0-408b-b3cd-4598cdb5bb7f",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "747d6f83-2887-424d-ad36-15e275238cc0",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "2883b7af-4b36-4612-98a8-cb4ce54233a3",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "b531af02-05ab-46fb-b4c4-572bb3502ce5",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "66a2da94-22da-40f5-8fa4-dfefeb99b16f",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "c48d2205-76d6-4dd6-93e6-1e74aaf552b0",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "85ca9ce7-a14f-40c6-8161-4da44b1805dc",
+            "properties": [
+                [
+                    "name",
+                    "EX-0013.02 Erroneous Input"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0013"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0013.02"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Injecting volumetric invalid data—such as wideband noise, malformed packets, or frames with bad CRCs—into receivers and parsers."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "fbc0bae9-7fde-409f-9ea9-9a443835ac47",
+                "30": "e3e4250f-e6ad-4f8b-8ecc-66523692334b",
+                "60": "7bc419b9-c87c-432e-b9fe-7f6f31de90e8",
+                "90": "abe30376-8b9c-4fc0-a19f-b7bd8f90aaea",
+                "120": "f9502ab2-94aa-408f-a1d5-b1095646015b",
+                "150": "8a1631af-5d9c-4d25-81d2-9fdffbfc6830",
+                "180": "4dff043a-a123-4e8d-9cbd-a5fe160997bc",
+                "210": "fa9d20d5-ddb3-462f-8082-780b594015e7",
+                "240": "ff806282-a485-4860-948a-a46f9500ce46",
+                "270": "d126632c-930a-4edc-9a74-878cceda7831",
+                "300": "ab17b338-1a23-4353-9741-f5406046aa7a",
+                "330": "e1940b5a-67cb-47f1-9a4d-3ae4a8aa72ac"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "fbc0bae9-7fde-409f-9ea9-9a443835ac47",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "e3e4250f-e6ad-4f8b-8ecc-66523692334b",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "7bc419b9-c87c-432e-b9fe-7f6f31de90e8",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "abe30376-8b9c-4fc0-a19f-b7bd8f90aaea",
+            "latches": [
+                "35da9675-9258-4262-9297-dd3744785ae6"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "f9502ab2-94aa-408f-a1d5-b1095646015b",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8a1631af-5d9c-4d25-81d2-9fdffbfc6830",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "4dff043a-a123-4e8d-9cbd-a5fe160997bc",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "fa9d20d5-ddb3-462f-8082-780b594015e7",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "ff806282-a485-4860-948a-a46f9500ce46",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "d126632c-930a-4edc-9a74-878cceda7831",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "ab17b338-1a23-4353-9741-f5406046aa7a",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "e1940b5a-67cb-47f1-9a4d-3ae4a8aa72ac",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "086d6b91-2a9d-4ed3-998e-5f19184ce31c",
+            "properties": [
+                [
+                    "name",
+                    "EX-0014.02 Bus Traffic Spoofing"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0014"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0014.02"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Emitting forged messages with valid identifiers, addresses, and timing parameters directly onto internal vehicle data paths (MIL-STD-1553, SpaceWire, CAN)."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "8810eed2-a8b4-44e0-9139-73527289081e",
+                "30": "3367a8d9-0825-4e90-bf00-d84baeb18b3b",
+                "60": "8a881d1d-d90e-4c66-a9c7-d71dfd2a3148",
+                "90": "55f2078e-1f28-47ac-850d-da874442d82f",
+                "120": "25a96c7c-7ffa-482a-b4d9-7da83e4d8007",
+                "150": "15ba1cf6-c681-40a5-b5c6-54faebf4333c",
+                "180": "7d804ef2-86d6-45b3-a3a1-4f557cec2b7b",
+                "210": "02e5eae4-c428-4f77-96e0-82137183931c",
+                "240": "59ff59e2-6d3d-453b-8029-0ed7853bce57",
+                "270": "4c4106ac-bc3c-48a4-8729-4563c62d70cb",
+                "300": "00eef1bb-181e-4433-9ede-1dfba42c1100",
+                "330": "e19482d7-5d67-428d-a5e2-3c8d918a71b0"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8810eed2-a8b4-44e0-9139-73527289081e",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "3367a8d9-0825-4e90-bf00-d84baeb18b3b",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "8a881d1d-d90e-4c66-a9c7-d71dfd2a3148",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "55f2078e-1f28-47ac-850d-da874442d82f",
+            "latches": [
+                "ac342953-8832-4135-8710-cc735dcb6f06"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "25a96c7c-7ffa-482a-b4d9-7da83e4d8007",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "15ba1cf6-c681-40a5-b5c6-54faebf4333c",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "7d804ef2-86d6-45b3-a3a1-4f557cec2b7b",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "02e5eae4-c428-4f77-96e0-82137183931c",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "59ff59e2-6d3d-453b-8029-0ed7853bce57",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "4c4106ac-bc3c-48a4-8729-4563c62d70cb",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "00eef1bb-181e-4433-9ede-1dfba42c1100",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "e19482d7-5d67-428d-a5e2-3c8d918a71b0",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "932c0f03-78f1-48f3-85ff-2e56f019a4e6",
+            "properties": [
+                [
+                    "name",
+                    "EX-0016.01 Uplink Jamming"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0016"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0016.01"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Transmitting RF interference toward the spacecraft's receive antenna to match its frequency, footprint, polarization, and Doppler conditions."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "278cf634-b889-4048-b769-27fb5ad867b0",
+                "30": "fd4500bc-a9de-41c6-b227-cd2749488f08",
+                "60": "e4ce4583-d308-46dd-87f0-63173a7e7494",
+                "90": "3aa03002-3366-4be8-a29e-058a77171edb",
+                "120": "219dec05-4ad0-481b-aea6-60d5ba363152",
+                "150": "95fd856e-85ac-48d4-aa5f-875dbcfac2ed",
+                "180": "da1437ab-6515-4958-a5ee-b4b44133b2d8",
+                "210": "5b62f93d-4c8e-4658-92f5-c8dc64a06fb4",
+                "240": "15b9c55d-ac0a-4c0a-83c6-2d8539909cc7",
+                "270": "c26e3c44-e1c2-452e-8531-00e34bd44303",
+                "300": "3eedafcb-a70f-42ac-9844-b0836866992d",
+                "330": "951c5c23-bd8e-46c7-bce4-50134a9d6948"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "278cf634-b889-4048-b769-27fb5ad867b0",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "fd4500bc-a9de-41c6-b227-cd2749488f08",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "e4ce4583-d308-46dd-87f0-63173a7e7494",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "3aa03002-3366-4be8-a29e-058a77171edb",
+            "latches": [
+                "54740533-ce15-4fa8-add7-e7300abd4b71"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "219dec05-4ad0-481b-aea6-60d5ba363152",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "95fd856e-85ac-48d4-aa5f-875dbcfac2ed",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "da1437ab-6515-4958-a5ee-b4b44133b2d8",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "5b62f93d-4c8e-4658-92f5-c8dc64a06fb4",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "15b9c55d-ac0a-4c0a-83c6-2d8539909cc7",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "c26e3c44-e1c2-452e-8531-00e34bd44303",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "3eedafcb-a70f-42ac-9844-b0836866992d",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "951c5c23-bd8e-46c7-bce4-50134a9d6948",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "a599d102-a230-49f2-bcfa-632ae120b554",
+            "properties": [
+                [
+                    "name",
+                    "EX-0016.02 Downlink Jamming "
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0004"
+                        ],
+                        [
+                            "technique",
+                            "EX-0016"
+                        ],
+                        [
+                            "subtechnique",
+                            "EX-0016.02"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Creating RF noise in the same frequency band as the satellite's downlink signal, targeting the field of view of ground receiving terminals."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "29a90925-15fa-4b11-8d42-7b6910fe7866",
+                "30": "7e16009f-f575-4b7a-baf2-c16f1cc303a1",
+                "60": "46c764cf-a9b4-4f1c-922a-465b375e0815",
+                "90": "0f82875d-970d-4662-8e60-0852e60ef5f8",
+                "120": "f32cc669-f58d-490c-92c2-573f38525cc2",
+                "150": "07743593-1e9e-4fae-84ed-ba36fec2f2c3",
+                "180": "b349ce3b-57e9-467b-b50b-ea400b151817",
+                "210": "dab83fb2-1189-4870-9f3f-0c9a67ae6d3d",
+                "240": "e5442b9e-7c05-4440-89f6-dd152a8ac5cf",
+                "270": "b8def343-3f92-47b1-b5df-6ed328a94d83",
+                "300": "292f92bd-96e2-412f-b31e-d530c5def35a",
+                "330": "eaec6b1a-9342-4231-9380-aafebe2e12d7"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "29a90925-15fa-4b11-8d42-7b6910fe7866",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "7e16009f-f575-4b7a-baf2-c16f1cc303a1",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "46c764cf-a9b4-4f1c-922a-465b375e0815",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "0f82875d-970d-4662-8e60-0852e60ef5f8",
+            "latches": [
+                "7cbb23ad-fea7-49c2-a58f-cbe558a4dddf"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "f32cc669-f58d-490c-92c2-573f38525cc2",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "07743593-1e9e-4fae-84ed-ba36fec2f2c3",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "b349ce3b-57e9-467b-b50b-ea400b151817",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "dab83fb2-1189-4870-9f3f-0c9a67ae6d3d",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "e5442b9e-7c05-4440-89f6-dd152a8ac5cf",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "b8def343-3f92-47b1-b5df-6ed328a94d83",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "292f92bd-96e2-412f-b31e-d530c5def35a",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "eaec6b1a-9342-4231-9380-aafebe2e12d7",
+            "latches": []
+        }
+    ],
+    "layout": {
+        "96778079-503d-42b6-beda-e8426cd3fe42": [
+            3125,
+            -1705
+        ],
+        "2fc6be66-3528-4b9c-b568-dc6c43cc5aad": [
+            3110,
+            -1000
+        ],
+        "c3f97c11-dc38-400d-9bea-1d605516e9c0": [
+            3120,
+            -285
+        ],
+        "1945da3d-58dc-4c22-90b8-701e39b071cf": [
+            3100,
+            425
+        ],
+        "d56c05d1-b888-418a-96da-5a4baee9f441": [
+            3100,
+            1070
+        ],
+        "aa205b5e-5d09-4382-a21e-561675bde5bf": [
+            3105,
+            1735
+        ],
+        "095a4f35-1180-436b-8cfa-d6dceaf71a1b": [
+            2850,
+            -1360
+        ],
+        "afa602e7-ae5f-4363-8426-67267710a5ec": [
+            3385,
+            -1345
+        ],
+        "3fd7344a-03ed-4a8d-a48b-c6e308ac5a54": [
+            3110,
+            -615
+        ],
+        "593a5cf9-1803-4ecc-b76d-c7ea0919dd28": [
+            2560,
+            90
+        ],
+        "83845d18-b4de-4a5e-8e1e-f0f23f6e67ad": [
+            2925,
+            95
+        ],
+        "b93ec558-cac2-4682-882e-a65489a99bd9": [
+            3290,
+            80
+        ],
+        "bcda4e38-c25e-4358-be54-1f9eaa3d63d5": [
+            3665,
+            110
+        ],
+        "fdd4a369-42d7-45dd-85c6-08af91fb1e28": [
+            2790,
+            755
+        ],
+        "85ca9ce7-a14f-40c6-8161-4da44b1805dc": [
+            3385,
+            765
+        ],
+        "086d6b91-2a9d-4ed3-998e-5f19184ce31c": [
+            3100,
+            1420
+        ],
+        "932c0f03-78f1-48f3-85ff-2e56f019a4e6": [
+            2820,
+            2075
+        ],
+        "a599d102-a230-49f2-bcfa-632ae120b554": [
+            3375,
+            2080
+        ]
+    },
+    "camera": {
+        "x": 2745,
+        "y": -119,
+        "k": 0.29687193067394896
+    }
+}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "_macros.html" import inventory_status_badge, lifecycle_badge, phase_timeline %}
+{% block title %}{{ component.fari_id }} | FARI Inventory{% endblock %}
+{% block content %}
+<section class="grid gap-7 rounded-3xl bg-latte-crust p-7 shadow-soft dark:bg-mocha-crust lg:grid-cols-[1fr_320px] lg:items-center sm:p-9">
+  <div>
+    <div class="flex flex-wrap gap-2"><span class="font-mono text-xs font-bold text-latte-sky dark:text-mocha-sky">{{ component.fari_id }}</span>{{ inventory_status_badge(component.status) }}</div>
+    <p class="mt-5 text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">SBOM inventory</p>
+    <h1 class="mt-2 text-4xl font-black tracking-tight">{{ component.name }}</h1>
+    <p class="mt-3 max-w-3xl text-latte-subtext0 dark:text-mocha-subtext0">{{ component.current_version or 'Version not supplied' }} · {{ component.ecosystem|human }}{% if asset %} · {{ asset.name }}{% endif %}</p>
+  </div>
+  <div class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
+    <p class="text-xs font-black uppercase tracking-[.18em] text-latte-blue dark:text-mocha-blue">Timeline status</p>
+    <strong class="mt-3 block text-3xl font-black">{{ component.events|length }}</strong>
+    <span class="mt-2 block text-sm text-latte-subtext0 dark:text-mocha-subtext0">Recorded event{{ '' if component.events|length == 1 else 's' }}</span>
+  </div>
+</section>
+{{ phase_timeline(phases) }}
+
+<nav class="mt-5 flex flex-wrap justify-end gap-3">
+  <a class="rounded-xl border border-latte-surface1 bg-latte-mantle px-4 py-3 text-sm font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle" href="{{ url_for('assessment_detail', assessment_id=assessment.id) }}">Back to assessment</a>
+  <a class="rounded-xl border border-latte-surface1 bg-latte-mantle px-4 py-3 text-sm font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle" href="{{ url_for('assessment_traceability', assessment_id=assessment.id) }}">Traceability</a>
+</nav>
+
+<section class="mt-8 grid gap-5 lg:grid-cols-[1fr_360px]">
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    {% for label, value, copy in [('Asset',asset.fari_id if asset else 'Assessment-wide',asset.name if asset else 'No single asset selected'),('Current version',component.current_version or 'Not supplied',component.last_seen_at),('Latest document',component.latest_document.fari_id if component.latest_document else 'Not supplied',component.latest_document.filename if component.latest_document else 'No SBOM source linked'),('Lifecycle',assessment.status|human,assessment.title)] %}
+    <article class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-5 dark:border-mocha-surface0 dark:bg-mocha-mantle"><span class="text-xs font-black uppercase tracking-wide text-latte-subtext0 dark:text-mocha-subtext0">{{ label }}</span><strong class="mt-2 block">{{ value }}</strong><small class="mt-1 block text-latte-subtext0 dark:text-mocha-subtext0">{{ copy }}</small></article>
+    {% endfor %}
+  </div>
+  <aside class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
+    <div class="flex items-center justify-between"><h2 class="text-lg font-black">Component status</h2>{{ lifecycle_badge(assessment.status) }}</div>
+    <div class="mt-4 flex flex-wrap gap-2">
+      {{ inventory_status_badge(component.status) }}
+      {% if component.purl %}<span class="rounded-lg bg-latte-surface0 px-2 py-1 text-[11px] font-bold dark:bg-mocha-surface0">{{ component.purl }}</span>{% endif %}
+    </div>
+    {% if component.notes %}<p class="mt-4 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ component.notes }}</p>{% endif %}
+  </aside>
+</section>
+
+<section class="mt-14 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+  <div>
+    <div class="mb-4"><p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Timeline</p><h2 class="text-2xl font-black">Inventory events</h2></div>
+    {% if component.events %}
+    <div class="space-y-3">
+      {% for event in component.events|reverse %}
+      <article class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-5 dark:border-mocha-surface0 dark:bg-mocha-mantle">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ event.fari_id }}</span>
+            <h3 class="mt-2 text-lg font-black">{{ event.event_type|human }}</h3>
+            <p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ event.occurred_at }}</p>
+          </div>
+          {% if event.status_after %}{{ inventory_status_badge(event.status_after) }}{% endif %}
+        </div>
+        <div class="mt-4 grid gap-3 md:grid-cols-2">
+          {% if event.vulnerability_id %}<div class="rounded-xl bg-latte-base px-4 py-3 text-sm dark:bg-mocha-base"><strong>Vulnerability</strong><p class="mt-1">{{ event.vulnerability_id }}{% if event.severity %} · {{ event.severity|human }}{% endif %}</p></div>{% endif %}
+          {% if event.from_version or event.to_version %}<div class="rounded-xl bg-latte-base px-4 py-3 text-sm dark:bg-mocha-base"><strong>Version movement</strong><p class="mt-1">{{ event.from_version or 'Unknown' }} → {{ event.to_version or component.current_version or 'Unknown' }}</p></div>{% endif %}
+          {% if event.document %}<div class="rounded-xl bg-latte-base px-4 py-3 text-sm dark:bg-mocha-base"><strong>Source document</strong><p class="mt-1">{{ event.document.fari_id }} · {{ event.document.filename }}</p></div>{% endif %}
+        </div>
+        {% if event.summary %}<p class="mt-4 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ event.summary }}</p>{% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="rounded-2xl border border-dashed border-latte-surface1 p-8 text-center text-sm text-latte-subtext0 dark:border-mocha-surface1 dark:text-mocha-subtext0">No inventory events yet.</div>
+    {% endif %}
+  </div>
+  {% if assessment.status != 'closed' %}
+  <aside class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
+    <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Add inventory event</p>
+    <h2 class="mt-1 text-xl font-black">Track vulnerability, update, or fix</h2>
+    <form method="post" action="{{ url_for('add_inventory_event', component_id=component.id) }}" class="mt-5 space-y-4">
+      <label class="block text-xs font-bold uppercase tracking-wide">Event type<select name="event_type" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">{% for value in ['vulnerability_detected','version_updated','fix_verified','status_changed','note'] %}<option value="{{ value }}">{{ value|human }}</option>{% endfor %}</select></label>
+      <label class="block text-xs font-bold uppercase tracking-wide">Occurred at<input type="text" name="occurred_at" value="{{ component.last_seen_at }}" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"></label>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block text-xs font-bold uppercase tracking-wide">From version<input name="from_version" value="{{ component.current_version }}" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"></label>
+        <label class="block text-xs font-bold uppercase tracking-wide">To version<input name="to_version" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"></label>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block text-xs font-bold uppercase tracking-wide">Vulnerability ID<input name="vulnerability_id" placeholder="CVE-2026-0001" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"></label>
+        <label class="block text-xs font-bold uppercase tracking-wide">Severity<select name="severity" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">{% for value in ['','critical','high','medium','low','info','unknown'] %}<option value="{{ value }}">{{ value|human if value else 'Not supplied' }}</option>{% endfor %}</select></label>
+      </div>
+      <label class="block text-xs font-bold uppercase tracking-wide">Status after<select name="status_after" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">{% for value in ['tracked','vulnerable','update_in_progress','fixed','accepted','not_affected'] %}<option value="{{ value }}" {% if component.status == value %}selected{% endif %}>{{ value|human }}</option>{% endfor %}</select></label>
+      <label class="block text-xs font-bold uppercase tracking-wide">Event summary<textarea name="summary" rows="4" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"></textarea></label>
+      <label class="block text-xs font-bold uppercase tracking-wide">Component notes<textarea name="component_notes" rows="3" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">{{ component.notes }}</textarea></label>
+      <button class="w-full rounded-xl bg-latte-blue px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust" type="submit">Record event</button>
+    </form>
+  </aside>
+  {% endif %}
+</section>
+{% endblock %}

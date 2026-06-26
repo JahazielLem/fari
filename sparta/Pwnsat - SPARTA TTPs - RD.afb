@@ -1,0 +1,454 @@
+{
+    "schema": "attack_flow_v2",
+    "theme": "dark_theme",
+    "objects": [
+        {
+            "id": "flow",
+            "instance": "8e95e175-e9d8-4554-a20e-25f60394d961",
+            "properties": [
+                [
+                    "name",
+                    "Pwnsat - SPARTA TTPs - RD"
+                ],
+                [
+                    "description",
+                    "Hacking the Final Frontier Offensive Security in Space Systems and Satellites with Pwnsat."
+                ],
+                [
+                    "author",
+                    [
+                        [
+                            "name",
+                            "Kevin Leon"
+                        ],
+                        [
+                            "identity_class",
+                            "individual"
+                        ],
+                        [
+                            "contact_information",
+                            "kevinleon.morales@gmail.com"
+                        ]
+                    ]
+                ],
+                [
+                    "scope",
+                    "attack-tree"
+                ],
+                [
+                    "external_references",
+                    []
+                ],
+                [
+                    "created",
+                    {
+                        "time": "2026-05-12T23:02:11.453-06:00",
+                        "zone": "America/Mexico_City"
+                    }
+                ]
+            ],
+            "objects": [
+                "56e81e3a-4d4b-4fb6-8032-005e083e5398",
+                "a8478b4b-26bc-4c04-b3b4-0c8ea7477a4a",
+                "89112057-3dcc-4571-88f4-f58dbd69bb8b",
+                "2eaa80df-6b4a-4245-ad0c-29a5138c6c1c",
+                "5ae948e4-553c-46bf-9a8d-6d349404ae16"
+            ]
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "56e81e3a-4d4b-4fb6-8032-005e083e5398",
+            "source": "9aa31825-a2a0-4d06-9458-fc02541ad299",
+            "target": "b9ecc84e-6708-4e8b-925f-37e7f6d6e69e",
+            "handles": [
+                "0387cbbe-ad6e-40c6-82b0-4d7037671669"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "9aa31825-a2a0-4d06-9458-fc02541ad299"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "b9ecc84e-6708-4e8b-925f-37e7f6d6e69e"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "0387cbbe-ad6e-40c6-82b0-4d7037671669"
+        },
+        {
+            "id": "dynamic_line",
+            "instance": "a8478b4b-26bc-4c04-b3b4-0c8ea7477a4a",
+            "source": "cf08b940-a24b-49fe-8d4f-75d20f485bdc",
+            "target": "534a621c-bfe9-4b5f-adc6-9e4143778538",
+            "handles": [
+                "def723ba-4669-41c0-9f07-a965e6925898"
+            ]
+        },
+        {
+            "id": "generic_latch",
+            "instance": "cf08b940-a24b-49fe-8d4f-75d20f485bdc"
+        },
+        {
+            "id": "generic_latch",
+            "instance": "534a621c-bfe9-4b5f-adc6-9e4143778538"
+        },
+        {
+            "id": "generic_handle",
+            "instance": "def723ba-4669-41c0-9f07-a965e6925898"
+        },
+        {
+            "id": "action",
+            "instance": "89112057-3dcc-4571-88f4-f58dbd69bb8b",
+            "properties": [
+                [
+                    "name",
+                    "RD-0001.03 Spacecraft"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0002"
+                        ],
+                        [
+                            "technique",
+                            "RD-0001"
+                        ],
+                        [
+                            "subtechnique",
+                            "RD-0001.03"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Constructing a rogue, independent RF ground stack using steerable mounts, antennas, low-loss IF chains, amplifiers, and baseband Software Defined Radios (SDRs)."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "dc7e572b-e840-4b38-94b0-5e13815d08f5",
+                "30": "5feb0af2-7d59-40b2-8c73-f7d50b75e322",
+                "60": "beacd80e-de44-4764-840a-a4d16ff1d2c5",
+                "90": "5677d821-540c-4a2f-9963-89288d8f555e",
+                "120": "afea163b-9ebb-401c-b277-8c6a5f8abc33",
+                "150": "8c768d7d-cf45-4846-8978-0f81a618c1ad",
+                "180": "fd0c5ae7-260a-4a81-a957-3d2e9a33452f",
+                "210": "1252d10c-4fe6-4905-b052-85a077a01874",
+                "240": "c76985ef-bb47-469d-aa19-baa62fedbaec",
+                "270": "99a44cea-3ab6-4f5c-ac93-260d49dbddc8",
+                "300": "311c2931-7e3f-4dba-b5ae-4ddf90b20a26",
+                "330": "dfcf3c4a-7a17-4ebe-bd9a-26d74b20798b"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "dc7e572b-e840-4b38-94b0-5e13815d08f5",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "5feb0af2-7d59-40b2-8c73-f7d50b75e322",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "beacd80e-de44-4764-840a-a4d16ff1d2c5",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "5677d821-540c-4a2f-9963-89288d8f555e",
+            "latches": [
+                "b9ecc84e-6708-4e8b-925f-37e7f6d6e69e"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "afea163b-9ebb-401c-b277-8c6a5f8abc33",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "8c768d7d-cf45-4846-8978-0f81a618c1ad",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "fd0c5ae7-260a-4a81-a957-3d2e9a33452f",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "1252d10c-4fe6-4905-b052-85a077a01874",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "c76985ef-bb47-469d-aa19-baa62fedbaec",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "99a44cea-3ab6-4f5c-ac93-260d49dbddc8",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "311c2931-7e3f-4dba-b5ae-4ddf90b20a26",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "dfcf3c4a-7a17-4ebe-bd9a-26d74b20798b",
+            "latches": []
+        },
+        {
+            "id": "action",
+            "instance": "2eaa80df-6b4a-4245-ad0c-29a5138c6c1c",
+            "properties": [
+                [
+                    "name",
+                    "RD-0001.01 Ground Station Equipment"
+                ],
+                [
+                    "ttp",
+                    [
+                        [
+                            "tactic",
+                            "ST0002"
+                        ],
+                        [
+                            "technique",
+                            "RD-0001"
+                        ],
+                        [
+                            "subtechnique",
+                            "RD-0001.01"
+                        ]
+                    ]
+                ],
+                [
+                    "description",
+                    "Deploying a dedicated physical spacecraft (e.g., small satellites in co-located or phasing orbits) or leveraging a hosted payload on a commercial bus."
+                ],
+                [
+                    "confidence",
+                    null
+                ],
+                [
+                    "execution_start",
+                    null
+                ],
+                [
+                    "execution_end",
+                    null
+                ]
+            ],
+            "anchors": {
+                "0": "0716959e-e348-4d22-8348-33895c3bb22c",
+                "30": "27f1aafe-a312-4cd0-806b-40feb0afcdaf",
+                "60": "e2bf47da-fa12-4941-a4a2-42ee1d214a0c",
+                "90": "7f8393af-48a8-438e-958d-13301f94c969",
+                "120": "ed2209c6-d40e-4008-b82d-410c138fdce8",
+                "150": "f89fd4cb-be0b-4cd9-b3e0-203d3bc2f549",
+                "180": "7b69859c-138d-45ce-898b-ef23f8fbbceb",
+                "210": "a82c4c24-c2e8-4ddf-ac27-ebb1812600d1",
+                "240": "2b590c69-04c2-42f0-9a22-7f2d25ef2ef3",
+                "270": "a39e193a-dc07-4c60-9682-2fe37395278b",
+                "300": "d27e174a-e95c-46e3-9d0b-69c5c23fa57c",
+                "330": "4cc022b6-70b3-4ad4-bf2a-21a8e1c428af"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "0716959e-e348-4d22-8348-33895c3bb22c",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "27f1aafe-a312-4cd0-806b-40feb0afcdaf",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "e2bf47da-fa12-4941-a4a2-42ee1d214a0c",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "7f8393af-48a8-438e-958d-13301f94c969",
+            "latches": [
+                "534a621c-bfe9-4b5f-adc6-9e4143778538"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "ed2209c6-d40e-4008-b82d-410c138fdce8",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "f89fd4cb-be0b-4cd9-b3e0-203d3bc2f549",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "7b69859c-138d-45ce-898b-ef23f8fbbceb",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "a82c4c24-c2e8-4ddf-ac27-ebb1812600d1",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "2b590c69-04c2-42f0-9a22-7f2d25ef2ef3",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "a39e193a-dc07-4c60-9682-2fe37395278b",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "d27e174a-e95c-46e3-9d0b-69c5c23fa57c",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "4cc022b6-70b3-4ad4-bf2a-21a8e1c428af",
+            "latches": []
+        },
+        {
+            "id": "grouping",
+            "instance": "5ae948e4-553c-46bf-9a8d-6d349404ae16",
+            "properties": [
+                [
+                    "name",
+                    "Acquire Infrastructure"
+                ],
+                [
+                    "description",
+                    "Independently provisioning or renting the assets needed to observe, reach, or impersonate mission components, spanning RF/optical hardware, VPS fleets, CDN relays, and burner identity fabrics."
+                ],
+                [
+                    "context",
+                    "Resource Development"
+                ]
+            ],
+            "anchors": {
+                "0": "4a58e56b-d065-4102-9b89-7e5ed3a5a500",
+                "30": "d17e79a4-3e8a-45ac-a0f9-c549d9b60acb",
+                "60": "3b902a96-242b-4519-895c-7460e3451e1c",
+                "90": "e6b46188-75f0-45ca-a98d-1f48c5e673b0",
+                "120": "876d4bda-584c-4beb-9686-024afa2b0e50",
+                "150": "a2db3be8-693a-4bc8-8fdf-c6698c5c659b",
+                "180": "e0cc6542-029b-40b1-81fc-6609a07cd8d2",
+                "210": "b56c8801-6046-4a1d-8f9c-cc28b9389fc9",
+                "240": "2ff64414-0ba6-4b44-bfc5-05ebb069a5e2",
+                "270": "9fda714a-2e33-433b-9504-2ae1e736b0e3",
+                "300": "3188c2e2-dfef-4fce-b6d1-66446d8c9d1b",
+                "330": "5b781195-3b64-466b-b267-227f35364ed9"
+            }
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "4a58e56b-d065-4102-9b89-7e5ed3a5a500",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "d17e79a4-3e8a-45ac-a0f9-c549d9b60acb",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "3b902a96-242b-4519-895c-7460e3451e1c",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "e6b46188-75f0-45ca-a98d-1f48c5e673b0",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "876d4bda-584c-4beb-9686-024afa2b0e50",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "a2db3be8-693a-4bc8-8fdf-c6698c5c659b",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "e0cc6542-029b-40b1-81fc-6609a07cd8d2",
+            "latches": []
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "b56c8801-6046-4a1d-8f9c-cc28b9389fc9",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "2ff64414-0ba6-4b44-bfc5-05ebb069a5e2",
+            "latches": [
+                "9aa31825-a2a0-4d06-9458-fc02541ad299"
+            ]
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "9fda714a-2e33-433b-9504-2ae1e736b0e3",
+            "latches": []
+        },
+        {
+            "id": "vertical_anchor",
+            "instance": "3188c2e2-dfef-4fce-b6d1-66446d8c9d1b",
+            "latches": [
+                "cf08b940-a24b-49fe-8d4f-75d20f485bdc"
+            ]
+        },
+        {
+            "id": "horizontal_anchor",
+            "instance": "5b781195-3b64-466b-b267-227f35364ed9",
+            "latches": []
+        }
+    ],
+    "layout": {
+        "89112057-3dcc-4571-88f4-f58dbd69bb8b": [
+            -215,
+            -130
+        ],
+        "2eaa80df-6b4a-4245-ad0c-29a5138c6c1c": [
+            305,
+            -120
+        ],
+        "5ae948e4-553c-46bf-9a8d-6d349404ae16": [
+            40,
+            -585
+        ]
+    },
+    "camera": {
+        "x": 29,
+        "y": -384,
+        "k": 1
+    }
+}
