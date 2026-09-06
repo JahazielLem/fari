@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="{{ fari_language() }}" class="scroll-smooth">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,46 +11,42 @@
     }
   </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='tailwind.css') }}?v={{ fari_version }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='fari.css') }}?v={{ fari_version }}">
 </head>
 <body class="fari-shell min-h-screen bg-latte-base text-latte-text antialiased transition-colors dark:bg-mocha-base dark:text-mocha-text">
   {% set current_endpoint = request.endpoint or '' %}
   {% set nav_items = [
-    {'label': 'Assessments', 'href': url_for('index'), 'active': current_endpoint not in ['wiki', 'resources', 'login', 'logout']},
-    {'label': 'Wiki', 'href': url_for('wiki'), 'active': current_endpoint == 'wiki'},
-    {'label': 'Resources', 'href': url_for('resources'), 'active': current_endpoint == 'resources'}
+    {'label': _('nav.assessments'), 'href': url_for('index'), 'active': current_endpoint not in ['wiki', 'resources', 'login', 'logout', 'language_dictionary']},
+    {'label': _('nav.wiki'), 'href': url_for('wiki'), 'active': current_endpoint == 'wiki'},
+    {'label': _('nav.resources'), 'href': url_for('resources'), 'active': current_endpoint in ['resources', 'language_dictionary']}
   ] %}
 
-  <header class="sticky top-0 z-40 border-b border-latte-surface0 bg-latte-base/90 backdrop-blur dark:border-mocha-surface0 dark:bg-mocha-base/90">
+  <header class="fari-topbar sticky top-0 z-40 border-b border-latte-surface0 bg-latte-base/90 backdrop-blur dark:border-mocha-surface0 dark:bg-mocha-base/90">
     <div class="mx-auto flex min-h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-3">
-        <button id="sidebar-toggle" type="button" class="group relative inline-flex h-10 w-10 items-center justify-center rounded-sm border border-latte-surface1 bg-latte-mantle text-latte-text transition hover:border-latte-blue hover:text-latte-blue dark:border-mocha-surface1 dark:bg-mocha-mantle dark:text-mocha-text dark:hover:border-mocha-blue dark:hover:text-mocha-blue" aria-label="Toggle sidebar" title="Show or hide the navigation sidebar">
-          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-          <span class="pointer-events-none absolute left-1/2 top-full z-10 mt-2 hidden -translate-x-1/2 whitespace-nowrap rounded-sm bg-mocha-crust px-2 py-1 text-[11px] font-bold text-mocha-text group-hover:block dark:bg-latte-crust dark:text-latte-text">Toggle sidebar</span>
+      <div class="flex min-w-0 items-center gap-3">
+        <button id="sidebar-toggle" type="button" class="fari-icon-button group relative" aria-label="{{ _('nav.toggle_sidebar') }}" title="{{ _('nav.toggle_sidebar') }}">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
         </button>
-        <a href="{{ url_for('index') }}" class="flex items-center gap-3">
-          <span class="text-lg font-black tracking-[.24em] text-latte-blue dark:text-mocha-blue">FARI</span>
-          <span class="hidden text-xs font-semibold text-latte-subtext0 dark:text-mocha-subtext0 sm:inline">Framework for Aerospace Research and Investigation</span>
+        <a href="{{ url_for('index') }}" class="flex min-w-0 items-center gap-3">
+          <span class="fari-brand-mark">FARI</span>
+          <span class="hidden truncate text-sm font-semibold text-latte-subtext0 dark:text-mocha-subtext0 sm:inline">Framework for Aerospace Research and Investigation</span>
         </a>
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="help-open" type="button" class="group relative inline-flex h-10 w-10 items-center justify-center rounded-sm border border-latte-surface1 bg-latte-mantle text-latte-text transition hover:border-latte-blue hover:text-latte-blue dark:border-mocha-surface1 dark:bg-mocha-mantle dark:text-mocha-text dark:hover:border-mocha-blue dark:hover:text-mocha-blue" aria-label="Open help wiki" title="Open the internal help wiki">
-          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 3-3 3" />
-            <path d="M12 17h.01" />
-            <circle cx="12" cy="12" r="9" />
-          </svg>
-          <span class="pointer-events-none absolute right-0 top-full z-10 mt-2 hidden whitespace-nowrap rounded-sm bg-mocha-crust px-2 py-1 text-[11px] font-bold text-mocha-text group-hover:block dark:bg-latte-crust dark:text-latte-text">Open the internal help wiki</span>
+        <a href="{{ url_for('new_assessment') }}" class="fari-topbar-action hidden sm:inline-flex">{{ _('page.create_frame') }}</a>
+        <button id="help-open" type="button" class="fari-icon-button group relative" aria-label="{{ _('nav.internal_help') }}" title="{{ _('nav.internal_help') }}">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 3-3 3" /><path d="M12 17h.01" /><circle cx="12" cy="12" r="9" /></svg>
         </button>
-        <button id="theme-toggle" type="button" class="group relative inline-flex h-10 w-10 items-center justify-center rounded-sm border border-latte-surface1 bg-latte-mantle text-latte-text transition hover:border-latte-blue hover:text-latte-blue dark:border-mocha-surface1 dark:bg-mocha-mantle dark:text-mocha-text dark:hover:border-mocha-blue dark:hover:text-mocha-blue" aria-label="Toggle theme" title="Switch between light and dark theme">
-          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v2.5M12 18.5V21M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M3 12h2.5M18.5 12H21M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" />
-            <circle cx="12" cy="12" r="4" />
-          </svg>
-          <span class="pointer-events-none absolute right-0 top-full z-10 mt-2 hidden whitespace-nowrap rounded-sm bg-mocha-crust px-2 py-1 text-[11px] font-bold text-mocha-text group-hover:block dark:bg-latte-crust dark:text-latte-text">Switch between light and dark theme</span>
+        <button id="theme-toggle" type="button" class="fari-icon-button group relative" aria-label="{{ _('nav.theme') }}" title="{{ _('nav.theme') }}">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v2.5M12 18.5V21M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M3 12h2.5M18.5 12H21M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" /><circle cx="12" cy="12" r="4" /></svg>
         </button>
+        <div class="fari-language-switch" aria-label="{{ _('language.switch') }}">
+          <span class="hidden text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0 sm:inline">{{ _('language.label') }}</span>
+          {% for code, label in fari_language_options %}
+          <a href="{{ url_for('set_language', language=code, next=request.full_path) }}" class="{% if fari_language() == code %}is-active{% endif %}">{{ code|upper }}</a>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </header>
@@ -58,63 +54,71 @@
   <div id="sidebar-overlay" class="fixed inset-0 top-16 z-20 hidden bg-mocha-crust/60 lg:hidden"></div>
 
   <aside id="workspace-sidebar" class="fari-sidebar fixed inset-y-16 left-0 z-30 w-72 -translate-x-full border-r border-latte-surface0 transition-transform duration-200 dark:border-mocha-surface0">
-    <div class="flex h-full flex-col overflow-y-auto px-5 py-5">
-      <section class="fari-profile-card rounded-sm border border-latte-surface1 px-4 py-5 text-latte-text dark:border-white/10 dark:text-white">
-        <div class="flex items-center gap-4">
-          <img src="{{ url_for('static', filename='papu_image.png') }}" alt="FARI profile image" class="h-16 w-16 rounded-full border border-latte-surface1 object-cover shadow-soft dark:border-white/15">
-          <div class="min-w-0">
-            <p class="text-[11px] font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-sky">Usuario</p>
-            <strong class="mt-1 block truncate text-lg">{{ current_user.id }}</strong>
-            <p class="mt-1 text-xs text-latte-subtext0 dark:text-mocha-subtext0">Fari-Agent</p>
-          </div>
+    <div class="flex h-full flex-col overflow-y-auto px-4 py-5">
+      <section class="fari-sidebar-user">
+        <div class="fari-avatar">{{ current_user.id[:1]|upper }}</div>
+        <div class="min-w-0">
+          <p class="fari-eyebrow">{{ _('nav.user') }}</p>
+          <strong class="mt-1 block truncate text-base">{{ current_user.id }}</strong>
+          <p class="mt-1 text-xs text-latte-subtext0 dark:text-mocha-subtext0">Fari-Agent · v{{ fari_version }}</p>
         </div>
       </section>
 
-      <nav aria-label="Workspace navigation" class="mt-6 flex-1">
-        <p class="px-1 text-[11px] font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-sky">Navigation</p>
+      <a href="{{ url_for('new_assessment') }}" class="fari-sidebar-cta">
+        <span class="grid h-8 w-8 place-items-center rounded-full bg-white/15 text-lg">+</span>
+        <span><strong class="block text-sm">{{ _('page.create_frame') }}</strong><small>{{ _('nav.create_frame_hint') }}</small></span>
+      </a>
+
+      <nav aria-label="{{ _('nav.navigation') }}" class="mt-7 flex-1">
+        <p class="fari-eyebrow px-3">{{ _('nav.navigation') }}</p>
         <div class="mt-3 space-y-1">
           {% for item in nav_items %}
-          <a href="{{ item.href }}" class="block rounded-sm border-l-2 px-4 py-3 text-sm font-bold transition {% if item.active %}border-latte-blue bg-latte-blue/10 text-latte-blue dark:border-mocha-blue dark:bg-mocha-blue/20 dark:text-white{% else %}border-transparent text-latte-subtext0 hover:border-latte-sky/70 hover:bg-latte-base/70 hover:text-latte-text dark:text-mocha-subtext0 dark:hover:border-mocha-sky/70 dark:hover:bg-mocha-surface0 dark:hover:text-white{% endif %}">{{ item.label }}</a>
+          <a href="{{ item.href }}" class="fari-nav-link {% if item.active %}is-active{% endif %}">
+            {% if loop.index == 1 %}<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+            {% elif loop.index == 2 %}<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M9.5 9a2.7 2.7 0 1 1 5.1 1.3c-1 1.1-2.6 1.4-2.6 3"/><path d="M12 17h.01"/></svg>
+            {% else %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>{% endif %}
+            <span>{{ item.label }}</span>
+          </a>
           {% endfor %}
         </div>
       </nav>
 
-      <form method="post" action="{{ url_for('logout') }}" class="mt-6">
-        <button type="submit" class="w-full rounded-sm border border-latte-red/35 bg-latte-red/10 px-4 py-3 text-sm font-extrabold text-latte-red transition hover:bg-latte-red/20 dark:border-mocha-red/35 dark:bg-mocha-red/10 dark:text-mocha-red dark:hover:bg-mocha-red/20">Sign out</button>
+      <section class="fari-sidebar-note">
+        <p class="fari-eyebrow">{{ _('nav.workspace_note_title') }}</p>
+        <p class="mt-2 text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('nav.workspace_note') }}</p>
+      </section>
+      <form method="post" action="{{ url_for('logout') }}" class="mt-4">
+        <button type="submit" class="fari-nav-link fari-nav-logout w-full"><span>{{ _('nav.sign_out') }}</span></button>
       </form>
     </div>
   </aside>
 
   <div id="workspace-main" class="transition-[padding-left] duration-200 lg:pl-72">
-    <main class="mx-auto min-h-[calc(100vh-4rem)] max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
+    <main class="fari-page mx-auto min-h-[calc(100vh-4rem)] max-w-screen-2xl px-4 py-7 sm:px-6 lg:px-8">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
-          <div class="mb-5 rounded-sm border px-4 py-3 text-sm font-semibold {% if category == 'error' %}border-latte-red/30 bg-latte-red/10 text-latte-red dark:border-mocha-red/30 dark:bg-mocha-red/10 dark:text-mocha-red{% else %}border-latte-green/30 bg-latte-green/10 text-latte-green dark:border-mocha-green/30 dark:bg-mocha-green/10 dark:text-mocha-green{% endif %}">{{ message }}</div>
+          <div class="fari-flash mb-5 {% if category == 'error' %}is-error{% else %}is-success{% endif %}"><span>{{ '!' if category == 'error' else '✓' }}</span><p>{{ message }}</p></div>
         {% endfor %}
       {% endwith %}
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="border-t border-latte-surface0 px-4 py-8 text-center text-xs text-latte-subtext0 dark:border-mocha-surface0 dark:text-mocha-subtext0">
-      Framework for Aerospace Research and Investigation. Generated with {{ fari_generated_with }}.
+    <footer class="fari-footer px-4 py-7 text-center text-xs text-latte-subtext0 dark:text-mocha-subtext0">
+      {{ _('footer.generated', version=fari_generated_with) }}
     </footer>
   </div>
 
   <div id="help-modal" class="fixed inset-0 z-50 hidden items-start justify-center bg-mocha-crust/70 p-4 pt-[8vh]" role="dialog" aria-modal="true" aria-labelledby="help-title">
-    <section class="flex max-h-[84vh] w-full max-w-4xl flex-col overflow-hidden rounded-sm border border-latte-surface1 bg-latte-base shadow-soft dark:border-mocha-surface1 dark:bg-mocha-base">
+    <section class="fari-modal flex max-h-[84vh] w-full max-w-4xl flex-col overflow-hidden bg-latte-base dark:bg-mocha-base">
       <header class="flex items-center justify-between border-b border-latte-surface0 p-5 dark:border-mocha-surface0">
-        <div>
-          <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Internal wiki</p>
-          <h2 id="help-title" class="text-2xl font-black">FARI field guide</h2>
-          <p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Search the specification, field guidance, and short worked examples without leaving the workflow.</p>
-        </div>
-        <button id="help-close" type="button" class="rounded-sm border border-latte-surface1 px-3 py-2 text-sm font-bold dark:border-mocha-surface1">Close</button>
+        <div><p class="fari-eyebrow">{{ _('nav.internal_help') }}</p><h2 id="help-title" class="mt-1 text-2xl font-black">FARI field guide</h2><p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.wiki_description') }}</p></div>
+        <button id="help-close" type="button" class="fari-secondary-button">{{ _('nav.close') }}</button>
       </header>
       <div class="border-b border-latte-surface0 p-5 dark:border-mocha-surface0">
-        <label class="block text-xs font-bold uppercase tracking-wide text-latte-subtext0 dark:text-mocha-subtext0">Search definitions
-          <input id="help-search" type="search" autocomplete="off" placeholder="Scope, mission context, OSINT, SPARTA, inconclusive..." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-mantle px-4 py-3 text-sm outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-mantle dark:focus:border-mocha-blue">
+        <label class="block text-xs font-bold uppercase tracking-wide text-latte-subtext0 dark:text-mocha-subtext0">{{ _('nav.search_definitions') }}
+          <input id="help-search" type="search" autocomplete="off" placeholder="{{ _('nav.search_placeholder') }}" class="fari-input mt-2">
         </label>
-        <p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">Tip: use <strong>Ctrl/Cmd + K</strong> to open this guide from any screen.</p>
+        <p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ _('nav.help_tip') }}</p>
       </div>
       <div id="help-results" class="space-y-3 overflow-y-auto p-5"></div>
     </section>
@@ -136,7 +140,7 @@
       root.classList.toggle('dark');
       localStorage.setItem('fari-theme', root.classList.contains('dark') ? 'dark' : 'light');
     }
-    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
 
     function setSidebarOpen(open, persist = true) {
       if (!sidebar) return;
@@ -154,135 +158,31 @@
       }
       if (persist) localStorage.setItem(sidebarStateKey, open ? 'open' : 'closed');
     }
-
     function syncSidebarFromStorage() {
       const stored = localStorage.getItem(sidebarStateKey);
-      const shouldOpen = desktopSidebarQuery.matches ? stored !== 'closed' : false;
-      setSidebarOpen(shouldOpen, false);
+      setSidebarOpen(desktopSidebarQuery.matches ? stored !== 'closed' : false, false);
     }
-
-    sidebarToggle.addEventListener('click', () => {
-      const open = sidebar.classList.contains('translate-x-0');
-      setSidebarOpen(!open);
-    });
-    sidebarOverlay.addEventListener('click', () => setSidebarOpen(false));
-    desktopSidebarQuery.addEventListener('change', () => syncSidebarFromStorage());
+    sidebarToggle?.addEventListener('click', () => setSidebarOpen(!sidebar.classList.contains('translate-x-0')));
+    sidebarOverlay?.addEventListener('click', () => setSidebarOpen(false));
+    desktopSidebarQuery.addEventListener('change', syncSidebarFromStorage);
     syncSidebarFromStorage();
 
     async function loadHelp(query = '') {
+      if (!results) return;
       const response = await fetch(`{{ url_for('help_search') }}?q=${encodeURIComponent(query)}`);
       const payload = await response.json();
       results.innerHTML = payload.items.length ? payload.items.map(item => `
-        <article class="rounded-sm border border-latte-surface0 bg-latte-mantle p-4 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <p class="text-[11px] font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">${item.section || 'Specification'}</p>
-              <h3 class="mt-1 text-base font-black text-latte-text dark:text-mocha-text">${item.title || item.term}</h3>
-            </div>
-            <a href="${item.href || '{{ url_for('wiki') }}'}" class="rounded-sm border border-latte-surface1 px-3 py-2 text-xs font-bold dark:border-mocha-surface1">Open in wiki</a>
-          </div>
-          <p class="mt-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">${item.body || item.definition}</p>
-          ${item.example ? `<div class="mt-3 rounded-sm border border-latte-blue/30 bg-latte-base p-3 text-sm dark:border-mocha-blue/30 dark:bg-mocha-base"><strong class="text-latte-blue dark:text-mocha-blue">Example:</strong> <span class="text-latte-subtext0 dark:text-mocha-subtext0">${item.example}</span></div>` : ''}
-        </article>`).join('') : '<p class="text-sm text-latte-subtext0 dark:text-mocha-subtext0">No matching guidance was found.</p>';
+        <article class="fari-help-result"><p class="fari-eyebrow">${item.section || '{{ _('nav.specification') }}'}</p><h3 class="mt-1 text-base font-black">${item.title || item.term}</h3><p class="mt-2 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">${item.body || item.definition}</p></article>`).join('') : '<p class="text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('nav.no_guidance') }}</p>';
     }
-
-    function openHelp() {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      loadHelp();
-      search.focus();
-    }
-
-    function closeHelp() {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    document.getElementById('help-open').addEventListener('click', openHelp);
-    document.getElementById('help-close').addEventListener('click', closeHelp);
-    modal.addEventListener('click', event => {
-      if (event.target === modal) closeHelp();
-    });
-    search.addEventListener('input', () => loadHelp(search.value));
-
+    function openHelp() { modal?.classList.remove('hidden'); modal?.classList.add('flex'); loadHelp(); search?.focus(); }
+    function closeHelp() { modal?.classList.add('hidden'); modal?.classList.remove('flex'); }
+    document.getElementById('help-open')?.addEventListener('click', openHelp);
+    document.getElementById('help-close')?.addEventListener('click', closeHelp);
+    modal?.addEventListener('click', event => { if (event.target === modal) closeHelp(); });
+    search?.addEventListener('input', () => loadHelp(search.value));
     document.addEventListener('keydown', event => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        openHelp();
-      }
-      if (event.key === 'Escape') {
-        closeHelp();
-        if (!desktopSidebarQuery.matches) setSidebarOpen(false, false);
-      }
-    });
-
-    function addText(parent, tag, text, classes = '') {
-      const element = document.createElement(tag);
-      element.className = classes;
-      element.textContent = text;
-      parent.appendChild(element);
-      return element;
-    }
-
-    document.querySelectorAll('.sparta-picker').forEach(picker => {
-      const query = picker.querySelector('.sparta-query');
-      const resultsBox = picker.querySelector('.sparta-results');
-      const idInput = picker.querySelector('.sparta-id');
-      const nameInput = picker.querySelector('.sparta-name');
-      const countermeasureBox = picker.querySelector('.sparta-countermeasures');
-      let timer;
-
-      async function loadCountermeasures(id) {
-        countermeasureBox.replaceChildren();
-        if (!id) return;
-        const response = await fetch(`/sparta/ttps/${encodeURIComponent(id)}/countermeasures`);
-        const payload = await response.json();
-        if (!payload.items?.length) {
-          addText(countermeasureBox, 'p', 'No linked SPARTA countermeasures were found for this TTP.');
-          return;
-        }
-        addText(countermeasureBox, 'p', `${payload.items.length} SPARTA-recommended countermeasures:`, 'font-bold');
-        const list = document.createElement('ul');
-        list.className = 'mt-2 space-y-1';
-        payload.items.forEach(item => addText(list, 'li', `${item.id} · ${item.name}`));
-        countermeasureBox.appendChild(list);
-      }
-
-      async function loadTtps(value) {
-        const response = await fetch(`/sparta/ttps?q=${encodeURIComponent(value)}`);
-        const payload = await response.json();
-        resultsBox.replaceChildren();
-        if (!payload.items?.length) {
-          addText(resultsBox, 'p', 'No matching SPARTA TTPs.', 'p-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0');
-        }
-        payload.items?.forEach(item => {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'block w-full rounded-sm p-3 text-left hover:bg-latte-surface0 dark:hover:bg-mocha-surface0';
-          addText(button, 'strong', `${item.id} · ${item.name}`, 'block text-sm');
-          addText(button, 'span', `${item.phase || 'No phase'} · ${item.countermeasure_count} countermeasures`, 'mt-1 block text-xs text-latte-subtext0 dark:text-mocha-subtext0');
-          button.addEventListener('click', () => {
-            idInput.value = item.id;
-            nameInput.value = item.name;
-            query.value = `${item.id} · ${item.name}`;
-            resultsBox.classList.add('hidden');
-            loadCountermeasures(item.id);
-          });
-          resultsBox.appendChild(button);
-        });
-        resultsBox.classList.remove('hidden');
-      }
-
-      query.addEventListener('focus', () => loadTtps(idInput.value || query.value));
-      query.addEventListener('input', () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => loadTtps(query.value), 180);
-      });
-      idInput.addEventListener('change', () => loadCountermeasures(idInput.value));
-      document.addEventListener('click', event => {
-        if (!picker.contains(event.target)) resultsBox.classList.add('hidden');
-      });
-      loadCountermeasures(idInput.value);
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); openHelp(); }
+      if (event.key === 'Escape') { closeHelp(); if (!desktopSidebarQuery.matches) setSidebarOpen(false, false); }
     });
   </script>
   {% block scripts %}{% endblock %}

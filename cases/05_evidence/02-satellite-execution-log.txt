@@ -1,0 +1,18 @@
+EVIDENCE ID: EVD-ORBIT-002
+TYPE: Satellite command and telemetry event log
+SATELLITE: Operational LEO vehicle
+EVENT TIME: 2026-05-14T10:01:30Z
+TIME SCALE: UTC
+
+2026-05-14T10:01:30Z command_receiver: CCSDS packet received APID=0x042
+2026-05-14T10:01:30Z command_authorizer: command accepted
+2026-05-14T10:01:31Z flight_computer: reset sequence started
+2026-05-14T10:01:32Z flight_computer: reset sequence completed
+2026-05-14T10:01:32Z flight_computer: reset_counter=0187 (previous=0186)
+2026-05-14T10:01:33Z telemetry: downlink interrupted during restart recovery
+2026-05-14T10:09:32Z telemetry: service restored; first post-reset frame received
+
+Observed effect: telemetry was unavailable for approximately eight minutes.
+The log records receipt, acceptance, and execution. It does not identify the
+physical transmitter or prove that the command originated from the primary
+ground station.

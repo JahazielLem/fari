@@ -531,7 +531,7 @@ def cover_metadata(markdown_path: Path, title: str) -> dict:
         return {
             "label": "Framework Specification",
             "title": f"Framework for Aerospace Research and Investigation {VERSION_TAG}",
-            "subtitle": "Canonical specification, glossary, workflow, companion profile, and release guidance",
+            "subtitle": "Canonical specification, glossary, workflow, and release guidance",
             "version_string": version_string,
             "show_result": None,
         }

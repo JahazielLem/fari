@@ -1,6 +1,6 @@
 # Framework for Aerospace Research and Investigation
 
-**Canonical specification for FARI v1.2.0**
+**Canonical specification for FARI v1.3.0**
 
 ## Purpose
 
@@ -57,7 +57,7 @@ The report author is responsible for:
 - defining the Frame;
 - translating raw material into normalized sections;
 - deciding sufficiency and conclusion states;
-- relating findings to SPARTA and other references;
+    - relating findings to technical meaning and optional framework references;
 - generating investigation and consolidated reports.
 
 ### Client or mission owner
@@ -80,10 +80,40 @@ In the current web workspace, those phases are also presented as a horizontal
 workflow timeline directly under the page hero so the report author can see the
 current state without losing screen space to a permanent side rail.
 
+### Current web contract
+
+The current web implementation is the reference execution of this workflow.
+Its machine-readable contract is recorded in `spec/current/fari.manifest.yml`
+and is consumed by the application templates, validation helpers, and parity
+checks. The web workspace also provides:
+
+- English and Spanish interface and report labels through editable JSON
+  dictionaries;
+- an editable language review page so technical terms can intentionally remain
+  in English;
+- a dedicated asset workspace for source files, normalized inventory, and
+  related investigations;
+- captured revisions and difference review for assessment fields, assets,
+  investigations, asset sources, and inventory components;
+- no independent source-inventory area outside the related asset.
+
+User-entered narratives, evidence content, and stable FARI identifiers are not
+translated. Only interface labels, controlled value labels, and generated
+report labels use the selected language.
+
+The web contract uses these controlled values: assessment status `draft` or
+`closed`; report maturity `draft`, `provisional`, `final`, or `superseded`;
+investigation status `draft`, `ready`, or `closed`; and asset access basis
+`private`, `public`, or `other`. Asset segments and coverage values are the
+sets listed in Frame. Sufficiency uses `sufficient`, `partial`, or
+`insufficient`; finding state uses `candidate`, `confirmed`, `observation`,
+`remediated`, or `verified_closed`; and mapping state uses `candidate`,
+`confirmed`, or `not_applicable`.
+
 ## Traceability and revisions
 
-FARI assessments can evolve as evidence is added, findings are normalized, SBOM
-inventory changes, and closure reviews happen. For that reason, FARI supports
+FARI assessments can evolve as evidence is added, findings are normalized, asset
+source inventory changes, and closure reviews happen. For that reason, FARI supports
 explicit assessment revisions.
 
 ### What a revision is
@@ -94,8 +124,8 @@ moment. It is not the same thing as every keystroke or every save.
 Typical revision points:
 
 - after a major evidence intake;
-- after findings and SPARTA mappings are normalized;
-- after a meaningful SBOM refresh;
+- after findings and optional framework mappings are normalized;
+- after a meaningful asset source refresh;
 - before executive review;
 - automatically when the assessment is closed.
 
@@ -105,7 +135,7 @@ Revisions answer questions such as:
 
 - what changed between the draft and the final assessment;
 - when a claim conclusion changed;
-- when an SBOM import changed a recorded component version;
+- when a source import changed a recorded component version;
 - whether a final report corresponds to a known assessment state.
 
 ### Revision rules
@@ -124,8 +154,7 @@ the current working state. At minimum, the comparison should show changes in:
 - assessment fields;
 - assets;
 - investigations and conclusions;
-- Attack Flow references;
-- SBOM documents;
+- asset source files attached to the relevant asset;
 - inventory components and their tracked status.
 
 ## Frame
@@ -265,30 +294,47 @@ Examples:
 - screenshot;
 - tool output;
 - script;
-- attack flow;
 - document from an external auditor.
 
-### SBOM inventory
+### Asset source inventory
 
-FARI treats SBOM and dependency inventories as first-class supplied material.
-They are especially useful for software-heavy spacecraft, payload, ground
-systems, mission applications, and supplier-delivered binaries.
+FARI treats technical source files as first-class supplied material attached to
+the asset they describe. This includes structured dependency inventories,
+firmware images, binaries, RF captures, SigMF metadata/data, packet captures,
+documents, logs, and other source formats.
 
-An SBOM upload should create two related records:
+An asset source upload creates a source record that:
 
-- an **SBOM document** that preserves the supplied source file;
-- an **inventory component** record for each tracked dependency or package.
+- preserves the supplied bytes and SHA-256 hash;
+- records the original filename, media type, size, and detected format;
+- optionally creates an **inventory component** record for each dependency or
+  package when the format supports structured extraction.
+
+The current detected format values are:
+
+`cyclonedx`, `spdx`, `package-lock`, `dependency-map`, `text-list`, `jsonl`,
+`jsonl-components`, `sigmf-meta`, `sigmf-data`, `binary`, `pcap`, `pcapng`,
+`elf`, `hex`, `csv`, `tsv`, `yaml`, `xml`, `pdf`, `doc`, `docx`, `xls`, `xlsx`,
+`text`, `json`, and `empty`.
+
+The source parser normalizes components from CycloneDX, SPDX, package-lock,
+dependency-map, package-style text lists, and component-shaped JSONL records.
+JSONL event logs, RF captures, SigMF data, firmware, binaries, packet captures,
+documents, archives, and unsupported technical formats remain preserved raw
+source material and are not represented as dependency components. A new source
+is uploaded through an asset and receives an `SRC-` identifier; generated
+component and inventory-event records use `CMP-` and `SBE-` identifiers.
 
 This lets the report author answer both:
 
-- what file was supplied; and
-- what component state FARI currently believes is true.
+- what file was supplied for the asset; and
+- what component state FARI currently believes is true, when applicable.
 
 ### Inventory component timeline
 
 Each component can accumulate events over time, for example:
 
-- imported from SBOM;
+- imported from an asset source;
 - vulnerability detected;
 - version updated;
 - status changed;
@@ -404,28 +450,11 @@ Each finding should contain:
 - condition text;
 - observed effect;
 - credible impact;
-- optional SPARTA mapping and rationale.
-
-### SPARTA
-
-SPARTA is a key reference inside FARI for spacecraft-relevant tactics,
-techniques, and countermeasures.
-
-FARI uses SPARTA to describe behavior and recommended countermeasures, but
-SPARTA does not decide the FARI conclusion automatically.
-
-Use SPARTA when it improves clarity. Do not force a weak mapping only because
-the wording feels similar.
-
-### Attack flow diagrams
-
-Attack Flow Builder files and SPARTA-oriented diagrams support the narrative by
-showing sequences, dependencies, and grouped actions. They are reference
-artifacts and should remain read-only evidence aids inside the application.
+    - optional framework mapping and rationale.
 
 ### Relationship between findings and inventory
 
-SBOM inventory does not replace a finding.
+Asset source inventory does not replace a finding.
 
 Use the inventory when tracking package/component state over time. Use a finding
 when there is a reportable condition that contributes to a claim conclusion.
@@ -589,126 +618,9 @@ The overall conclusion is derived from gating investigations:
 
 This preserves clarity without creating a misleading average score.
 
-## Compliance scenarios and companion profiles
-
-FARI is not a certification scheme and should not pretend to be one.
-
-What FARI does well is preserve the evidence, claim logic, scope boundaries,
-findings, SPARTA relationships, and executive decisions that a compliance
-conversation needs in order to stay honest.
-
-When a mission owner also wants a recognizable control-oriented view, FARI
-should use a **companion profile** instead of bending the core framework away
-from its purpose.
-
-### How FARI can support compliance decisions
-
-The same assessment can move through different compliance proceeding scenarios.
-These are not numeric scores. They are qualitative operating modes for the
-report author and client.
-
-1. **Evidence-backed alignment**
-   The relevant controls are implemented and directly supported by FARI
-   evidence, claims, and findings.
-2. **Partial alignment**
-   Some controls are implemented while others are only partially implemented or
-   planned, but the assessment is still usable because the gaps are explicit.
-3. **Compensating controls**
-   A direct control may be absent, but alternative safeguards reduce the same
-   mission exposure and are documented with rationale.
-4. **Inconclusive due to scope boundary**
-   The assessment cannot support a clean compliance statement because access,
-   environment, supplier visibility, or mission consequence evidence is limited.
-5. **Supplier attestation pending**
-   Compliance depends on third-party firmware, hosted services, or external
-   operational controls that still require validation or vendor evidence.
-6. **Continuous assurance**
-   The assessment is treated as a living baseline and updated through retest,
-   SBOM refresh, monitoring changes, and new revisions.
-
-### Companion profile model
-
-The recommended pattern is to keep FARI as the claim-and-evidence layer and add
-one or more external profiles that reference FARI records.
-
-For example:
-
-- FARI investigation `INV-0001-001`
-- evidence `EVD-0001-003`
-- Attack Flow `AFB-0001-001`
-- SBOM document `SBM-0001-001`
-- component `CMP-0001-004`
-
-Those records can then be cited by a companion control such as:
-
-> Replay protection exists on the command path.
-
-This preserves one important boundary:
-
-- FARI decides whether the tested claim was supported.
-- the companion profile decides how that evidence maps to a control view.
-
-### SPD-5 companion profile
-
-The first recommended companion is an SPD-5-inspired checklist based on the
-official *Space Policy Directive-5: Cybersecurity Principles for Space Systems*
-guidance published by the U.S. Government.
-
-Reference:
-
-- [Space Policy Directive-5 official PDF](https://www.transportation.gov/sites/dot.gov/files/2023-11/Memorandum%20on%20Space%20Policy%20Directive-5%E2%80%94Cybersecurity%20Principles%20for%20Space%20Systems.pdf)
-
-The companion profile groups controls into these families:
-
-- Governance
-- Ground Segment
-- Space Segment
-- Communications
-- Supply Chain
-- Monitoring
-
-Each control should be assigned one qualitative implementation state:
-
-- `Implemented`
-- `Partially Implemented`
-- `Planned`
-- `Not Implemented`
-- `Not Applicable`
-- `Not Verified`
-
-The profile itself can then roll up into one qualitative posture:
-
-- `Aligned`
-- `Partially Aligned`
-- `Gap Identified`
-- `Inconclusive`
-- `Not Started`
-
-These postures are not legal determinations and not replacements for authority
-review. They are internal executive signals that help the client understand how
-far the available evidence currently supports an SPD-5-style control statement.
-
-### Relationship to closure
-
-Companion profiles should normally remain **outside the minimum closure gates**
-for a FARI investigation or assessment.
-
-Reason:
-
-- a FARI assessment may still be complete and useful even when a compliance
-  overlay is not yet filled;
-- a companion profile may depend on governance evidence, supplier attestations,
-  or operational decisions that were never part of the original technical scope.
-
-In practice:
-
-- close the FARI record when the claim-based investigation is complete;
-- continue or reopen work in a new revision when the compliance overlay gains
-  better evidence or a different conclusion.
-
 ## Traceable inventory example
 
-Assume an SBOM import registers:
+Assume an asset source import registers:
 
 - component `libfoo`
 - current version `1.4.2`
@@ -773,7 +685,7 @@ forged frame changes the displayed value.
 ### Relate entries
 
 - Finding title: `Forged reply-like frame influences displayed telemetry`
-- SPARTA mapping: `EX-0014.02 Bus Traffic Spoofing`
+- Framework mapping: optional external reference, if one is required by the engagement
 - Mapping state: `Confirmed`
 
 ### Inform entries
@@ -797,9 +709,9 @@ When filling FARI by hand, use this order:
 2. attach or register the supplied material;
 3. separate facts, assertions, inferences, assumptions, contradictions, and gaps;
 4. decide the three sufficiency fields;
-5. normalize findings and SPARTA mappings;
+5. normalize findings and optional framework mappings;
 6. choose conclusion, scenario disposition, confidence, action, and priority;
-7. if software inventory matters, ingest SBOM material and update component timelines;
+7. if software inventory matters, ingest an asset source and update component timelines;
 8. capture a revision whenever the assessment meaning changed materially;
 9. write scope boundary, rationale, recommendations, and acceptance criteria;
 10. close the investigation only when the record can stand on its own.
@@ -825,8 +737,8 @@ sufficiency decisions.
 
 ### Relate
 
-The phase where normalized material becomes findings, scenarios, SPARTA
-relationships, and reportable technical meaning.
+The phase where normalized material becomes findings, scenarios, optional
+framework mappings, and reportable technical meaning.
 
 ### Inform
 
@@ -887,12 +799,6 @@ directly shown, partially supported, or still speculative.
 A normalized reportable condition derived from the investigation and connected
 to evidence, assets, claims, and optional framework mappings.
 
-### SPARTA
-
-The Space Attack Research and Tactic Analysis matrix. In FARI it is used as a
-behavior and countermeasure reference, especially for spacecraft-relevant
-techniques.
-
 ### Conclusion
 
 The qualitative answer to the claim within the stated scope: Meets, Does Not
@@ -923,34 +829,21 @@ consolidated report is final for the declared scope.
 A named snapshot of the assessment state, such as `v1` or `v2`, captured for
 traceability and difference review.
 
-### SBOM document
+### Asset source
 
-A preserved inventory source file, such as CycloneDX, SPDX, package-lock JSON,
-or a dependency text list, stored as evidence for software composition tracking.
+A preserved technical file attached to an asset, such as a dependency inventory,
+firmware image, binary, packet capture, SigMF file, log, or document. The source
+record retains the original bytes and metadata and may produce normalized
+inventory components when parsing is supported.
 
 ### Inventory component
 
-A tracked software package or dependency record derived from an SBOM or
-dependency list and maintained over time with status and version changes.
+A tracked software package or dependency record derived from a structured asset
+source or dependency list and maintained over time with status and version
+changes.
 
 ### Inventory event
 
 A timestamped traceability record attached to an inventory component, used to
 record vulnerability discovery, version movement, status changes, and fix
 verification.
-
-### Compliance scenario
-
-The qualitative way a compliance-oriented conversation is proceeding, such as
-evidence-backed alignment, partial alignment, compensating controls, or
-inconclusive scope.
-
-### Companion profile
-
-An overlay that maps FARI records to an external control baseline such as
-SPD-5, without changing the core FARI workflow or decision model.
-
-### Compliance posture
-
-The qualitative roll-up of a companion profile, such as Aligned, Partially
-Aligned, Gap Identified, Inconclusive, or Not Started.

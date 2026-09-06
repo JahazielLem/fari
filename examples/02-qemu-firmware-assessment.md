@@ -61,8 +61,6 @@ Mappings:
 
 | Framework | Mapping | State | Rationale |
 |---|---|---|---|
-| SPARTA | `EX-0009 Exploit Code Flaws` | Confirmed | Code flaw and execution effect reproduced in the emulated flight image |
-| SPARTA | `DE-0002 Disrupt or Deceive Downlink` | Not applicable | The observed behavior affected command processing, not downlink visibility |
 | NIST / organization controls | Input validation and software verification requirements | Deficiency | Required negative-input behavior was absent |
 
 Conclusion reasoning:
@@ -105,4 +103,4 @@ Required actions:
 
 The technical team remains free to choose QEMU, bridge design, fuzzing engine,
 and debugging approach. FARI converts the work into a bounded conclusion,
-SPARTA relationship, remediation plan, and honest assurance claim.
+framework-neutral relationship, remediation plan, and honest assurance claim.

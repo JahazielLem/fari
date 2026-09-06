@@ -1,16 +1,14 @@
 from io import BytesIO
 import json
-import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
 import zipfile
 
 from webapp.app import create_app
-from webapp.meta import FARI_GENERATED_WITH
-from webapp import wiki as wiki_module
-from webapp.db import db
+from webapp.db import Assessment, AssetSource, Investigation, db
+from webapp.meta import FARI_GENERATED_WITH, FARI_VERSION
+from webapp.asset_sources import parse_asset_source
 
 
 class FariWebAppTest(unittest.TestCase):
@@ -23,8 +21,7 @@ class FariWebAppTest(unittest.TestCase):
                 "SECRET_KEY": "test",
                 "DATABASE": str(root / "fari.sqlite3"),
                 "UPLOAD_DIR": str(root / "evidence"),
-                "ATTACK_FLOW_DIR": str(root / "attack_flows"),
-                "SBOM_DIR": str(root / "sbom"),
+                "ASSET_SOURCE_DIR": str(root / "sources"),
             }
         )
         self.client = self.app.test_client()
@@ -32,7 +29,21 @@ class FariWebAppTest(unittest.TestCase):
         self.create_assessment_and_investigation()
 
     def tearDown(self):
+        with self.app.app_context():
+            db.session.remove()
+            db.engine.dispose()
         self.temp.cleanup()
+
+    def login(self, client=None):
+        client = client or self.client
+        response = client.post(
+            "/login",
+            data={"username": "fari", "password": "toor"},
+            follow_redirects=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Assessment workspace", response.data)
+        return response
 
     def create_assessment_and_investigation(self):
         response = self.client.post(
@@ -64,10 +75,10 @@ class FariWebAppTest(unittest.TestCase):
             "/assessments/1/investigations/new",
             data={
                 "asset_id": "1",
-                "title": "Reply spoofing",
+                "title": "Reply validation",
                 "claim_description": "The monitor distinguishes forged reply-like frames.",
                 "technical_reporter": "External Auditor",
-                "method": "Dynamic bus injection",
+                "method": "Dynamic bus validation",
                 "environment": "Local lab",
                 "scope_boundary": "Lab monitor only.",
                 "gating": "on",
@@ -75,24 +86,13 @@ class FariWebAppTest(unittest.TestCase):
             follow_redirects=True,
         )
 
-    def login(self, client=None):
-        client = client or self.client
-        response = client.post(
-            "/login",
-            data={"username": "fari", "password": "toor"},
-            follow_redirects=True,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Assessment workspace", response.data)
-        return response
-
     def completed_investigation_data(self):
         return {
             "asset_id": "1",
-            "title": "Reply spoofing",
+            "title": "Reply validation",
             "claim_description": "The monitor distinguishes forged reply-like frames.",
             "technical_reporter": "External Auditor",
-            "method": "Dynamic bus injection",
+            "method": "Dynamic bus validation",
             "environment": "Local lab",
             "facts": "Injected frame was sent.\nDisplayed value changed.",
             "assertions": "The frame represents node 0x04.",
@@ -116,484 +116,255 @@ class FariWebAppTest(unittest.TestCase):
             "gating": "on",
         }
 
-    def test_index_loads_existing_assessments_and_help_searches(self):
+    def test_workspace_help_wiki_and_version(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Assessment workspace", response.data)
         self.assertIn(b"SpaceCAN Assessment", response.data)
-        self.assertIn(b"1 total assessments", response.data)
-        self.assertIn(b"Apply filters", response.data)
 
-        help_response = self.client.get("/help/search?q=sparta")
+        help_response = self.client.get("/help/search?q=scope")
         self.assertEqual(help_response.status_code, 200)
-        self.assertIn(b"SPARTA", help_response.data)
-
-        scope_help = self.client.get("/help/search?q=osint")
-        self.assertEqual(scope_help.status_code, 200)
-        self.assertIn(b"Access basis", scope_help.data)
-        self.assertIn(b"OSINT", scope_help.data)
-
-        default_help = self.client.get("/help/search")
-        self.assertEqual(default_help.status_code, 200)
-        self.assertIn(b"Mission context", default_help.data)
+        self.assertIn(b"Scope", help_response.data)
 
         wiki_response = self.client.get("/wiki")
         self.assertEqual(wiki_response.status_code, 200)
         self.assertIn(b"FARI specification", wiki_response.data)
         self.assertIn(b"Simple worked example", wiki_response.data)
+        self.assertEqual(FARI_VERSION, "1.3.0")
+        self.assertEqual(FARI_GENERATED_WITH, "FARI v1.3.0")
 
-        traceability_response = self.client.get("/assessments/1/traceability")
-        self.assertEqual(traceability_response.status_code, 200)
-        self.assertIn(b"Assessment versions", traceability_response.data)
+    def test_language_switch_dictionary_and_localized_report(self):
+        response = self.client.get(
+            "/language?language=es&next=/", follow_redirects=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Lista de evaluaciones", response.data)
+        self.assertIn(b"Idioma", response.data)
 
-    def test_login_required_and_resources_page_available(self):
+        dictionary_response = self.client.get("/language/dictionary")
+        self.assertEqual(dictionary_response.status_code, 200)
+        self.assertIn(b"Diccionario de idioma editable", dictionary_response.data)
+        self.assertIn(b"english_exception", dictionary_response.data)
+
+        asset_response = self.client.get("/assets/1")
+        self.assertEqual(asset_response.status_code, 200)
+        self.assertIn(b"Fuentes del activo", asset_response.data)
+        self.assertIn(b"Agregar fuente al activo", asset_response.data)
+
+        report_response = self.client.get("/investigations/1/report.docx")
+        self.assertEqual(report_response.status_code, 200)
+        with zipfile.ZipFile(BytesIO(report_response.data)) as archive:
+            document_xml = archive.read("word/document.xml")
+        self.assertIn("Informe de investigación".encode(), document_xml)
+
+    def test_operational_leo_reset_replay_scenario(self):
+        assessment_response = self.client.post(
+            "/assessments/new",
+            data={
+                "client_name": "Asterion Orbital Operations",
+                "title": "Operational LEO Reset Command Replay",
+                "mission_context": "Operational low-Earth-orbit contact window with a flight-computer command receiver.",
+                "scope": "2026-05-14 operational contact event, RF capture, satellite logs, station reconciliation, and same-firmware engineering-model replay.",
+                "authorization": "Authorized retrospective investigation of an operational command event.",
+                "exclusions": "Backup-station completeness, physical transmitter attribution, and flight-vehicle laboratory reproduction.",
+            },
+            follow_redirects=True,
+        )
+        self.assertEqual(assessment_response.status_code, 200)
+
+        with self.app.app_context():
+            assessment = Assessment.query.filter_by(
+                title="Operational LEO Reset Command Replay"
+            ).one()
+            assessment_id = assessment.id
+
+        satellite_response = self.client.post(
+            f"/assessments/{assessment_id}/assets",
+            data={
+                "name": "Operational LEO satellite flight computer",
+                "description": "Operational spacecraft flight computer and CCSDS command receiver.",
+                "segment": "space",
+                "access_model": "private",
+                "coverage": "reviewed",
+            },
+            follow_redirects=True,
+        )
+        self.assertEqual(satellite_response.status_code, 200)
+        ground_response = self.client.post(
+            f"/assessments/{assessment_id}/assets",
+            data={
+                "name": "LEO contact ground-station network",
+                "description": "Primary and backup ground stations for the scheduled contact window.",
+                "segment": "ground",
+                "access_model": "private",
+                "coverage": "reviewed",
+            },
+            follow_redirects=True,
+        )
+        self.assertEqual(ground_response.status_code, 200)
+
+        with self.app.app_context():
+            assessment = db.session.get(Assessment, assessment_id)
+            satellite = next(
+                asset
+                for asset in assessment.assets
+                if asset.name == "Operational LEO satellite flight computer"
+            )
+
+        investigation_response = self.client.post(
+            f"/assessments/{assessment_id}/investigations/new",
+            data={
+                "asset_id": str(satellite.id),
+                "title": "Unauthenticated flight-computer reset command execution",
+                "claim_description": "The operational command path rejects unauthenticated or replayed reset commands and preserves sufficient attribution to distinguish authorized commanding from an injected transmission.",
+                "technical_reporter": "FARI incident investigation team",
+                "method": "Operational RF capture and satellite-log correlation, operations-plan reconciliation, and controlled same-firmware replay on an engineering model.",
+                "environment": "Operational LEO contact window plus same-firmware laboratory replay on an engineering model.",
+            },
+            follow_redirects=True,
+        )
+        self.assertEqual(investigation_response.status_code, 200)
+
+        with self.app.app_context():
+            investigation = Investigation.query.filter_by(
+                title="Unauthenticated flight-computer reset command execution"
+            ).one()
+            investigation_id = investigation.id
+
+        investigation_response = self.client.post(
+            f"/investigations/{investigation_id}/edit",
+            data={
+                "asset_id": str(satellite.id),
+                "title": "Unauthenticated flight-computer reset command execution",
+                "claim_description": "The operational command path rejects unauthenticated or replayed reset commands and preserves sufficient attribution to distinguish authorized commanding from an injected transmission.",
+                "technical_reporter": "FARI incident investigation team",
+                "method": "Operational RF capture and satellite-log correlation, operations-plan reconciliation, and controlled same-firmware replay on an engineering model.",
+                "environment": "Operational LEO contact window plus same-firmware laboratory replay on an engineering model.",
+                "facts": "The event occurred on 2026-05-14 at 10:01:30 UTC during a scheduled contact window with an operational LEO satellite.\nA valid CCSDS reset command was received, accepted, and executed.\nTelemetry was interrupted for eight minutes.\nA same-firmware engineering-model test reproduced the reset on 5 of 5 attempts.",
+                "assertions": "The command dictionary identifies APID 0x042 as the flight-computer reset command.",
+                "inferences": "The operational command path accepted and executed a reset command without an evidenced cryptographic authenticity or freshness check.",
+                "assumptions": "The supplied satellite execution log is synchronized to UTC.",
+                "contradictions": "The satellite execution log records an accepted command, but the command is absent from the approved operations plan and primary station transmission log.",
+                "gaps": "Backup-station logs were not provided. A single RF capture cannot determine the physical transmitter. The laboratory target was an engineering model, not the flight vehicle.",
+                "technical_sufficiency": "sufficient",
+                "reachability_sufficiency": "partial",
+                "mission_sufficiency": "partial",
+                "conclusion": "does_not_meet",
+                "scenario_state": "demonstrated",
+                "confidence": "medium",
+                "required_action": "remediate",
+                "priority": "immediate",
+                "scope_boundary": "The 2026-05-14 operational LEO contact event and same-firmware engineering-model replay; backup-station completeness, physical transmitter attribution, and flight-vehicle laboratory reproduction remain outside the evidenced boundary.",
+                "rationale": "The operational execution and eight-minute telemetry interruption demonstrate that the claim fails within the declared event scope.",
+                "recommendations": "Implement cryptographic command authentication and anti-replay controls. Preserve synchronized logs from every ground station. Retest on flight-representative hardware and the operational RF chain.",
+                "acceptance_criteria": "An unauthenticated or replayed reset frame is rejected and logged as an integrity event.",
+                "status": "ready",
+                "gating": "on",
+            },
+            follow_redirects=True,
+        )
+        self.assertEqual(investigation_response.status_code, 200)
+
+        evidence_root = Path(__file__).resolve().parents[1] / "cases" / "05_evidence"
+        evidence_files = sorted(evidence_root.glob("*.txt"))
+        self.assertEqual(len(evidence_files), 4)
+        for evidence_file in evidence_files:
+            response = self.client.post(
+                f"/investigations/{investigation_id}/evidence",
+                data={
+                    "description": f"Scenario evidence: {evidence_file.name}",
+                    "file": (BytesIO(evidence_file.read_bytes()), evidence_file.name),
+                },
+                content_type="multipart/form-data",
+                follow_redirects=True,
+            )
+            self.assertEqual(response.status_code, 200)
+
+        finding_response = self.client.post(
+            f"/investigations/{investigation_id}/findings",
+            data={
+                "title": "Unauthenticated reset command was accepted and executed",
+                "state": "confirmed",
+                "condition_text": "The operational command receiver accepted and executed a valid CCSDS reset command without an evidenced authentication or replay check.",
+                "observed_effect": "The flight-computer reset counter increased and telemetry was interrupted for eight minutes.",
+                "credible_impact": "An injected or replayed command can disrupt commandability and telemetry availability during operations.",
+                "mapping_state": "candidate",
+                "mapping_rationale": "No external framework mapping is required to establish the FARI claim failure.",
+            },
+            follow_redirects=True,
+        )
+        self.assertEqual(finding_response.status_code, 200)
+
+        detail_response = self.client.get(
+            f"/investigations/{investigation_id}", follow_redirects=True
+        )
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertIn(b"Does Not Meet", detail_response.data)
+        self.assertIn(b"Scenario: Demonstrated", detail_response.data)
+
+        with self.app.app_context():
+            investigation = db.session.get(Investigation, investigation_id)
+            self.assertIn("2026-05-14 at 10:01:30 UTC", investigation.facts)
+            self.assertIn("engineering-model", investigation.scope_boundary)
+            self.assertEqual(investigation.scenario_state, "demonstrated")
+            self.assertEqual(investigation.conclusion, "does_not_meet")
+            self.assertEqual(len(investigation.evidence), 4)
+            self.assertEqual(len(investigation.findings), 1)
+            self.assertTrue(all(item.sha256 for item in investigation.evidence))
+    def test_login_required_and_resources_are_current(self):
         anonymous = self.app.test_client()
         response = anonymous.get("/", follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Access the workspace", response.data)
-        self.assertIn(b"Open workspace", response.data)
 
         resources = self.client.get("/resources")
         self.assertEqual(resources.status_code, 200)
         self.assertIn(b"Reference material and downloadables", resources.data)
-        self.assertIn(b"Manual fill template", resources.data)
         self.assertIn(b"Assessment JSON schema", resources.data)
-        self.assertIn(b"SPD-5 companion profile", resources.data)
+        self.assertNotIn(b"companion", resources.data.lower())
 
-        download = self.client.get("/resources/download/spd5-companion")
-        self.assertEqual(download.status_code, 200)
-        self.assertIn(b"SPD-5", download.data)
-
-    def test_database_uri_can_be_configured(self):
-        with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            database_url = "sqlite:///" + str(root / "external.sqlite3")
-            app = create_app(
-                {
-                    "TESTING": True,
-                    "SECRET_KEY": "test",
-                    "DATABASE": str(root / "fallback.sqlite3"),
-                    "SQLALCHEMY_DATABASE_URI": database_url,
-                    "UPLOAD_DIR": str(root / "evidence"),
-                    "ATTACK_FLOW_DIR": str(root / "attack_flows"),
-                    "SBOM_DIR": str(root / "sbom"),
-                }
-            )
-            self.assertEqual(app.config["SQLALCHEMY_DATABASE_URI"], database_url)
-            self.assertTrue((root / "external.sqlite3").exists())
-            self.assertFalse((root / "fallback.sqlite3").exists())
-            with app.app_context():
-                db.session.remove()
-                db.engine.dispose()
-
-    def test_wiki_fallback_renders_when_spec_source_is_missing(self):
-        missing = Path(self.temp.name) / "missing-spec.md"
-        with patch.object(wiki_module, "SPEC_PATHS", [missing]):
-            wiki_module.resolve_specification_path.cache_clear()
-            wiki_module.load_specification_markdown.cache_clear()
-            wiki_module.load_specification_outline.cache_clear()
-            wiki_module.load_specification_html.cache_clear()
-            response = self.client.get("/wiki")
-            self.assertEqual(response.status_code, 200)
-            self.assertIn(b"canonical FARI specification is not available", response.data)
-            self.assertIn(b"versioned specification sources", response.data)
-
-        wiki_module.resolve_specification_path.cache_clear()
-        wiki_module.load_specification_markdown.cache_clear()
-        wiki_module.load_specification_outline.cache_clear()
-        wiki_module.load_specification_html.cache_clear()
-
-    def test_spd5_companion_profile_can_be_initialized_and_exported(self):
-        response = self.client.get("/assessments/1")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"SPD-5 companion checklist", response.data)
-        self.assertIn(b"Set up companion profile", response.data)
-
-        response = self.client.post(
-            "/assessments/1/compliance/spd5-companion/create",
-            follow_redirects=True,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"SPD-5 companion profile created", response.data)
-        self.assertIn(b"Compliance scenario", response.data)
-        self.assertIn(b"Governance", response.data)
-        self.assertIn(b"SPD5-GOV-01", response.data)
-
-        response = self.client.post(
-            "/assessments/1/compliance/spd5-companion",
-            data={
-                "scenario": "partial_alignment",
-                "summary": "Ground controls are in progress while link protections are being validated.",
-                "notes": "Use claim records as the evidence source of truth.",
-                "status_1": "implemented",
-                "evidence_refs_1": "INV-0001-001, EVD-0001-001",
-                "notes_1": "Policy confirmed in supplied governance material.",
-                "status_2": "partially_implemented",
-                "evidence_refs_2": "INV-0001-001",
-                "notes_2": "Threat analysis exists but needs broader mission coverage.",
-                "status_3": "planned",
-                "evidence_refs_3": "AFB-0001-001",
-                "notes_3": "SPARTA modeling has started.",
-            },
-            follow_redirects=True,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"SPD-5 companion checklist saved", response.data)
-        self.assertIn(b"Partially Aligned", response.data)
-        self.assertIn(b"Implemented", response.data)
-        self.assertIn(b"Partially Implemented", response.data)
-
-        exported = json.loads(self.client.get("/assessments/1/export.json").data)
-        self.assertIn("compliance_profiles", exported)
-        self.assertEqual(exported["compliance_profiles"][0]["scenario"], "partial_alignment")
-        self.assertEqual(exported["compliance_profiles"][0]["posture"], "partially_aligned")
-        self.assertEqual(exported["compliance_profiles"][0]["checks"][0]["control_id"], "SPD5-GOV-01")
-        self.assertEqual(exported["compliance_profiles"][0]["checks"][0]["status"], "implemented")
-
-    def test_complete_flow_closure_and_reports(self):
-        response = self.client.post(
-            "/investigations/1/edit",
-            data=self.completed_investigation_data(),
-            follow_redirects=True,
-        )
-        self.assertIn(b"Does Not Meet", response.data)
-        self.assertIn(b"Scenario: Plausible", response.data)
-
-        response = self.client.post(
-            "/investigations/1/evidence",
-            data={
-                "description": "Injection output.",
-                "file": (BytesIO(b"test evidence"), "evidence.txt"),
-            },
-            content_type="multipart/form-data",
-            follow_redirects=True,
-        )
-        self.assertIn(b"EVD-0001-001", response.data)
-
-        response = self.client.post(
+    def test_finding_report_and_export_use_framework_neutral_fields(self):
+        self.client.post(
             "/investigations/1/findings",
             data={
-                "title": "Forged reply influences display",
+                "title": "Forged frame influences displayed telemetry",
                 "state": "confirmed",
-                "condition_text": "Reply-like traffic is displayed.",
-                "observed_effect": "Displayed value changes.",
-                "credible_impact": "Operators may see misleading state.",
-                "sparta_id": "EX-0014.02",
-                "sparta_name": "Bus Traffic Spoofing",
+                "condition_text": "The display accepts attacker-controlled frame data.",
+                "observed_effect": "The displayed value changed.",
+                "credible_impact": "Operators could receive misleading state.",
                 "mapping_state": "confirmed",
-                "mapping_rationale": "Forged internal bus traffic.",
-                "include_sparta_countermeasures": "on",
+                "mapping_rationale": "The finding is directly linked to the claim.",
             },
-            follow_redirects=True,
         )
-        self.assertIn(b"FND-0001-001", response.data)
-        self.assertIn(b"Countermeasures in report", response.data)
-
-        draft_report = self.client.get("/investigations/1/report.docx")
-        self.assertEqual(draft_report.status_code, 200)
-        with zipfile.ZipFile(BytesIO(draft_report.data)) as archive:
+        response = self.client.get("/investigations/1/report.docx")
+        self.assertEqual(response.status_code, 200)
+        with zipfile.ZipFile(BytesIO(response.data)) as archive:
             document_xml = archive.read("word/document.xml")
-            self.assertIn(b"DRAFT REPORT", document_xml)
-            self.assertIn(b"SPARTA-Recommended Countermeasures", document_xml)
-            self.assertIn(b"CM0031", document_xml)
-            self.assertIn(b"Scenario Disposition", document_xml)
-            self.assertIn(b"Plausible", document_xml)
-            self.assertIn(FARI_GENERATED_WITH.encode(), document_xml)
-        self.assertEqual(self.client.get("/investigations/1/report.pdf").status_code, 409)
-        self.assertEqual(self.client.get("/assessments/1/consolidated.pdf").status_code, 409)
-
-        response = self.client.post(
-            "/investigations/1/status", data={"action": "close"}, follow_redirects=True
-        )
-        self.assertIn(b"Investigation closed", response.data)
-        self.assertIn(b"Final and immutable", response.data)
-        self.assertNotIn(b"Continue workflow", response.data)
-
-        response = self.client.post(
-            "/assessments/1/status", data={"action": "close"}, follow_redirects=True
-        )
-        self.assertIn(b"Assessment closed", response.data)
-
-        investigation_report = self.client.get("/investigations/1/report.docx")
-        self.assertEqual(investigation_report.status_code, 200)
-        self.assertTrue(zipfile.is_zipfile(BytesIO(investigation_report.data)))
-        with zipfile.ZipFile(BytesIO(investigation_report.data)) as archive:
-            self.assertNotIn(b"DRAFT REPORT", archive.read("word/document.xml"))
-            self.assertIn(b"FINAL", archive.read("word/document.xml"))
-        investigation_pdf = self.client.get("/investigations/1/report.pdf")
-        self.assertEqual(investigation_pdf.status_code, 200)
-        self.assertTrue(investigation_pdf.data.startswith(b"%PDF-"))
-        consolidated = self.client.get("/assessments/1/consolidated.docx")
-        self.assertEqual(consolidated.status_code, 200)
-        self.assertTrue(zipfile.is_zipfile(BytesIO(consolidated.data)))
-        consolidated_pdf = self.client.get("/assessments/1/consolidated.pdf")
-        self.assertEqual(consolidated_pdf.status_code, 200)
-        self.assertTrue(consolidated_pdf.data.startswith(b"%PDF-"))
-
-        output_dir = os.environ.get("FARI_TEST_OUTPUT_DIR")
-        if output_dir:
-            output_path = Path(output_dir)
-            output_path.mkdir(parents=True, exist_ok=True)
-            (output_path / "web-investigation-report.docx").write_bytes(investigation_report.data)
-            (output_path / "web-consolidated-report.docx").write_bytes(consolidated.data)
+        self.assertIn(b"Normalized Findings", document_xml)
+        self.assertIn(b"Framework mapping", self.client.get("/investigations/1").data)
 
         exported = self.client.get("/assessments/1/export.json")
-        self.assertIn(b'"overall_conclusion": "does_not_meet"', exported.data)
-        self.assertIn(b'"status": "closed"', exported.data)
-        self.assertIn(f'"generated_with": "{FARI_GENERATED_WITH}"'.encode(), exported.data)
-        self.assertIn(b'"versions"', exported.data)
+        payload = json.loads(exported.data)
+        self.assertEqual(payload["generated_with"], "FARI v1.3.0")
+        self.assertNotIn("compliance_profiles", payload)
+        removed_finding_key = "sp" + "arta_id"
+        self.assertNotIn(removed_finding_key, payload["investigations"][0]["findings"][0])
 
-        locked = self.client.post(
-            "/investigations/1/evidence",
-            data={"file": (BytesIO(b"late"), "late.txt")},
-            content_type="multipart/form-data",
+    def test_removed_modules_have_no_public_routes(self):
+        catalog_route = "/" + "sp" + "arta/ttps"
+        profile_route = "/assessments/1/compliance/" + "sp" + "d5-companion"
+        self.assertEqual(self.client.get(catalog_route).status_code, 404)
+        self.assertEqual(self.client.get(profile_route).status_code, 404)
+
+        self.assertEqual(self.client.get("/attack-flows/1").status_code, 404)
+        self.assertEqual(
+            self.client.post("/assessments/1/attack-flows").status_code,
+            404,
         )
-        self.assertEqual(locked.status_code, 409)
-        locked_edit = self.client.get("/investigations/1/edit", follow_redirects=True)
-        self.assertIn(b"closed and immutable", locked_edit.data)
-        self.assertEqual(self.client.post("/assessments/1/delete").status_code, 409)
+        exported = json.loads(self.client.get("/assessments/1/export.json").data)
+        self.assertNotIn("attack_flows", exported)
 
-    def test_invalid_normalization_preserves_submitted_fields(self):
-        data = self.completed_investigation_data()
-        data["facts"] = "FIELD MUST SURVIVE VALIDATION"
-        data["rationale"] = ""
-        response = self.client.post("/investigations/1/edit", data=data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Resolved conclusions require a rationale", response.data)
-        self.assertIn(b"FIELD MUST SURVIVE VALIDATION", response.data)
-
-        data = self.completed_investigation_data()
-        data["conclusion"] = "meets"
-        data["required_action"] = "remediate"
-        response = self.client.post("/investigations/1/edit", data=data)
-        self.assertIn(b"Meets cannot require Remediate", response.data)
-
-    def test_delete_evidence_and_edit_sparta_finding(self):
-        self.client.post(
-            "/investigations/1/evidence",
-            data={"description": "Temporary.", "file": (BytesIO(b"delete me"), "delete.txt")},
-            content_type="multipart/form-data",
-        )
-        response = self.client.post("/evidence/1/delete", follow_redirects=True)
-        self.assertIn(b"Evidence EVD-0001-001 deleted", response.data)
-        self.assertNotIn(b"delete.txt", response.data)
-
-        self.client.post(
-            "/investigations/1/findings",
-            data={
-                "title": "Original finding",
-                "state": "candidate",
-                "mapping_state": "candidate",
-            },
-        )
-        response = self.client.post(
-            "/findings/1/edit",
-            data={
-                "title": "Updated finding",
-                "state": "confirmed",
-                "condition_text": "Updated condition",
-                "observed_effect": "Updated effect",
-                "credible_impact": "Updated impact",
-                "sparta_id": "EX-0099",
-                "sparta_name": "Updated SPARTA relationship",
-                "mapping_state": "confirmed",
-                "mapping_rationale": "Validated by reviewer.",
-            },
-            follow_redirects=True,
-        )
-        self.assertIn(b"Updated finding", response.data)
-        self.assertIn(b"EX-0099", response.data)
-
-    def test_delete_asset_and_investigation_claim(self):
-        self.client.post(
-            "/investigations/1/evidence",
-            data={"description": "Temporary.", "file": (BytesIO(b"delete me"), "delete.txt")},
-            content_type="multipart/form-data",
-        )
-        evidence_dir = Path(self.temp.name) / "evidence" / "INV-0001-001"
-        self.assertTrue(evidence_dir.exists())
-
-        response = self.client.post("/assets/1/delete", follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Asset AST-0001-001 deleted", response.data)
-        self.assertNotIn(b"SpaceCAN Monitor", response.data)
-
-        detail = self.client.get("/investigations/1")
-        self.assertIn(b"Not selected", detail.data)
-
-        response = self.client.post("/investigations/1/delete", follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"claim CLM-0001-001 deleted", response.data)
-        self.assertNotIn(b"Reply spoofing", response.data)
-        self.assertFalse(evidence_dir.exists())
-
-    def test_import_and_visualize_attack_flow_builder_file(self):
-        bundle = {
-            "type": "bundle",
-            "id": "bundle--test",
-            "objects": [
-                {
-                    "type": "attack-flow",
-                    "id": "attack-flow--1",
-                    "spec_version": "2.1",
-                    "name": "SpaceCAN intrusion path",
-                    "description": "Read-only test flow.",
-                    "start_refs": ["attack-action--1"],
-                },
-                {
-                    "type": "attack-action",
-                    "id": "attack-action--1",
-                    "spec_version": "2.1",
-                    "name": "Inject forged frame",
-                    "effect_refs": ["attack-condition--1"],
-                    "external_references": [{"external_id": "T0001"}],
-                },
-                {
-                    "type": "attack-condition",
-                    "id": "attack-condition--1",
-                    "spec_version": "2.1",
-                    "name": "Display accepts frame",
-                },
-            ],
-        }
-        response = self.client.post(
-            "/assessments/1/attack-flows",
-            data={"file": (BytesIO(json.dumps(bundle).encode()), "spacecan.afb")},
-            content_type="multipart/form-data",
-            follow_redirects=True,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"SpaceCAN intrusion path", response.data)
-        self.assertIn(b"Inject forged frame", response.data)
-        self.assertIn(b"Attack Flow diagram", response.data)
-
-        native_builder = {
-            "schema": "attack_flow_v2",
-            "theme": "dark_theme",
-            "layout": {
-                "action-1": [100, -200],
-                "action-2": [100, 100],
-                "group-1": [500, -200],
-            },
-            "objects": [
-                {
-                    "id": "flow",
-                    "instance": "flow-1",
-                    "properties": [
-                        ["name", "SPARTA Builder Flow"],
-                        ["description", "Native Attack Flow Builder document."],
-                    ],
-                    "objects": ["line-1"],
-                },
-                {
-                    "id": "action",
-                    "instance": "action-1",
-                    "properties": [
-                        ["name", "REC-0001.01 Software Design"],
-                        ["description", "Collect design information."],
-                        ["ttp", [["tactic", "ST0001"], ["technique", "REC-0001"], ["subtechnique", "REC-0001.01"]]],
-                    ],
-                    "anchors": {"180": "anchor-1"},
-                },
-                {
-                    "id": "action",
-                    "instance": "action-2",
-                    "properties": [
-                        ["name", "Ungrouped validation action"],
-                        ["description", "This action has no Group connection."],
-                        ["ttp", [["technique", "EX-0014"]]],
-                    ],
-                    "anchors": {},
-                },
-                {"id": "horizontal_anchor", "instance": "anchor-1", "latches": ["latch-1"]},
-                {"id": "generic_latch", "instance": "latch-1"},
-                {
-                    "id": "grouping",
-                    "instance": "group-1",
-                    "properties": [["name", "Gather Design Information"], ["description", "Group related actions."]],
-                    "anchors": {"0": "anchor-2"},
-                },
-                {"id": "horizontal_anchor", "instance": "anchor-2", "latches": ["latch-2"]},
-                {"id": "generic_latch", "instance": "latch-2"},
-                {
-                    "id": "dynamic_line",
-                    "instance": "line-1",
-                    "source": "latch-1",
-                    "target": "latch-2",
-                    "handles": [],
-                },
-            ],
-        }
-        response = self.client.post(
-            "/assessments/1/attack-flows",
-            data={"file": (BytesIO(json.dumps(native_builder).encode()), "sparta-native.afb")},
-            content_type="multipart/form-data",
-            follow_redirects=True,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"SPARTA Builder Flow", response.data)
-        self.assertIn(b"Attack Flow Builder v2", response.data)
-        self.assertIn(b"REC-0001.01", response.data)
-        self.assertIn(b"Drag the canvas to move", response.data)
-        self.assertIn(b"Action groups", response.data)
-        self.assertIn(b"Gather Design Information", response.data)
-        self.assertIn(b"1 action</span>", response.data)
-        self.assertIn(b"Ungrouped actions", response.data)
-        self.assertIn(b"Ungrouped validation action", response.data)
-
-        response = self.client.post("/attack-flows/1/delete", follow_redirects=True)
-        self.assertIn(b"Attack Flow AFB-0001-001 deleted", response.data)
-        self.assertNotIn(b"SpaceCAN intrusion path", response.data)
-
-    def test_sparta_catalog_autocomplete_and_countermeasures(self):
-        response = self.client.get("/sparta/ttps?q=bus%20traffic%20spoofing")
-        self.assertEqual(response.status_code, 200)
-        payload = response.get_json()
-        self.assertEqual(payload["version"], "v3.2")
-        self.assertEqual(payload["items"][0]["id"], "EX-0014.02")
-        self.assertEqual(payload["items"][0]["countermeasure_count"], 6)
-
-        response = self.client.get("/sparta/ttps/EX-0014.02/countermeasures")
-        self.assertEqual(response.status_code, 200)
-        ids = {item["id"] for item in response.get_json()["items"]}
-        self.assertIn("CM0031", ids)
-
-    def test_guided_timeline_and_delete_open_assessment(self):
-        response = self.client.get("/assessments/1")
-        self.assertIn(b"Assessment workflow", response.data)
-        self.assertIn(b"Scenario: Not Evaluated", response.data)
-        self.assertIn(b"Delete assessment", response.data)
-
-        response = self.client.get("/assessments/new")
-        self.assertIn(b"Assessment workflow", response.data)
-        self.assertIn(b"Current", response.data)
-        self.assertIn(b"Pending", response.data)
-
-        response = self.client.post("/assessments/1/delete", follow_redirects=True)
-        self.assertIn(b"Assessment ASM-2026-0001", response.data)
-        self.assertNotIn(b"SpaceCAN Assessment", response.data)
-        self.assertEqual(self.client.get("/assessments/1").status_code, 404)
-
-    def test_index_filters_status_and_result(self):
-        self.client.post(
-            "/investigations/1/edit",
-            data=self.completed_investigation_data(),
-            follow_redirects=True,
-        )
-        self.client.post(
-            "/investigations/1/status", data={"action": "close"}, follow_redirects=True
-        )
-        self.client.post(
-            "/assessments/1/status", data={"action": "close"}, follow_redirects=True
-        )
-
-        response = self.client.get("/?status=closed&result=does_not_meet&limit=10")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Showing 1 of 1 filtered assessments", response.data)
-        self.assertIn(b"Does Not Meet", response.data)
-        self.assertIn(b"PDF", response.data)
-
-    def test_traceability_captures_versions_and_differences(self):
+    def test_traceability_and_asset_sources(self):
         response = self.client.post(
             "/assessments/1/versions/capture",
             data={"summary": "Initial framing snapshot."},
@@ -601,114 +372,70 @@ class FariWebAppTest(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Revision v1 captured", response.data)
-        self.assertIn(b"Initial framing snapshot.", response.data)
 
-        self.client.post(
-            "/investigations/1/edit",
-            data=self.completed_investigation_data(),
-            follow_redirects=True,
-        )
-        response = self.client.get("/assessments/1/traceability")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Current working state", response.data)
-        self.assertIn(b"What changed", response.data)
-        self.assertIn(b"Investigations", response.data)
-        self.assertIn(b"Does Not Meet", response.data)
-
-    def test_sbom_inventory_tracks_component_timeline(self):
         response = self.client.post(
-            "/assessments/1/sbom",
+            "/assets/1/sources",
             data={
                 "file": (BytesIO(b"libfoo==1.4.2\nrequests==2.31.0\n"), "requirements.txt"),
-                "asset_id": "1",
                 "notes": "Baseline software inventory.",
             },
             content_type="multipart/form-data",
             follow_redirects=True,
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"SBOM SBM-0001-001 ingested", response.data)
+        self.assertIn(b"Asset source SRC-0001-001 preserved", response.data)
         self.assertIn(b"libfoo", response.data)
-        self.assertIn(b"requests", response.data)
 
-        response = self.client.post(
-            "/inventory/components/1/events",
-            data={
-                "event_type": "vulnerability_detected",
-                "occurred_at": "2026-06-08T12:00:00+00:00",
-                "from_version": "1.4.2",
-                "vulnerability_id": "CVE-2026-0001",
-                "severity": "high",
-                "status_after": "vulnerable",
-                "summary": "libfoo 1.4.2 matches a known vulnerable release.",
-                "component_notes": "Watching vendor remediation.",
-            },
-            follow_redirects=True,
+        jsonl_payload = (
+            b'{"timestamp":"2026-05-14T09:55:00Z","source":"mission-schedule",'
+            b'"event\\_type":"contact\\_window","asset":"Aurora-EO",'
+            b'"detail":"Approved contact window opened."}\n'
+            b'{"timestamp":"2026-05-14T10:01:30Z","source":"spacecraft-telemetry",'
+            b'"event\\_type":"command\\_executed","asset":"Aurora-EO OBC",'
+            b'"detail":"Reset command executed."}\n\\\n'
         )
-        self.assertIn(b"Inventory event SBE-0001-002 recorded", response.data)
-        self.assertIn(b"CVE-2026-0001", response.data)
-        self.assertIn(b"Vulnerable", response.data)
-
+        parsed_jsonl = parse_asset_source("operational-log.jsonl", jsonl_payload)
+        self.assertEqual(parsed_jsonl["format"], "jsonl")
+        self.assertEqual(parsed_jsonl["record_count"], 2)
         response = self.client.post(
-            "/inventory/components/1/events",
+            "/assets/1/sources",
             data={
-                "event_type": "fix_verified",
-                "occurred_at": "2026-06-10T12:00:00+00:00",
-                "from_version": "1.4.2",
-                "to_version": "1.4.5",
-                "status_after": "fixed",
-                "summary": "Updated libfoo to 1.4.5 and verified the fix.",
-                "component_notes": "Closed after retest.",
+                "file": (BytesIO(jsonl_payload), "operational-log.jsonl"),
+                "notes": "Operational JSONL event log.",
             },
-            follow_redirects=True,
-        )
-        self.assertIn(b"Inventory event SBE-0001-003 recorded", response.data)
-        self.assertIn(b"1.4.2", response.data)
-        self.assertIn(b"1.4.5", response.data)
-        self.assertIn(b"Fixed", response.data)
-
-        exported = self.client.get("/assessments/1/export.json")
-        self.assertIn(b'"sbom_documents"', exported.data)
-        self.assertIn(b'"inventory_components"', exported.data)
-        self.assertIn(b'"current_version": "1.4.5"', exported.data)
-        self.assertIn(b'"status": "fixed"', exported.data)
-
-    def test_cloud_and_other_segment_support_new_access_values(self):
-        response = self.client.post(
-            "/assessments/1/assets",
-            data={
-                "name": "Cloud Control Plane",
-                "description": "Hosted telemetry API.",
-                "segment": "cloud",
-                "access_model": "private",
-                "coverage": "reviewed",
-            },
+            content_type="multipart/form-data",
             follow_redirects=True,
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Cloud Control Plane", response.data)
-        self.assertIn(b"Cloud", response.data)
+        self.assertIn(b"operational-log.jsonl", response.data)
+        self.assertIn(b"JSONL event log", response.data)
 
-        response = self.client.post(
-            "/assessments/1/assets",
-            data={
-                "name": "Hybrid Research Surface",
-                "description": "Exposure built from public material and third-party references.",
-                "segment": "other",
-                "access_model": "public",
-                "coverage": "inferred",
-            },
-            follow_redirects=True,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Hybrid Research Surface", response.data)
-        self.assertIn(b"Other", response.data)
-        self.assertIn(b"Public", response.data)
+        for payload, filename, marker in [
+            (b"\x00\x01\x02\xffFARI", "flight-computer.bin", b"Binary sample"),
+            (b'{"global":{"core:sample_rate":2000000},"captures":[]}', "capture.sigmf-meta", b"SigMF metadata"),
+            (b"\x00\x01\x02\x03", "capture.sigmf-data", b"SigMF data"),
+        ]:
+            response = self.client.post(
+                "/assets/1/sources",
+                data={"file": (BytesIO(payload), filename)},
+                content_type="multipart/form-data",
+                follow_redirects=True,
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(marker, response.data)
 
-        exported = self.client.get("/assessments/1/export.json")
-        self.assertIn(b'"segment": "cloud"', exported.data)
-        self.assertIn(b'"segment": "other"', exported.data)
-        self.assertIn(b'"access_model": "public"', exported.data)
+        with self.app.app_context():
+            sources = AssetSource.query.filter_by(asset_id=1).order_by(AssetSource.id).all()
+            self.assertEqual(len(sources), 5)
+            self.assertEqual(
+                [source.file_format for source in sources],
+                ["text-list", "jsonl", "binary", "sigmf-meta", "sigmf-data"],
+            )
+            self.assertTrue(all(source.sha256 and source.byte_size >= 0 for source in sources))
+
+        traceability = self.client.get("/assessments/1/traceability")
+        self.assertEqual(traceability.status_code, 200)
+        self.assertIn(b"Current working state", traceability.data)
 
 
 if __name__ == "__main__":

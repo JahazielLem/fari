@@ -31,9 +31,10 @@ from that snapshot.
 
 - guided assessment workflow
 - evidence upload
-- SPARTA and Attack Flow visualization
-- SBOM inventory
-- SPD-5 companion checklist
+- per-asset technical source inventory, preserving raw bytes, SHA-256, size, MIME,
+  and detected formats including binaries, SigMF, PCAP/PCAPNG, JSONL, and
+  structured dependency data when available
+- bilingual EN/ES interface and generated report labels backed by editable dictionaries
 - report generation
 - PostgreSQL or SQLite persistence
 

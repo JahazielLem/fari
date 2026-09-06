@@ -147,7 +147,7 @@ def build_report(source, output, report_label, title, evidence_source, report_da
     doc.core_properties.title = f"FARI {report_label}: {title}"
     doc.core_properties.subject = f"FARI {report_label}"
     doc.core_properties.author = "FARI Report Author"
-    doc.core_properties.keywords = "FARI, space cybersecurity, investigation, SPARTA"
+    doc.core_properties.keywords = "FARI, space cybersecurity, investigation"
     doc.save(output)
     print(output)
 

@@ -4,13 +4,7 @@
     "title": "QEMU Flight Software Assessment",
     "status": "closed",
     "conclusion_id": "CON-ASM-002",
-    "framework_profiles": [
-      {
-        "name": "SPARTA",
-        "version": "live",
-        "accessed": "2026-06-07"
-      }
-    ],
+    "framework_profiles": [],
     "roles": {
       "evidence_producers": ["Example technical assessor"],
       "report_author": "Example FARI report author",
@@ -33,7 +27,7 @@
       "id": "AST-SV-FSW-001",
       "name": "Flight-software command-and-data-handling image",
       "segment": "space",
-      "access_model": "white_box",
+      "access_model": "private",
       "coverage": "tested",
       "mission_objectives": ["OBJ-001"]
     }
@@ -127,18 +121,7 @@
       "confidence": "medium",
       "fari_conclusion": "does_not_meet",
       "required_action": "remediate",
-      "mappings": [
-        {
-          "framework": "SPARTA",
-          "external_id": "EX-0009",
-          "name": "Exploit Code Flaws",
-          "state": "confirmed",
-          "rationale": "The code flaw and execution effect were reproduced in the emulated flight image.",
-          "version": "live",
-          "accessed": "2026-06-07",
-          "source_url": "https://sparta.aerospace.org/technique/EX-0009/"
-        }
-      ],
+      "mappings": [],
       "limitations": [
         "RF reachability and target-hardware behavior were not assessed."
       ]

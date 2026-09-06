@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from collections import Counter
+from contextvars import ContextVar
 from datetime import date
 from html import escape
 from io import BytesIO
+from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
@@ -36,8 +38,8 @@ from tools.build_reference_docx import (
     set_run_font,
     set_table_geometry,
 )
+from webapp.i18n import load_catalog
 from webapp.meta import FARI_GENERATED_WITH
-from webapp.sparta_parser import countermeasures_for
 
 
 RESULT_STYLE = {
@@ -47,58 +49,17 @@ RESULT_STYLE = {
     "not_assessed": ("NOT ASSESSED", "475467", "FFFFFF"),
 }
 
-LABELS = {
-    "high": "High",
-    "medium": "Medium",
-    "low": "Low",
-    "accept": "Accept",
-    "remediate": "Remediate",
-    "extend_investigation": "Extend Investigation",
-    "retest": "Retest",
-    "no_action": "No Action",
-    "immediate": "Immediate",
-    "planned": "Planned",
-    "routine": "Routine",
-    "none": "None",
-    "sufficient": "Sufficient",
-    "partial": "Partial",
-    "insufficient": "Insufficient",
-    "demonstrated": "Demonstrated",
-    "plausible": "Plausible",
-    "not_demonstrated": "Not Demonstrated",
-    "not_evaluated": "Not Evaluated",
-    "tracked": "Tracked",
-    "vulnerable": "Vulnerable",
-    "update_in_progress": "Update In Progress",
-    "fixed": "Fixed",
-    "accepted": "Accepted",
-    "not_affected": "Not Affected",
-    "manual_snapshot": "Manual Snapshot",
-    "assessment_closed": "Assessment Closed",
-    "live_state": "Live State",
-    "not_verified": "Not Verified",
-    "implemented": "Implemented",
-    "partially_implemented": "Partially Implemented",
-    "planned": "Planned",
-    "not_implemented": "Not Implemented",
-    "not_applicable": "Not Applicable",
-    "aligned": "Aligned",
-    "partially_aligned": "Partially Aligned",
-    "gap_identified": "Gap Identified",
-    "not_started": "Not Started",
-    "evidence_backed_alignment": "Evidence-Backed Alignment",
-    "partial_alignment": "Partial Alignment",
-    "compensating_controls": "Compensating Controls",
-    "inconclusive_scope_boundary": "Inconclusive Due To Scope",
-    "supplier_attestation_pending": "Supplier Attestation Pending",
-    "continuous_assurance": "Continuous Assurance",
-    "direct": "Direct",
-    "supporting": "Supporting",
-}
+_REPORT_LANGUAGE = ContextVar("fari_report_language", default="en")
+_REPORT_CATALOG = load_catalog(str(Path(__file__).resolve().parent / "translations"))
+
+
+def report_text(key: str, **values) -> str:
+    return _REPORT_CATALOG.get(f"report.{key}", _REPORT_LANGUAGE.get(), **values)
 
 
 def human(value: str) -> str:
-    return LABELS.get(value, value.replace("_", " ").title())
+    raw = "" if value is None else str(value)
+    return _REPORT_CATALOG.human(raw, _REPORT_LANGUAGE.get())
 
 
 def revision_label(assessment) -> str:
@@ -110,7 +71,13 @@ def revision_label(assessment) -> str:
 
 
 def add_cover(
-    doc, label: str, title: str, client_name: str, report_author: str, document_state: str
+    doc,
+    label: str,
+    title: str,
+    client_name: str,
+    report_author: str,
+    document_state: str,
+    is_draft: bool = False,
 ):
     for _ in range(4):
         doc.add_paragraph()
@@ -130,7 +97,10 @@ def add_cover(
     set_run_font(run, size=15, color=MUTED)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run(f"Client: {client_name}  |  Report Author: {report_author}")
+    run = p.add_run(
+        f"{report_text('client')}: {client_name}  |  "
+        f"{report_text('report_author')}: {report_author}"
+    )
     set_run_font(run, size=10.5, color=MUTED, bold=True)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -138,7 +108,7 @@ def add_cover(
     set_run_font(run, size=10, color=MUTED)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run(f"Generated with {FARI_GENERATED_WITH}")
+    run = p.add_run(f"{report_text('generated_with')} {FARI_GENERATED_WITH}")
     set_run_font(run, size=9.5, color=MUTED)
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -146,7 +116,7 @@ def add_cover(
     set_run_font(
         run,
         size=16,
-        color="B42318" if document_state == "DRAFT" else "15803D",
+        color="B42318" if is_draft else "15803D",
         bold=True,
     )
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
@@ -159,9 +129,10 @@ def add_heading(doc, text: str, level: int = 1):
 
 
 def add_result_banner(doc, conclusion: str, confidence: str, action: str):
-    label, fill, text_color = RESULT_STYLE.get(
+    _label, fill, text_color = RESULT_STYLE.get(
         conclusion, RESULT_STYLE["not_assessed"]
     )
+    label = report_text(f"result_{conclusion}")
     table = doc.add_table(rows=1, cols=1)
     set_table_geometry(table, [9360])
     set_repeat_table_header(table.rows[0])
@@ -177,7 +148,8 @@ def add_result_banner(doc, conclusion: str, confidence: str, action: str):
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_after = Pt(8)
     run = p.add_run(
-        f"Confidence: {human(confidence)}  |  Required Action: {human(action)}"
+        f"{report_text('confidence')}: {human(confidence)}  |  "
+        f"{report_text('required_action')}: {human(action)}"
     )
     set_run_font(run, size=10.5, color=text_color, bold=True)
     doc.add_paragraph().paragraph_format.space_after = Pt(1)
@@ -187,8 +159,8 @@ def add_key_value_table(doc, rows):
     table = doc.add_table(rows=1, cols=2)
     set_table_geometry(table, [2700, 6660])
     set_repeat_table_header(table.rows[0])
-    table.cell(0, 0).text = "Field"
-    table.cell(0, 1).text = "Result"
+    table.cell(0, 0).text = report_text("field")
+    table.cell(0, 1).text = report_text("result")
     for cell in table.rows[0].cells:
         set_cell_shading(cell, "E8EEF5")
         for run in cell.paragraphs[0].runs:
@@ -196,7 +168,7 @@ def add_key_value_table(doc, rows):
     for label, value in rows:
         cells = table.add_row().cells
         cells[0].text = str(label)
-        cells[1].text = str(value or "Not supplied")
+        cells[1].text = str(value or report_text("not_supplied"))
         for run in cells[0].paragraphs[0].runs:
             set_run_font(run, size=9.2, color=INK, bold=True)
         for run in cells[1].paragraphs[0].runs:
@@ -209,7 +181,7 @@ def add_list_section(doc, title: str, text: str, level: int = 2):
     items = [item.strip() for item in (text or "").splitlines() if item.strip()]
     if not items:
         p = doc.add_paragraph()
-        run = p.add_run("Not supplied.")
+        run = p.add_run(f"{report_text('not_supplied')}.")
         set_run_font(run, size=10.5, color=MUTED, italic=True)
         return
     for item in items:
@@ -218,67 +190,44 @@ def add_list_section(doc, title: str, text: str, level: int = 2):
 
 
 def add_findings(doc, findings):
-    add_heading(doc, "Findings and SPARTA Relationships", 2)
+    add_heading(doc, report_text("normalized_findings"), 2)
     if not findings:
-        add_callout(doc, "No normalized findings have been added.")
+        add_callout(doc, report_text("no_normalized_findings"))
         return
     for finding in findings:
         add_heading(doc, f"{finding['fari_id']}: {finding['title']}", 3)
         add_key_value_table(
             doc,
             [
-                ("State", human(finding["state"])),
-                ("Condition", finding["condition_text"]),
-                ("Observed Effect", finding["observed_effect"]),
-                ("Credible Impact", finding["credible_impact"]),
-                (
-                    "SPARTA",
-                    (
-                        f"{finding['sparta_id']} {finding['sparta_name']}"
-                        if finding["sparta_id"]
-                        else "No mapping supplied"
-                    ),
-                ),
-                ("Mapping State", human(finding["mapping_state"])),
-                ("Mapping Rationale", finding["mapping_rationale"]),
+                (report_text("state"), human(finding["state"])),
+                (report_text("condition"), finding["condition_text"]),
+                (report_text("observed_effect"), finding["observed_effect"]),
+                (report_text("credible_impact"), finding["credible_impact"]),
+                (report_text("mapping_state"), human(finding["mapping_state"])),
+                (report_text("mapping_rationale"), finding["mapping_rationale"]),
             ],
         )
-        if finding["include_sparta_countermeasures"] and finding["sparta_id"]:
-            add_sparta_countermeasures(doc, finding["sparta_id"], 3)
 
 
-def add_sparta_countermeasures(doc, sparta_id: str, level: int = 3):
-    items = countermeasures_for(sparta_id)
-    add_heading(doc, f"SPARTA-Recommended Countermeasures for {sparta_id}", level)
-    if not items:
-        add_callout(doc, "No linked countermeasures were found in the local SPARTA catalog.")
-        return
-    add_key_value_table(
-        doc,
-        [
-            (f"{item['id']}: {item['name']}", item["description"] or "No description supplied.")
-            for item in items
-        ],
-    )
-
-
-def build_investigation_report(assessment, investigation, asset, evidence, findings):
+def build_investigation_report(assessment, investigation, asset, evidence, findings, language="en"):
+    _REPORT_LANGUAGE.set(language)
     document_state = "FINAL" if investigation["status"] == "closed" else "DRAFT"
     doc = Document()
     configure_styles(doc)
     configure_running_furniture(doc.sections[0])
     add_cover(
         doc,
-        "Investigation Report",
+        report_text("investigation_report"),
         investigation["title"],
         assessment["client_name"],
         assessment["report_author"],
-        document_state,
+        report_text("final") if document_state == "FINAL" else report_text("draft"),
+        is_draft=document_state == "DRAFT",
     )
     if document_state == "DRAFT":
         add_callout(
             doc,
-            "DRAFT REPORT: This document may change until the investigation is closed.",
+            report_text("draft_investigation"),
         )
     add_result_banner(
         doc,
@@ -286,56 +235,56 @@ def build_investigation_report(assessment, investigation, asset, evidence, findi
         investigation["confidence"],
         investigation["required_action"],
     )
-    add_heading(doc, "1. FARI Result Card", 1)
+    add_heading(doc, f"1. {report_text('fari_result_card')}", 1)
     add_key_value_table(
         doc,
         [
-            ("Conclusion", human(investigation["conclusion"])),
-            ("Scenario Disposition", human(investigation["scenario_state"])),
-            ("Confidence", human(investigation["confidence"])),
-            ("Required Action", human(investigation["required_action"])),
-            ("Generated With", FARI_GENERATED_WITH),
-            ("Assessment Revision", revision_label(assessment)),
-            ("Priority", human(investigation["priority"])),
-            ("Scope Boundary", investigation["scope_boundary"]),
-            ("Rationale", investigation["rationale"]),
+            (report_text("overall_conclusion"), human(investigation["conclusion"])),
+            (report_text("scenario_disposition"), human(investigation["scenario_state"])),
+            (report_text("confidence"), human(investigation["confidence"])),
+            (report_text("required_action"), human(investigation["required_action"])),
+            (report_text("generated_with_field"), FARI_GENERATED_WITH),
+            (report_text("assessment_revision"), revision_label(assessment)),
+            (report_text("priority"), human(investigation["priority"])),
+            (report_text("scope_boundary"), investigation["scope_boundary"]),
+            (report_text("rationale"), investigation["rationale"]),
         ],
     )
-    add_heading(doc, "2. Frame", 1)
+    add_heading(doc, f"2. {report_text('frame')}", 1)
     add_key_value_table(
         doc,
         [
-            ("Assessment", assessment["fari_id"]),
-            ("Assessment Revision", revision_label(assessment)),
-            ("Client", assessment["client_name"]),
-            ("Investigation", investigation["fari_id"]),
-            ("Claim", investigation["claim_id"]),
-            ("Claim Description", investigation["claim_description"]),
-            ("Gating Claim", "Yes" if investigation["gating"] else "No"),
-            ("Asset", asset["fari_id"] + " - " + asset["name"] if asset else "Not supplied"),
-            ("Technical Reporter", investigation["technical_reporter"]),
-            ("Report Author", assessment["report_author"]),
-            ("Method", investigation["method"]),
-            ("Environment", investigation["environment"]),
+            (report_text("assessment"), assessment["fari_id"]),
+            (report_text("assessment_revision"), revision_label(assessment)),
+            (report_text("client"), assessment["client_name"]),
+            (report_text("investigation"), investigation["fari_id"]),
+            (report_text("claim"), investigation["claim_id"]),
+            (report_text("claim_description"), investigation["claim_description"]),
+            (report_text("gating_claim"), report_text("yes") if investigation["gating"] else report_text("no")),
+            (report_text("asset"), asset["fari_id"] + " - " + asset["name"] if asset else report_text("not_supplied")),
+            (report_text("technical_reporter"), investigation["technical_reporter"]),
+            (report_text("report_author"), assessment["report_author"]),
+            (report_text("method"), investigation["method"]),
+            (report_text("environment"), investigation["environment"]),
         ],
     )
-    add_heading(doc, "3. Acquire", 1)
-    add_list_section(doc, "Evidence-Backed Facts", investigation["facts"])
-    add_list_section(doc, "Evidence-Producer Assertions", investigation["assertions"])
-    add_list_section(doc, "Report-Author Inferences", investigation["inferences"])
-    add_list_section(doc, "Assumptions", investigation["assumptions"])
-    add_list_section(doc, "Contradictions", investigation["contradictions"])
-    add_list_section(doc, "Missing Information", investigation["gaps"])
-    add_heading(doc, "Evidence Sufficiency", 2)
+    add_heading(doc, f"3. {report_text('acquire')}", 1)
+    add_list_section(doc, report_text("evidence_backed_facts"), investigation["facts"])
+    add_list_section(doc, report_text("evidence_producer_assertions"), investigation["assertions"])
+    add_list_section(doc, report_text("report_author_inferences"), investigation["inferences"])
+    add_list_section(doc, report_text("assumptions"), investigation["assumptions"])
+    add_list_section(doc, report_text("contradictions"), investigation["contradictions"])
+    add_list_section(doc, report_text("missing_information"), investigation["gaps"])
+    add_heading(doc, report_text("evidence_sufficiency"), 2)
     add_key_value_table(
         doc,
         [
-            ("Technical Condition", human(investigation["technical_sufficiency"])),
-            ("Reachability", human(investigation["reachability_sufficiency"])),
-            ("Mission Consequence", human(investigation["mission_sufficiency"])),
+            (report_text("technical_condition"), human(investigation["technical_sufficiency"])),
+            (report_text("reachability"), human(investigation["reachability_sufficiency"])),
+            (report_text("mission_consequence"), human(investigation["mission_sufficiency"])),
         ],
     )
-    add_heading(doc, "Evidence Index", 2)
+    add_heading(doc, report_text("evidence_index"), 2)
     if evidence:
         add_key_value_table(
             doc,
@@ -348,13 +297,13 @@ def build_investigation_report(assessment, investigation, asset, evidence, findi
             ],
         )
     else:
-        add_callout(doc, "No evidence files have been uploaded.")
-    add_heading(doc, "4. Relate", 1)
+        add_callout(doc, report_text("no_evidence_files"))
+    add_heading(doc, f"4. {report_text('relate')}", 1)
     add_findings(doc, findings)
-    add_heading(doc, "5. Inform", 1)
-    add_list_section(doc, "Recommendations", investigation["recommendations"])
-    add_list_section(doc, "Acceptance Criteria", investigation["acceptance_criteria"])
-    add_heading(doc, "Closing Result", 1)
+    add_heading(doc, f"5. {report_text('inform')}", 1)
+    add_list_section(doc, report_text("recommendations"), investigation["recommendations"])
+    add_list_section(doc, report_text("acceptance_criteria"), investigation["acceptance_criteria"])
+    add_heading(doc, report_text("closing_result"), 1)
     add_result_banner(
         doc,
         investigation["conclusion"],
@@ -400,7 +349,8 @@ def consolidated_action(conclusion: str) -> str:
     }[conclusion]
 
 
-def build_consolidated_report(assessment, assets, investigations):
+def build_consolidated_report(assessment, assets, investigations, language="en"):
+    _REPORT_LANGUAGE.set(language)
     document_state = "FINAL" if assessment["status"] == "closed" else "DRAFT"
     conclusion = overall_conclusion(investigations)
     confidence = overall_confidence(investigations)
@@ -410,48 +360,49 @@ def build_consolidated_report(assessment, assets, investigations):
     configure_running_furniture(doc.sections[0])
     add_cover(
         doc,
-        "Consolidated Assessment Report",
+        report_text("consolidated_report"),
         assessment["title"],
         assessment["client_name"],
         assessment["report_author"],
-        document_state,
+        report_text("final") if document_state == "FINAL" else report_text("draft"),
+        is_draft=document_state == "DRAFT",
     )
     if document_state == "DRAFT":
         add_callout(
             doc,
-            "DRAFT REPORT: This document may change until the assessment is closed.",
+            report_text("draft_assessment"),
         )
     add_result_banner(doc, conclusion, confidence, action)
-    add_heading(doc, "1. Overall FARI Result Card", 1)
+    add_heading(doc, f"1. {report_text('overall_fari_result_card')}", 1)
     add_key_value_table(
         doc,
         [
-            ("Overall Conclusion", human(conclusion)),
-            ("Confidence", human(confidence)),
-            ("Required Action", human(action)),
-            ("Generated With", FARI_GENERATED_WITH),
-            ("Assessment Revision", revision_label(assessment)),
-            ("Assessment", assessment["fari_id"]),
-            ("Client", assessment["client_name"]),
-            ("Scope Boundary", assessment["scope"]),
+            (report_text("overall_conclusion"), human(conclusion)),
+            (report_text("confidence"), human(confidence)),
+            (report_text("required_action"), human(action)),
+            (report_text("generated_with_field"), FARI_GENERATED_WITH),
+            (report_text("assessment_revision"), revision_label(assessment)),
+            (report_text("assessment"), assessment["fari_id"]),
+            (report_text("client"), assessment["client_name"]),
+            (report_text("scope_boundary"), assessment["scope"]),
             (
-                "Rationale",
-                "Derived from declared gating claims without averaging results.",
+                report_text("rationale"),
+                report_text("derived_from_gating"),
             ),
         ],
     )
-    add_heading(doc, "2. Frame and Client Context", 1)
+    add_heading(doc, f"2. {report_text('frame_client_context')}", 1)
     add_key_value_table(
         doc,
         [
-            ("Mission Context", assessment["mission_context"]),
-            ("Scope", assessment["scope"]),
-            ("Authorization", assessment["authorization"]),
-            ("Exclusions", assessment["exclusions"]),
-            ("Report Author", assessment["report_author"]),
+            (report_text("mission_context"), assessment["mission_context"]),
+            (report_text("scope"), assessment["scope"]),
+            (report_text("authorization"), assessment["authorization"]),
+            (report_text("exclusions"), assessment["exclusions"]),
+            (report_text("report_author"), assessment["report_author"]),
         ],
     )
-    add_heading(doc, "3. Asset Register", 1)
+    add_heading(doc, f"3. {report_text('asset_register')}", 1)
     add_key_value_table(
         doc,
         [
@@ -462,9 +413,9 @@ def build_consolidated_report(assessment, assets, investigations):
             )
             for asset in assets
         ]
-        or [("Assets", "No assets registered")],
+        or [(report_text("asset"), report_text("no_assets"))],
     )
-    add_heading(doc, "4. Investigation Results", 1)
+    add_heading(doc, f"4. {report_text('investigation_results')}", 1)
     for investigation in investigations:
         add_heading(
             doc,
@@ -480,17 +431,17 @@ def build_consolidated_report(assessment, assets, investigations):
         add_key_value_table(
             doc,
             [
-                ("Claim", f"{investigation['claim_id']}: {investigation['claim_description']}"),
-                ("Gating", "Yes" if investigation["gating"] else "No"),
-                ("Priority", human(investigation["priority"])),
-                ("Scenario Disposition", human(investigation["scenario_state"])),
-                ("Technical Sufficiency", human(investigation["technical_sufficiency"])),
-                ("Reachability Sufficiency", human(investigation["reachability_sufficiency"])),
-                ("Mission Sufficiency", human(investigation["mission_sufficiency"])),
-                ("Rationale", investigation["rationale"]),
+                (report_text("claim"), f"{investigation['claim_id']}: {investigation['claim_description']}"),
+                (report_text("gating"), report_text("yes") if investigation["gating"] else report_text("no")),
+                (report_text("priority"), human(investigation["priority"])),
+                (report_text("scenario_disposition"), human(investigation["scenario_state"])),
+                (report_text("technical_sufficiency"), human(investigation["technical_sufficiency"])),
+                (report_text("reachability_sufficiency"), human(investigation["reachability_sufficiency"])),
+                (report_text("mission_sufficiency"), human(investigation["mission_sufficiency"])),
+                (report_text("rationale"), investigation["rationale"]),
             ],
         )
-        add_heading(doc, "Evidence Index", 3)
+        add_heading(doc, report_text("evidence_index"), 3)
         if investigation.evidence:
             add_key_value_table(
                 doc,
@@ -503,9 +454,9 @@ def build_consolidated_report(assessment, assets, investigations):
                 ],
             )
         else:
-            add_callout(doc, "No evidence files have been uploaded.")
+            add_callout(doc, report_text("no_evidence_files"))
         add_findings(doc, investigation.findings)
-    add_heading(doc, "5. Totalized Results", 1)
+    add_heading(doc, f"5. {report_text('totalized_results')}", 1)
     counts = Counter(row["conclusion"] for row in investigations)
     add_key_value_table(
         doc,
@@ -515,7 +466,7 @@ def build_consolidated_report(assessment, assets, investigations):
         ],
     )
     scenario_counts = Counter(row["scenario_state"] for row in investigations)
-    add_heading(doc, "Scenario Dispositions", 2)
+    add_heading(doc, report_text("scenario_dispositions"), 2)
     add_key_value_table(
         doc,
         [
@@ -523,12 +474,12 @@ def build_consolidated_report(assessment, assets, investigations):
             for key in ("demonstrated", "plausible", "not_demonstrated", "not_evaluated")
         ],
     )
-    add_heading(doc, "6. Required Actions", 1)
+    add_heading(doc, f"6. {report_text('required_actions')}", 1)
     for investigation in investigations:
         add_heading(doc, investigation["fari_id"], 2)
-        add_list_section(doc, "Recommendations", investigation["recommendations"], 3)
-        add_list_section(doc, "Acceptance Criteria", investigation["acceptance_criteria"], 3)
-    add_heading(doc, "Closing Overall Result", 1)
+        add_list_section(doc, report_text("recommendations"), investigation["recommendations"], 3)
+        add_list_section(doc, report_text("acceptance_criteria"), investigation["acceptance_criteria"], 3)
+    add_heading(doc, report_text("closing_overall_result"), 1)
     add_result_banner(doc, conclusion, confidence, action)
     doc.core_properties.author = assessment["report_author"]
     doc.core_properties.title = f"{assessment['fari_id']} Consolidated Assessment"
@@ -539,8 +490,9 @@ def build_consolidated_report(assessment, assets, investigations):
     return output
 
 
-def build_investigation_pdf(assessment, investigation, asset, evidence, findings):
+def build_investigation_pdf(assessment, investigation, asset, evidence, findings, language="en"):
     """Build the immutable final investigation report as a PDF."""
+    _REPORT_LANGUAGE.set(language)
     output = BytesIO()
     styles = getSampleStyleSheet()
     styles.add(
@@ -586,62 +538,65 @@ def build_investigation_pdf(assessment, investigation, asset, evidence, findings
     )
     story = [
         Spacer(1, 1.1 * inch),
-        Paragraph("FARI<br/>FINAL INVESTIGATION<br/>REPORT", styles["FariHeading"]),
+        Paragraph(
+            f"FARI<br/>{escape(report_text('final_investigation'))}<br/>{escape(report_text('report_label'))}",
+            styles["FariHeading"],
+        ),
         Paragraph(escape(investigation["title"]), styles["FariTitle"]),
         Paragraph(
-            f"Client: {escape(assessment['client_name'])}<br/>"
-            f"Report Author: {escape(assessment['report_author'])}<br/>"
-            f"Closed report generated: {date.today().isoformat()}<br/>"
-            f"Generated with {escape(FARI_GENERATED_WITH)}",
+            f"{escape(report_text('client'))}: {escape(assessment['client_name'])}<br/>"
+            f"{escape(report_text('report_author'))}: {escape(assessment['report_author'])}<br/>"
+            f"{escape(report_text('closed_report_generated'))}: {date.today().isoformat()}<br/>"
+            f"{escape(report_text('generated_with'))} {escape(FARI_GENERATED_WITH)}",
             styles["BodyText"],
         ),
         Spacer(1, 0.3 * inch),
         _pdf_result_banner(investigation, styles),
         PageBreak(),
-        Paragraph("FARI Result Card", styles["FariHeading"]),
+        Paragraph(report_text("fari_result_card"), styles["FariHeading"]),
         _pdf_key_value(
             [
-                ("Conclusion", human(investigation["conclusion"])),
-                ("Scenario Disposition", human(investigation["scenario_state"])),
-                ("Confidence", human(investigation["confidence"])),
-                ("Required Action", human(investigation["required_action"])),
-                ("Generated With", FARI_GENERATED_WITH),
-                ("Assessment Revision", revision_label(assessment)),
-                ("Priority", human(investigation["priority"])),
-                ("Scope Boundary", investigation["scope_boundary"]),
-                ("Rationale", investigation["rationale"]),
+                (report_text("overall_conclusion"), human(investigation["conclusion"])),
+                (report_text("scenario_disposition"), human(investigation["scenario_state"])),
+                (report_text("confidence"), human(investigation["confidence"])),
+                (report_text("required_action"), human(investigation["required_action"])),
+                (report_text("generated_with_field"), FARI_GENERATED_WITH),
+                (report_text("assessment_revision"), revision_label(assessment)),
+                (report_text("priority"), human(investigation["priority"])),
+                (report_text("scope_boundary"), investigation["scope_boundary"]),
+                (report_text("rationale"), investigation["rationale"]),
             ],
             styles,
         ),
-        Paragraph("Frame", styles["FariHeading"]),
+        Paragraph(report_text("frame"), styles["FariHeading"]),
         _pdf_key_value(
             [
-                ("Assessment", assessment["fari_id"]),
-                ("Assessment Revision", revision_label(assessment)),
-                ("Investigation", investigation["fari_id"]),
-                ("Claim", investigation["claim_id"]),
-                ("Claim Description", investigation["claim_description"]),
-                ("Asset", f"{asset['fari_id']} - {asset['name']}" if asset else "Not supplied"),
-                ("Technical Reporter", investigation["technical_reporter"]),
-                ("Method", investigation["method"]),
-                ("Environment", investigation["environment"]),
+                (report_text("assessment"), assessment["fari_id"]),
+                (report_text("assessment_revision"), revision_label(assessment)),
+                (report_text("investigation"), investigation["fari_id"]),
+                (report_text("claim"), investigation["claim_id"]),
+                (report_text("claim_description"), investigation["claim_description"]),
+                (report_text("asset"), f"{asset['fari_id']} - {asset['name']}" if asset else report_text("not_supplied")),
+                (report_text("technical_reporter"), investigation["technical_reporter"]),
+                (report_text("method"), investigation["method"]),
+                (report_text("environment"), investigation["environment"]),
             ],
             styles,
         ),
-        Paragraph("Acquire", styles["FariHeading"]),
+        Paragraph(report_text("acquire"), styles["FariHeading"]),
     ]
     for title, text in [
-        ("Evidence-Backed Facts", investigation["facts"]),
-        ("Evidence-Producer Assertions", investigation["assertions"]),
-        ("Report-Author Inferences", investigation["inferences"]),
-        ("Assumptions", investigation["assumptions"]),
-        ("Contradictions", investigation["contradictions"]),
-        ("Missing Information", investigation["gaps"]),
+        (report_text("evidence_backed_facts"), investigation["facts"]),
+        (report_text("evidence_producer_assertions"), investigation["assertions"]),
+        (report_text("report_author_inferences"), investigation["inferences"]),
+        (report_text("assumptions"), investigation["assumptions"]),
+        (report_text("contradictions"), investigation["contradictions"]),
+        (report_text("missing_information"), investigation["gaps"]),
     ]:
         story.extend(_pdf_list(title, text, styles))
     story.extend(
         [
-            Paragraph("Evidence Index", styles["FariHeading"]),
+            Paragraph(report_text("evidence_index"), styles["FariHeading"]),
             _pdf_key_value(
                 [
                     (
@@ -650,10 +605,10 @@ def build_investigation_pdf(assessment, investigation, asset, evidence, findings
                     )
                     for item in evidence
                 ]
-                or [("Evidence", "No evidence files uploaded.")],
+                or [(report_text("evidence"), report_text("no_evidence_uploaded"))],
                 styles,
             ),
-            Paragraph("Relate: Findings and SPARTA", styles["FariHeading"]),
+            Paragraph(f"{report_text('relate')}: {report_text('normalized_findings')}", styles["FariHeading"]),
         ]
     )
     for finding in findings:
@@ -661,40 +616,21 @@ def build_investigation_pdf(assessment, investigation, asset, evidence, findings
         story.append(
             _pdf_key_value(
                 [
-                    ("State", human(finding["state"])),
-                    ("Condition", finding["condition_text"]),
-                    ("Observed Effect", finding["observed_effect"]),
-                    ("Credible Impact", finding["credible_impact"]),
-                    ("SPARTA", f"{finding['sparta_id']} {finding['sparta_name']}".strip() or "No mapping supplied"),
-                    ("Mapping State", human(finding["mapping_state"])),
-                    ("Mapping Rationale", finding["mapping_rationale"]),
+                    (report_text("state"), human(finding["state"])),
+                    (report_text("condition"), finding["condition_text"]),
+                    (report_text("observed_effect"), finding["observed_effect"]),
+                    (report_text("credible_impact"), finding["credible_impact"]),
+                    (report_text("mapping_state"), human(finding["mapping_state"])),
+                    (report_text("mapping_rationale"), finding["mapping_rationale"]),
                 ],
                 styles,
             )
         )
-        if finding["include_sparta_countermeasures"] and finding["sparta_id"]:
-            items = countermeasures_for(finding["sparta_id"])
-            story.append(
-                Paragraph(
-                    f"SPARTA-Recommended Countermeasures for {escape(finding['sparta_id'])}",
-                    styles["Heading3"],
-                )
-            )
-            story.append(
-                _pdf_key_value(
-                    [
-                        (f"{item['id']}: {item['name']}", item["description"])
-                        for item in items
-                    ]
-                    or [("SPARTA", "No linked countermeasures were found in the local catalog.")],
-                    styles,
-                )
-            )
     story.extend(
         [
-            Paragraph("Inform", styles["FariHeading"]),
-            *_pdf_list("Recommendations", investigation["recommendations"], styles),
-            *_pdf_list("Acceptance Criteria", investigation["acceptance_criteria"], styles),
+            Paragraph(report_text("inform"), styles["FariHeading"]),
+            *_pdf_list(report_text("recommendations"), investigation["recommendations"], styles),
+            *_pdf_list(report_text("acceptance_criteria"), investigation["acceptance_criteria"], styles),
             Spacer(1, 0.2 * inch),
             _pdf_result_banner(investigation, styles),
         ]
@@ -704,8 +640,9 @@ def build_investigation_pdf(assessment, investigation, asset, evidence, findings
     return output
 
 
-def build_consolidated_pdf(assessment, assets, investigations):
+def build_consolidated_pdf(assessment, assets, investigations, language="en"):
     """Build the immutable final assessment-level report as a PDF."""
+    _REPORT_LANGUAGE.set(language)
     output = BytesIO()
     styles = _pdf_styles()
     conclusion = overall_conclusion(investigations)
@@ -727,44 +664,47 @@ def build_consolidated_pdf(assessment, assets, investigations):
         "required_action": action,
     }
     story = [
-        Paragraph("FARI<br/>FINAL CONSOLIDATED<br/>ASSESSMENT", styles["FariHeading"]),
+        Paragraph(
+            f"FARI<br/>{escape(report_text('final_consolidated'))}<br/>{escape(report_text('assessment_label'))}",
+            styles["FariHeading"],
+        ),
         Spacer(1, 1.1 * inch),
         Paragraph(escape(assessment["title"]), styles["FariTitle"]),
         Paragraph(
-            f"Client: {escape(assessment['client_name'])}<br/>"
-            f"Report Author: {escape(assessment['report_author'])}<br/>"
-            f"Final report generated: {date.today().isoformat()}<br/>"
-            f"Generated with {escape(FARI_GENERATED_WITH)}",
+            f"{escape(report_text('client'))}: {escape(assessment['client_name'])}<br/>"
+            f"{escape(report_text('report_author'))}: {escape(assessment['report_author'])}<br/>"
+            f"{escape(report_text('final_report_generated'))}: {date.today().isoformat()}<br/>"
+            f"{escape(report_text('generated_with'))} {escape(FARI_GENERATED_WITH)}",
             styles["BodyText"],
         ),
         Spacer(1, 0.3 * inch),
         _pdf_result_banner(overall, styles),
         PageBreak(),
-        Paragraph("Overall FARI Result Card", styles["FariHeading"]),
+        Paragraph(report_text("overall_fari_result_card"), styles["FariHeading"]),
         _pdf_key_value(
             [
-                ("Overall Conclusion", human(conclusion)),
-                ("Confidence", human(confidence)),
-                ("Required Action", human(action)),
-                ("Generated With", FARI_GENERATED_WITH),
-                ("Assessment Revision", revision_label(assessment)),
-                ("Assessment", assessment["fari_id"]),
-                ("Scope Boundary", assessment["scope"]),
-                ("Derivation", "Derived from declared gating claims without averaging."),
+                (report_text("overall_conclusion"), human(conclusion)),
+                (report_text("confidence"), human(confidence)),
+                (report_text("required_action"), human(action)),
+                (report_text("generated_with_field"), FARI_GENERATED_WITH),
+                (report_text("assessment_revision"), revision_label(assessment)),
+                (report_text("assessment"), assessment["fari_id"]),
+                (report_text("scope_boundary"), assessment["scope"]),
+                (report_text("rationale"), report_text("derived_from_gating")),
             ],
             styles,
         ),
-        Paragraph("Frame and Client Context", styles["FariHeading"]),
+        Paragraph(report_text("frame_client_context"), styles["FariHeading"]),
         _pdf_key_value(
             [
-                ("Mission Context", assessment["mission_context"]),
-                ("Scope", assessment["scope"]),
-                ("Authorization", assessment["authorization"]),
-                ("Exclusions", assessment["exclusions"]),
+                (report_text("mission_context"), assessment["mission_context"]),
+                (report_text("scope"), assessment["scope"]),
+                (report_text("authorization"), assessment["authorization"]),
+                (report_text("exclusions"), assessment["exclusions"]),
             ],
             styles,
         ),
-        Paragraph("Asset Register", styles["FariHeading"]),
+        Paragraph(report_text("asset_register"), styles["FariHeading"]),
         _pdf_key_value(
             [
                 (
@@ -774,11 +714,11 @@ def build_consolidated_pdf(assessment, assets, investigations):
                 )
                 for asset in assets
             ]
-            or [("Assets", "No assets registered.")],
+            or [(report_text("asset"), report_text("no_assets"))],
             styles,
         ),
         PageBreak(),
-        Paragraph("Investigation Results", styles["FariHeading"]),
+        Paragraph(report_text("investigation_results"), styles["FariHeading"]),
     ]
     for investigation in investigations:
         story.extend(
@@ -790,18 +730,18 @@ def build_consolidated_pdf(assessment, assets, investigations):
                 _pdf_result_banner(investigation, styles),
                 _pdf_key_value(
                     [
-                        ("Claim", f"{investigation['claim_id']}: {investigation['claim_description']}"),
-                        ("Gating", "Yes" if investigation["gating"] else "No"),
-                        ("Scenario Disposition", human(investigation["scenario_state"])),
-                        ("Technical Sufficiency", human(investigation["technical_sufficiency"])),
-                        ("Reachability Sufficiency", human(investigation["reachability_sufficiency"])),
-                        ("Mission Sufficiency", human(investigation["mission_sufficiency"])),
-                        ("Scope Boundary", investigation["scope_boundary"]),
-                        ("Rationale", investigation["rationale"]),
+                        (report_text("claim"), f"{investigation['claim_id']}: {investigation['claim_description']}"),
+                        (report_text("gating"), report_text("yes") if investigation["gating"] else report_text("no")),
+                        (report_text("scenario_disposition"), human(investigation["scenario_state"])),
+                        (report_text("technical_sufficiency"), human(investigation["technical_sufficiency"])),
+                        (report_text("reachability_sufficiency"), human(investigation["reachability_sufficiency"])),
+                        (report_text("mission_sufficiency"), human(investigation["mission_sufficiency"])),
+                        (report_text("scope_boundary"), investigation["scope_boundary"]),
+                        (report_text("rationale"), investigation["rationale"]),
                     ],
                     styles,
                 ),
-                Paragraph("Evidence Index", styles["Heading3"]),
+                Paragraph(report_text("evidence_index"), styles["Heading3"]),
                 _pdf_key_value(
                     [
                         (
@@ -810,49 +750,33 @@ def build_consolidated_pdf(assessment, assets, investigations):
                         )
                         for item in investigation.evidence
                     ]
-                    or [("Evidence", "No evidence files uploaded.")],
+                    or [(report_text("evidence"), report_text("no_evidence_uploaded"))],
                     styles,
                 ),
-                Paragraph("Findings and SPARTA", styles["Heading3"]),
+                Paragraph(report_text("normalized_findings"), styles["Heading3"]),
             ]
         )
         for finding in investigation.findings:
             story.append(
                 _pdf_key_value(
                     [
-                        ("Finding", f"{finding['fari_id']}: {finding['title']}"),
-                        ("State", human(finding["state"])),
-                        ("Condition", finding["condition_text"]),
-                        ("Observed Effect", finding["observed_effect"]),
-                        ("Credible Impact", finding["credible_impact"]),
-                        ("SPARTA", f"{finding['sparta_id']} {finding['sparta_name']}".strip() or "No mapping supplied"),
+                        (report_text("finding_title"), f"{finding['fari_id']}: {finding['title']}"),
+                        (report_text("state"), human(finding["state"])),
+                        (report_text("condition"), finding["condition_text"]),
+                        (report_text("observed_effect"), finding["observed_effect"]),
+                        (report_text("credible_impact"), finding["credible_impact"]),
+                        (report_text("mapping_state"), human(finding["mapping_state"])),
+                        (report_text("mapping_rationale"), finding["mapping_rationale"]),
                     ],
                     styles,
                 )
             )
-            if finding["include_sparta_countermeasures"] and finding["sparta_id"]:
-                story.append(
-                    Paragraph(
-                        f"SPARTA-Recommended Countermeasures for {escape(finding['sparta_id'])}",
-                        styles["Heading3"],
-                    )
-                )
-                story.append(
-                    _pdf_key_value(
-                        [
-                            (f"{item['id']}: {item['name']}", item["description"])
-                            for item in countermeasures_for(finding["sparta_id"])
-                        ]
-                        or [("SPARTA", "No linked countermeasures were found in the local catalog.")],
-                        styles,
-                    )
-                )
         if not investigation.findings:
-            story.append(Paragraph("No normalized findings.", styles["FariSmall"]))
+            story.append(Paragraph(report_text("no_findings"), styles["FariSmall"]))
         story.extend(
             [
-                *_pdf_list("Recommendations", investigation["recommendations"], styles),
-                *_pdf_list("Acceptance Criteria", investigation["acceptance_criteria"], styles),
+                *_pdf_list(report_text("recommendations"), investigation["recommendations"], styles),
+                *_pdf_list(report_text("acceptance_criteria"), investigation["acceptance_criteria"], styles),
                 Spacer(1, 0.15 * inch),
             ]
         )
@@ -862,7 +786,7 @@ def build_consolidated_pdf(assessment, assets, investigations):
     story.extend(
         [
             PageBreak(),
-            Paragraph("Totalized Results", styles["FariHeading"]),
+            Paragraph(report_text("totalized_results"), styles["FariHeading"]),
             _pdf_key_value(
                 [
                     (RESULT_STYLE[key][0], conclusion_counts.get(key, 0))
@@ -870,7 +794,7 @@ def build_consolidated_pdf(assessment, assets, investigations):
                 ],
                 styles,
             ),
-            Paragraph("Scenario Dispositions", styles["FariHeading"]),
+            Paragraph(report_text("scenario_dispositions"), styles["FariHeading"]),
             _pdf_key_value(
                 [
                     (human(key), scenario_counts.get(key, 0))
@@ -878,7 +802,7 @@ def build_consolidated_pdf(assessment, assets, investigations):
                 ],
                 styles,
             ),
-            Paragraph("Closing Overall Result", styles["FariHeading"]),
+            Paragraph(report_text("closing_overall_result"), styles["FariHeading"]),
             _pdf_result_banner(overall, styles),
         ]
     )
@@ -924,16 +848,17 @@ def _pdf_styles():
 
 
 def _pdf_result_banner(investigation, styles):
-    label, fill, _text_color = RESULT_STYLE.get(
+    _label, fill, _text_color = RESULT_STYLE.get(
         investigation["conclusion"], RESULT_STYLE["not_assessed"]
     )
+    label = report_text(f"result_{investigation['conclusion']}")
     table = Table(
         [
             [Paragraph(f"<b>{label}</b>", styles["Title"])],
             [
                 Paragraph(
-                    f"Confidence: {human(investigation['confidence'])} | "
-                    f"Required Action: {human(investigation['required_action'])}",
+                    f"{report_text('confidence')}: {human(investigation['confidence'])} | "
+                    f"{report_text('required_action')}: {human(investigation['required_action'])}",
                     styles["BodyText"],
                 )
             ],
@@ -958,15 +883,15 @@ def _pdf_result_banner(investigation, styles):
 def _pdf_key_value(rows, styles):
     data = [
         [
-            Paragraph("<b>Field</b>", styles["BodyText"]),
-            Paragraph("<b>Result</b>", styles["BodyText"]),
+            Paragraph(f"<b>{escape(report_text('field'))}</b>", styles["BodyText"]),
+            Paragraph(f"<b>{escape(report_text('result'))}</b>", styles["BodyText"]),
         ]
     ]
     for label, value in rows:
         data.append(
             [
                 Paragraph(f"<b>{escape(str(label))}</b>", styles["BodyText"]),
-                Paragraph(escape(str(value or "Not supplied")).replace("\n", "<br/>"), styles["BodyText"]),
+                Paragraph(escape(str(value or report_text("not_supplied"))).replace("\n", "<br/>"), styles["BodyText"]),
             ]
         )
     table = Table(data, colWidths=[1.6 * inch, 5.5 * inch], repeatRows=1)
@@ -988,7 +913,7 @@ def _pdf_list(title, text, styles):
     items = [item.strip() for item in (text or "").splitlines() if item.strip()]
     result = [Paragraph(escape(title), styles["Heading3"])]
     if not items:
-        result.append(Paragraph("Not supplied.", styles["FariSmall"]))
+        result.append(Paragraph(f"{escape(report_text('not_supplied'))}.", styles["FariSmall"]))
     else:
         result.extend(
             Paragraph(f"• {escape(item)}", styles["BodyText"]) for item in items
@@ -1003,7 +928,7 @@ def _pdf_footer(canvas, doc):
     canvas.drawString(
         0.65 * inch,
         0.38 * inch,
-        f"Framework for Aerospace Research and Investigation FINAL REPORT | {FARI_GENERATED_WITH}",
+        f"{report_text('framework_footer')} | {FARI_GENERATED_WITH}",
     )
-    canvas.drawRightString(7.85 * inch, 0.38 * inch, f"Page {doc.page}")
+    canvas.drawRightString(7.85 * inch, 0.38 * inch, f"{report_text('page')} {doc.page}")
     canvas.restoreState()

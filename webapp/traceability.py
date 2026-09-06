@@ -41,8 +41,15 @@ INVESTIGATION_FIELDS = [
     "rationale",
     "status",
 ]
-ATTACK_FLOW_FIELDS = ["name", "description", "filename"]
-SBOM_DOCUMENT_FIELDS = ["filename", "file_format", "component_count", "asset_fari_id", "sha256"]
+ASSET_SOURCE_FIELDS = [
+    "filename",
+    "file_format",
+    "component_count",
+    "asset_fari_id",
+    "sha256",
+    "byte_size",
+    "mime_type",
+]
 INVENTORY_FIELDS = [
     "name",
     "ecosystem",
@@ -55,30 +62,6 @@ INVENTORY_FIELDS = [
     "event_count",
     "latest_event_type",
 ]
-COMPLIANCE_PROFILE_FIELDS = [
-    "profile_key",
-    "title",
-    "framework_name",
-    "framework_version",
-    "scenario",
-    "posture",
-    "summary",
-    "notes",
-    "check_count",
-]
-COMPLIANCE_CHECK_FIELDS = [
-    "profile_fari_id",
-    "profile_key",
-    "control_id",
-    "family",
-    "title",
-    "spd5_alignment",
-    "principle_reference",
-    "status",
-    "evidence_refs",
-    "notes",
-]
-
 HUMAN_VALUE_FIELDS = {
     "status",
     "maturity",
@@ -97,9 +80,6 @@ HUMAN_VALUE_FIELDS = {
     "latest_event_type",
     "file_format",
     "ecosystem",
-    "scenario",
-    "posture",
-    "spd5_alignment",
 }
 
 
@@ -135,23 +115,23 @@ def build_assessment_snapshot(assessment) -> dict:
             }
             for investigation in assessment.investigations
         ],
-        "attack_flows": [
-            {
-                "fari_id": flow.fari_id,
-                **{field: getattr(flow, field) for field in ATTACK_FLOW_FIELDS},
-            }
-            for flow in assessment.attack_flows
-        ],
-        "sbom_documents": [
+        "asset_sources": [
             {
                 "fari_id": document.fari_id,
                 "asset_fari_id": document.asset.fari_id if document.asset else "",
                 **{
                     field: getattr(document, field)
-                    for field in ("filename", "file_format", "component_count", "sha256")
+                    for field in (
+                        "filename",
+                        "file_format",
+                        "component_count",
+                        "sha256",
+                        "byte_size",
+                        "mime_type",
+                    )
                 },
             }
-            for document in assessment.sbom_documents
+            for document in assessment.asset_sources
         ],
         "inventory_components": [
             {
@@ -169,38 +149,6 @@ def build_assessment_snapshot(assessment) -> dict:
                 "latest_event_type": component.events[-1].event_type if component.events else "",
             }
             for component in assessment.inventory_components
-        ],
-        "compliance_profiles": [
-            {
-                "fari_id": profile.fari_id,
-                "profile_key": profile.profile_key,
-                "title": profile.title,
-                "framework_name": profile.framework_name,
-                "framework_version": profile.framework_version,
-                "scenario": profile.scenario,
-                "posture": profile.posture,
-                "summary": profile.summary,
-                "notes": profile.notes,
-                "check_count": len(profile.checks),
-            }
-            for profile in assessment.compliance_profiles
-        ],
-        "compliance_checks": [
-            {
-                "fari_id": check.fari_id,
-                "profile_fari_id": profile.fari_id,
-                "profile_key": profile.profile_key,
-                "control_id": check.control_id,
-                "family": check.family,
-                "title": check.title,
-                "spd5_alignment": check.spd5_alignment,
-                "principle_reference": check.principle_reference,
-                "status": check.status,
-                "evidence_refs": check.evidence_refs,
-                "notes": check.notes,
-            }
-            for profile in assessment.compliance_profiles
-            for check in profile.checks
         ],
     }
 
@@ -264,18 +212,10 @@ def diff_snapshots(base_snapshot: dict, target_snapshot: dict) -> dict:
     )
     groups.append(
         _compare_collection_group(
-            "Attack flows",
-            base_snapshot.get("attack_flows", []),
-            target_snapshot.get("attack_flows", []),
-            ATTACK_FLOW_FIELDS,
-        )
-    )
-    groups.append(
-        _compare_collection_group(
-            "SBOM documents",
-            base_snapshot.get("sbom_documents", []),
-            target_snapshot.get("sbom_documents", []),
-            SBOM_DOCUMENT_FIELDS,
+            "Asset sources",
+            base_snapshot.get("asset_sources", []),
+            target_snapshot.get("asset_sources", []),
+            ASSET_SOURCE_FIELDS,
         )
     )
     groups.append(
@@ -284,22 +224,6 @@ def diff_snapshots(base_snapshot: dict, target_snapshot: dict) -> dict:
             base_snapshot.get("inventory_components", []),
             target_snapshot.get("inventory_components", []),
             INVENTORY_FIELDS + ["notes"],
-        )
-    )
-    groups.append(
-        _compare_collection_group(
-            "Compliance profiles",
-            base_snapshot.get("compliance_profiles", []),
-            target_snapshot.get("compliance_profiles", []),
-            COMPLIANCE_PROFILE_FIELDS,
-        )
-    )
-    groups.append(
-        _compare_collection_group(
-            "Compliance checks",
-            base_snapshot.get("compliance_checks", []),
-            target_snapshot.get("compliance_checks", []),
-            COMPLIANCE_CHECK_FIELDS,
         )
     )
     groups = [group for group in groups if group["changes"]]

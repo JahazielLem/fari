@@ -1,264 +1,75 @@
 {% extends "base.html" %}
-{% from "_macros.html" import conclusion_badge, lifecycle_badge, check_list, scenario_badge, inventory_status_badge, phase_timeline, compliance_posture_badge %}
+{% from "_macros.html" import conclusion_badge, lifecycle_badge, check_list, scenario_badge, inventory_status_badge, phase_timeline %}
 {% block title %}{{ assessment.fari_id }} | FARI{% endblock %}
 {% block content %}
-<section class="grid gap-7 rounded-sm bg-latte-crust p-7 shadow-soft dark:bg-mocha-crust lg:grid-cols-[1fr_320px] lg:items-center sm:p-9">
-  <div>
-    <div class="flex flex-wrap gap-2"><span class="font-mono text-xs font-bold text-latte-sky dark:text-mocha-sky">{{ assessment.fari_id }}</span>{{ lifecycle_badge(assessment.status) }}</div>
-    <p class="mt-5 text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">{{ assessment.client_name }}</p>
-    <h1 class="mt-2 text-4xl font-black tracking-tight sm:text-5xl">{{ assessment.title }}</h1>
-    <p class="mt-4 max-w-3xl text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.scope or 'Scope has not been supplied.' }}</p>
-    <div class="mt-4 flex flex-wrap gap-2">
-      <span class="rounded-lg bg-latte-surface0 px-3 py-2 text-xs font-bold dark:bg-mocha-surface0">Revision {{ revision_label }}</span>
-      <span class="rounded-lg bg-latte-surface0 px-3 py-2 text-xs font-bold dark:bg-mocha-surface0">{{ assessment.revision_count }} captured version{{ '' if assessment.revision_count == 1 else 's' }}</span>
+<section class="fari-hero p-6 sm:p-8">
+  <div class="grid gap-7 lg:grid-cols-[1fr_320px] lg:items-center">
+    <div>
+      <div class="flex flex-wrap items-center gap-2"><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.fari_id }}</span>{{ lifecycle_badge(assessment.status) }}<span class="rounded-full bg-latte-blue/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-latte-blue dark:bg-mocha-blue/15 dark:text-mocha-blue">{{ revision_label }}</span></div>
+      <p class="mt-5 fari-eyebrow">{{ assessment.client_name }}</p>
+      <h1 class="mt-2 text-4xl font-black tracking-tight sm:text-5xl">{{ assessment.title }}</h1>
+      <p class="mt-4 max-w-3xl text-base leading-7 text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.scope or _('error.scope_missing') }}</p>
+      {% if assessment.mission_context %}<div class="mt-5 fari-workflow-note">{{ assessment.mission_context }}</div>{% endif %}
     </div>
-  </div>
-  <div class="rounded-sm p-6 text-white {% if overall == 'meets' %}bg-latte-blue{% elif overall == 'does_not_meet' %}bg-latte-red{% elif overall == 'inconclusive' %}bg-latte-yellow{% else %}bg-latte-overlay0{% endif %}">
-    <p class="text-xs font-black uppercase tracking-[.18em] opacity-80">Overall claim conclusion</p>
-    <strong class="mt-3 block text-3xl font-black">{{ overall|human }}</strong>
-    <span class="mt-2 block text-sm opacity-85">Derived from gating claims · not a severity score</span>
+    <div class="rounded-2xl p-6 text-white {% if overall == 'meets' %}bg-latte-blue{% elif overall == 'does_not_meet' %}bg-latte-red{% elif overall == 'inconclusive' %}bg-latte-yellow{% else %}bg-latte-overlay0{% endif %}">
+      <p class="text-xs font-black uppercase tracking-[.18em] opacity-80">{{ _('page.overall_claim_conclusion') }}</p>
+      <strong class="mt-3 block text-3xl font-black">{{ overall|human }}</strong>
+      <span class="mt-2 block text-sm opacity-85">{{ _('page.gating_not_severity') }}</span>
+      <div class="mt-5 flex flex-wrap gap-2"><span class="rounded-full bg-white/15 px-3 py-1 text-[11px] font-extrabold">{{ _('page.captured_versions', count=assessment.revision_count, s='' if assessment.revision_count == 1 else 's') }}</span><span class="rounded-full bg-white/15 px-3 py-1 text-[11px] font-extrabold">{{ assets|length }} {{ _('page.assets') }}</span></div>
+    </div>
   </div>
 </section>
 {{ phase_timeline(phases) }}
 
-<nav class="mt-5 flex flex-wrap justify-center gap-3">
-  {% if assessment.status != 'closed' %}<a class="rounded-sm bg-latte-blue px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust" href="{{ url_for('new_investigation', assessment_id=assessment.id) }}">New investigation</a>{% endif %}
-  <a class="rounded-sm border border-latte-surface1 bg-latte-mantle px-4 py-3 text-sm font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle" href="{{ url_for('assessment_traceability', assessment_id=assessment.id) }}">Traceability &amp; versions</a>
-  <a class="rounded-sm border border-latte-surface1 bg-latte-mantle px-4 py-3 text-sm font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle" href="{{ url_for('assessment_spd5_companion', assessment_id=assessment.id) }}">SPD-5 companion</a>
-  <a class="rounded-sm border border-latte-surface1 bg-latte-mantle px-4 py-3 text-sm font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle" href="{{ url_for('consolidated_report', assessment_id=assessment.id) }}">{{ 'Final' if assessment.status == 'closed' else 'DRAFT' }} consolidated DOCX</a>
-  {% if assessment.status == 'closed' %}<a class="rounded-sm border border-latte-green bg-latte-green/10 px-4 py-3 text-sm font-bold text-latte-green dark:border-mocha-green dark:bg-mocha-green/10 dark:text-mocha-green" href="{{ url_for('consolidated_report_pdf', assessment_id=assessment.id) }}">Final consolidated PDF</a>{% endif %}
-  <a class="rounded-sm border border-latte-surface1 bg-latte-mantle px-4 py-3 text-sm font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle" href="{{ url_for('export_assessment', assessment_id=assessment.id) }}">Export JSON</a>
-  {% if assessment.status != 'closed' %}<form method="post" action="{{ url_for('delete_assessment', assessment_id=assessment.id) }}" onsubmit="return confirm('Delete {{ assessment.fari_id }} and all of its open working data? This cannot be undone.')"><button class="rounded-sm border border-latte-red px-4 py-3 text-sm font-bold text-latte-red dark:border-mocha-red dark:text-mocha-red" type="submit">Delete assessment</button></form>{% endif %}
+<nav class="fari-actionbar mt-5 flex flex-wrap gap-2">
+  {% if assessment.status != 'closed' %}<a class="fari-primary-button" href="{{ url_for('new_investigation', assessment_id=assessment.id) }}">{{ _('page.new_investigation') }} <span class="ml-2 text-lg leading-none">+</span></a>{% endif %}
+  <a class="fari-secondary-button" href="{{ url_for('assessment_traceability', assessment_id=assessment.id) }}">{{ _('page.traceability_versions') }}</a>
+  <a class="fari-secondary-button" href="{{ url_for('consolidated_report', assessment_id=assessment.id) }}">{{ _('page.consolidated_docx', state=_('page.final') if assessment.status == 'closed' else _('page.draft')) }}</a>
+  {% if assessment.status == 'closed' %}<a class="fari-secondary-button text-latte-green dark:text-mocha-green" href="{{ url_for('consolidated_report_pdf', assessment_id=assessment.id) }}">{{ _('page.final_consolidated_pdf') }}</a>{% endif %}
+  <a class="fari-secondary-button" href="{{ url_for('export_assessment', assessment_id=assessment.id) }}">{{ _('page.export_json') }}</a>
+  {% if assessment.status != 'closed' %}<form method="post" action="{{ url_for('delete_assessment', assessment_id=assessment.id) }}" onsubmit="return confirm('{{ _('page.delete_assessment') }} {{ assessment.fari_id }}?')"><button class="fari-secondary-button text-latte-red dark:text-mocha-red" type="submit">{{ _('page.delete_assessment') }}</button></form>{% endif %}
 </nav>
 
-<section id="frame" class="mt-12 scroll-mt-24 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-  <div>
-    <div class="mb-4"><p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Frame</p><h2 class="text-2xl font-black">Asset register</h2></div>
-    {% if assets %}<div class="space-y-3">
-      {% for asset in assets %}
-      <article class="rounded-sm border border-latte-surface0 bg-latte-mantle p-5 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ asset.fari_id }}</span>
-            <h3 class="mt-2 text-lg font-black">{{ asset.name }}</h3>
-            <p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ asset.description or 'No description supplied.' }}</p>
-          </div>
-          {% if assessment.status != 'closed' %}
-          <form method="post" action="{{ url_for('delete_asset', asset_id=asset.id) }}" onsubmit="return confirm('Delete {{ asset.fari_id }}? Linked investigations and inventory records will keep their history but lose the direct asset reference.')">
-            <button type="submit" class="rounded-sm border border-latte-red px-3 py-2 text-xs font-bold text-latte-red dark:border-mocha-red dark:text-mocha-red">Delete asset</button>
-          </form>
-          {% endif %}
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2">{% for value in [asset.segment, asset.access_model, asset.coverage] %}<span class="rounded-lg bg-latte-surface0 px-2 py-1 text-[11px] font-bold dark:bg-mocha-surface0">{{ value|human }}</span>{% endfor %}</div>
-      </article>
-      {% endfor %}
-    </div>{% else %}<div class="rounded-sm border border-dashed border-latte-surface1 p-8 text-center text-sm text-latte-subtext0 dark:border-mocha-surface1 dark:text-mocha-subtext0">Add at least one asset so investigations can reference the affected system.</div>{% endif %}
-  </div>
-  {% if assessment.status != 'closed' %}<aside class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Add asset</p><h2 class="mt-1 text-xl font-black">Register a reportable asset</h2>
-    <p class="mt-2 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">Describe the asset so later evidence, claims, SBOM entries, and conclusions can reference it precisely. Use <strong>Other</strong> when the segment or access basis does not fit a single predefined option.</p>
-    <form method="post" action="{{ url_for('add_asset', assessment_id=assessment.id) }}" class="mt-5 space-y-4">
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wide">Asset name<input name="name" required placeholder="Hosted telemetry API gateway" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"></label>
-        <p class="mt-2 text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0">Name the system exactly as it should be referenced by investigations and evidence. Example: <span class="font-semibold">Operator web console</span>.</p>
-      </div>
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wide">Description<textarea name="description" rows="3" placeholder="Mission operations API exposed to operators and partner systems in the staging environment." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"></textarea></label>
-        <p class="mt-2 text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0">Briefly explain what the asset does and where it sits. This helps the report read clearly without reopening the raw evidence.</p>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wide">Segment<select name="segment" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">{% for value in ['space','ground','user','link','supply_chain','cloud','other'] %}<option value="{{ value }}">{{ value|human }}</option>{% endfor %}</select></label>
-          <p class="mt-2 text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0">Pick the segment where the exposure primarily exists. Use <span class="font-semibold">Other</span> for hybrid or non-standard assets.</p>
-        </div>
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wide">Access basis<select name="access_model" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">{% for value in ['private','public','other'] %}<option value="{{ value }}">{{ value|human }}</option>{% endfor %}</select></label>
-          <p class="mt-2 text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0"><span class="font-semibold">Public</span> for OSINT, exposed services, or third-party material. <span class="font-semibold">Private</span> for authorized internal or lab access. <span class="font-semibold">Other</span> for mixed access.</p>
-        </div>
-      </div>
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wide">Coverage<select name="coverage" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">{% for value in ['not_assessed','tested','reviewed','inferred','out_of_scope'] %}<option value="{{ value }}">{{ value|human }}</option>{% endfor %}</select></label>
-        <p class="mt-2 text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0">Use <span class="font-semibold">Tested</span> for direct technical validation, <span class="font-semibold">Reviewed</span> for code or document review, and <span class="font-semibold">Inferred</span> when the asset is understood from supporting material.</p>
-      </div>
-      <button class="w-full rounded-sm bg-latte-blue px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust" type="submit">Add asset</button>
-    </form>
-  </aside>{% endif %}
+<section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <article class="fari-kpi"><p class="fari-eyebrow">{{ _('page.asset_register') }}</p><strong>{{ assets|length }}</strong><small>{{ _('page.assets_count', count=assets|length) }}</small></article>
+  <article class="fari-kpi"><p class="fari-eyebrow">{{ _('page.investigations_claims') }}</p><strong>{{ investigations|length }}</strong><small>{{ _('page.investigations_count', count=investigations|length) }}</small></article>
+  <article class="fari-kpi"><p class="fari-eyebrow">{{ _('page.asset_sources') }}</p><strong>{{ asset_source_count }}</strong><small>{{ _('page.asset_sources_count', count=asset_source_count, s='' if asset_source_count == 1 else 's') }}</small></article>
+  <article class="fari-kpi"><p class="fari-eyebrow">{{ _('page.traceability') }}</p><strong>v{{ assessment.revision_count }}</strong><small>{{ _('page.captured_versions', count=assessment.revision_count, s='' if assessment.revision_count == 1 else 's') }}</small></article>
 </section>
 
-<section id="acquire" class="mt-14 scroll-mt-24">
-  <div class="mb-4"><p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Acquire · Relate · Inform</p><h2 class="text-2xl font-black">Investigations and claims</h2></div>
-  {% if investigations %}<div class="space-y-3">
-    {% for investigation in investigations %}
-    <article class="grid gap-4 rounded-sm border border-latte-surface0 bg-latte-mantle p-5 transition hover:border-latte-blue dark:border-mocha-surface0 dark:bg-mocha-mantle dark:hover:border-mocha-blue md:grid-cols-[1fr_auto] md:items-center">
-      <div>
-        <div class="flex flex-wrap gap-2"><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ investigation.fari_id }}</span><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ investigation.claim_id }}</span></div>
-        <a href="{{ url_for('investigation_detail', investigation_id=investigation.id) }}" class="block rounded-sm outline-none hover:text-latte-blue focus:text-latte-blue dark:hover:text-mocha-blue dark:focus:text-mocha-blue">
-          <h3 class="mt-2 text-lg font-black">{{ investigation.title }}</h3>
-          <p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ investigation.claim_description }}</p>
-        </a>
-      </div>
-      <div class="space-y-3">
-        <div class="flex flex-wrap gap-2 md:justify-end">{{ lifecycle_badge(investigation.status) }}{{ conclusion_badge(investigation.conclusion) }}{{ scenario_badge(investigation.scenario_state) }}</div>
-        <div class="flex flex-wrap gap-2 md:justify-end">
-          <a href="{{ url_for('investigation_detail', investigation_id=investigation.id) }}" class="rounded-sm border border-latte-surface1 px-3 py-2 text-xs font-bold dark:border-mocha-surface1">Open claim</a>
-          {% if assessment.status != 'closed' and investigation.status != 'closed' %}
-          <form method="post" action="{{ url_for('delete_investigation', investigation_id=investigation.id) }}" onsubmit="return confirm('Delete {{ investigation.fari_id }} and {{ investigation.claim_id }}? Evidence and findings in this draft claim will be removed.')">
-            <button type="submit" class="rounded-sm border border-latte-red px-3 py-2 text-xs font-bold text-latte-red dark:border-mocha-red dark:text-mocha-red">Delete claim</button>
-          </form>
-          {% endif %}
-        </div>
-      </div>
-    </article>
-    {% endfor %}
-  </div>{% else %}<div class="rounded-sm border border-dashed border-latte-surface1 p-8 text-center text-sm text-latte-subtext0 dark:border-mocha-surface1 dark:text-mocha-subtext0">No investigations yet. Create one after registering the relevant assets.</div>{% endif %}
-</section>
-
-<section id="relate" class="mt-14 scroll-mt-24 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-  <div>
-    <div class="mb-4"><p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Read-only context</p><h2 class="text-2xl font-black">Attack Flow diagrams</h2></div>
-    {% if attack_flows %}<div class="space-y-3">{% for flow in attack_flows %}
-      <article class="rounded-sm border border-latte-surface0 bg-latte-mantle p-5 transition hover:border-latte-blue dark:border-mocha-surface0 dark:bg-mocha-mantle dark:hover:border-mocha-blue"><a href="{{ url_for('attack_flow_detail', attack_flow_id=flow.id) }}" class="block"><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ flow.fari_id }}</span><h3 class="mt-2 text-lg font-black">{{ flow.name }}</h3><p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ flow.description or flow.filename }}</p></a>{% if assessment.status != 'closed' %}<form method="post" action="{{ url_for('delete_attack_flow', attack_flow_id=flow.id) }}" class="mt-4 text-right" onsubmit="return confirm('Delete {{ flow.fari_id }}?')"><button type="submit" class="rounded-lg border border-latte-red px-3 py-2 text-xs font-bold text-latte-red dark:border-mocha-red dark:text-mocha-red">Delete diagram</button></form>{% endif %}</article>
-    {% endfor %}</div>{% else %}<div class="rounded-sm border border-dashed border-latte-surface1 p-8 text-center text-sm text-latte-subtext0 dark:border-mocha-surface1 dark:text-mocha-subtext0">No Attack Flow Builder files imported.</div>{% endif %}
-  </div>
-  {% if assessment.status != 'closed' %}<aside class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Attack Flow Builder</p><h2 class="mt-1 text-xl font-black">Import `.afb`</h2><p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">FARI parses and visualizes the flow but never modifies the supplied file.</p>
-    <form method="post" enctype="multipart/form-data" action="{{ url_for('add_attack_flow', assessment_id=assessment.id) }}" class="mt-5 space-y-4">
-      <input type="file" name="file" accept=".afb" required class="w-full rounded-sm border border-latte-surface1 bg-latte-base px-3 py-3 text-sm dark:border-mocha-surface1 dark:bg-mocha-base">
-      <button class="w-full rounded-sm bg-latte-blue px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust" type="submit">Import and visualize</button>
-    </form>
-  </aside>{% endif %}
-</section>
-
-<section id="inventory" class="mt-14 scroll-mt-24 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-  <div>
-    <div class="mb-4"><p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Acquire · Relate</p><h2 class="text-2xl font-black">SBOM inventory</h2></div>
-    {% if inventory_components %}
+<section id="frame" class="mt-10 scroll-mt-24">
+  <div class="fari-section-title"><div><p class="fari-eyebrow">{{ _('page.frame') }}</p><h2>{{ _('page.asset_register') }}</h2></div><span class="text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.asset_register_hint') }}</span></div>
+  <div class="mt-5 grid gap-5 xl:grid-cols-[1.45fr_1fr]">
     <div class="space-y-3">
-      {% for component in inventory_components %}
-      <a href="{{ url_for('inventory_component_detail', component_id=component.id) }}" class="block rounded-sm border border-latte-surface0 bg-latte-mantle p-5 transition hover:border-latte-blue dark:border-mocha-surface0 dark:bg-mocha-mantle dark:hover:border-mocha-blue">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ component.fari_id }}</span>
-            <h3 class="mt-2 text-lg font-black">{{ component.name }}</h3>
-            <p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ component.current_version or 'Version not supplied' }} · {{ component.ecosystem|human }}{% if component.asset %} · {{ component.asset.name }}{% endif %}</p>
-          </div>
-          <div class="flex flex-wrap gap-2 md:justify-end">
-            {{ inventory_status_badge(component.status) }}
-            <span class="rounded-lg bg-latte-surface0 px-2 py-1 text-[11px] font-bold dark:bg-mocha-surface0">{{ component.events|length }} event{{ '' if component.events|length == 1 else 's' }}</span>
-          </div>
-        </div>
-        {% if component.events %}
-        {% set latest_event = component.events[-1] %}
-        <div class="mt-4 rounded-sm bg-latte-base px-4 py-3 text-sm text-latte-subtext0 dark:bg-mocha-base dark:text-mocha-subtext0">
-          <strong class="text-latte-text dark:text-mocha-text">{{ latest_event.event_type|human }}</strong>
-          {% if latest_event.summary %}<span class="block mt-1">{{ latest_event.summary }}</span>{% endif %}
-        </div>
-        {% endif %}
-      </a>
-      {% endfor %}
+      {% if assets %}{% for asset in assets %}
+      <article class="fari-card p-5"><div class="flex flex-wrap items-start justify-between gap-4"><div><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ asset.fari_id }}</span><h3 class="mt-2 text-lg font-black"><a href="{{ url_for('asset_detail', asset_id=asset.id) }}" class="hover:text-latte-blue dark:hover:text-mocha-blue">{{ asset.name }}</a></h3><p class="mt-1 max-w-2xl text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ asset.description or _('page.no_description') }}</p></div>{% if assessment.status != 'closed' %}<form method="post" action="{{ url_for('delete_asset', asset_id=asset.id) }}" onsubmit="return confirm('{{ _('page.delete_asset') }} {{ asset.fari_id }}?')"><button type="submit" class="fari-secondary-button px-3 py-2 text-xs text-latte-red dark:text-mocha-red">{{ _('page.delete_asset') }}</button></form>{% endif %}</div><div class="mt-4 flex flex-wrap items-center gap-2">{% for value in [asset.segment, asset.access_model, asset.coverage] %}<span class="rounded-full bg-latte-blue/10 px-3 py-1 text-[11px] font-bold text-latte-blue dark:bg-mocha-blue/15 dark:text-mocha-blue">{{ value|human }}</span>{% endfor %}<a href="{{ url_for('asset_detail', asset_id=asset.id) }}" class="fari-secondary-button ml-auto px-3 py-2 text-xs">{{ _('page.open_asset') }}</a><span class="text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ asset.sources|length }} {{ _('page.asset_sources') }} · {{ asset.inventory_components|length }} {{ _('page.components') }}</span></div></article>
+      {% endfor %}{% else %}<div class="fari-card border-dashed p-8 text-center text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.no_assets') }}</div>{% endif %}
     </div>
-    {% else %}
-    <div class="rounded-sm border border-dashed border-latte-surface1 p-8 text-center text-sm text-latte-subtext0 dark:border-mocha-surface1 dark:text-mocha-subtext0">No inventory components yet. Upload an SBOM or dependency list to start a traceable component timeline.</div>
-    {% endif %}
-  </div>
-  <aside class="space-y-5">
-    <section class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-      <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">SBOM documents</p>
-      <h2 class="mt-1 text-xl font-black">Uploaded inventory sources</h2>
-      {% if sbom_documents %}
-      <div class="mt-5 space-y-3">
-        {% for document in sbom_documents|reverse %}
-        <article class="rounded-sm bg-latte-base p-4 dark:bg-mocha-base">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ document.fari_id }}</span>
-              <p class="mt-2 text-sm font-bold">{{ document.filename }}</p>
-              <p class="mt-1 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ document.file_format|human }} · {{ document.component_count }} components</p>
-            </div>
-            <a href="{{ url_for('download_sbom', document_id=document.id) }}" class="rounded-lg border border-latte-surface1 px-3 py-2 text-xs font-bold dark:border-mocha-surface1">Download</a>
-          </div>
-        </article>
-        {% endfor %}
-      </div>
-      {% else %}
-      <p class="mt-4 text-sm text-latte-subtext0 dark:text-mocha-subtext0">No SBOM documents have been uploaded yet.</p>
-      {% endif %}
-    </section>
     {% if assessment.status != 'closed' %}
-    <section class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-      <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Inventory intake</p>
-      <h2 class="mt-1 text-xl font-black">Upload SBOM or dependency list</h2>
-      <p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Supports CycloneDX JSON, SPDX JSON, package-lock style JSON, and simple `name==version` text lists.</p>
-      <form method="post" enctype="multipart/form-data" action="{{ url_for('upload_sbom', assessment_id=assessment.id) }}" class="mt-5 space-y-4">
-        <input type="file" name="file" required class="w-full rounded-sm border border-latte-surface1 bg-latte-base px-3 py-3 text-sm dark:border-mocha-surface1 dark:bg-mocha-base">
-        <label class="block text-xs font-bold uppercase tracking-wide">Related asset<select name="asset_id" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"><option value="">Assessment-wide inventory</option>{% for asset in assets %}<option value="{{ asset.id }}">{{ asset.fari_id }} · {{ asset.name }}</option>{% endfor %}</select></label>
-        <label class="block text-xs font-bold uppercase tracking-wide">Notes<textarea name="notes" rows="3" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base"></textarea></label>
-        <button class="w-full rounded-sm bg-latte-blue px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust" type="submit">Ingest inventory</button>
+    <aside class="fari-card p-5"><p class="fari-eyebrow">{{ _('page.add_asset') }}</p><h2 class="mt-1 text-xl font-black">{{ _('page.register_asset') }}</h2><p class="mt-2 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.register_asset_description') }}</p>
+      <form method="post" action="{{ url_for('add_asset', assessment_id=assessment.id) }}" class="mt-5 space-y-4">
+        <label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.asset_name') }}<input name="name" required placeholder="Hosted telemetry API gateway" class="fari-form-control mt-2"></label>
+        <label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.description') }}<textarea name="description" rows="3" placeholder="Mission operations API exposed to operators and partner systems." class="fari-form-control mt-2"></textarea></label>
+        <div class="grid gap-4 sm:grid-cols-2"><label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.segment') }}<select name="segment" class="fari-form-control mt-2">{% for value in fari_contract.asset_segments %}<option value="{{ value }}">{{ value|human }}</option>{% endfor %}</select></label><label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.access_basis') }}<select name="access_model" class="fari-form-control mt-2">{% for value in fari_contract.access_basis %}<option value="{{ value }}">{{ value|human }}</option>{% endfor %}</select></label></div>
+        <label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.coverage') }}<select name="coverage" class="fari-form-control mt-2">{% for value in fari_contract.coverage_values %}<option value="{{ value }}">{{ value|human }}</option>{% endfor %}</select></label>
+        <button class="fari-primary-button w-full" type="submit">{{ _('page.add_asset_button') }}</button>
       </form>
-    </section>
-    {% endif %}
-  </aside>
-</section>
-
-<section id="comply" class="mt-14 scroll-mt-24 grid gap-6 xl:grid-cols-[1.45fr_360px]">
-  <div class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Optional overlay</p>
-        <h2 class="mt-1 text-2xl font-black">SPD-5 companion checklist</h2>
-      </div>
-      {% if spd5_profile %}{{ compliance_posture_badge(spd5_profile.posture) }}{% endif %}
-    </div>
-    {% if spd5_profile %}
-    <p class="mt-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">This assessment already has an SPD-5 companion profile. Use it to express how the current FARI evidence maps into governance, ground, space, communications, supply chain, and monitoring expectations.</p>
-    <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-      <div class="rounded-sm bg-latte-base p-4 dark:bg-mocha-base"><p class="text-xs font-black uppercase tracking-wide text-latte-blue dark:text-mocha-blue">Implemented</p><p class="mt-2 text-2xl font-black">{{ spd5_counts.implemented }}</p></div>
-      <div class="rounded-sm bg-latte-base p-4 dark:bg-mocha-base"><p class="text-xs font-black uppercase tracking-wide text-latte-blue dark:text-mocha-blue">Partial or planned</p><p class="mt-2 text-2xl font-black">{{ spd5_counts.partially_implemented + spd5_counts.planned }}</p></div>
-      <div class="rounded-sm bg-latte-base p-4 dark:bg-mocha-base"><p class="text-xs font-black uppercase tracking-wide text-latte-blue dark:text-mocha-blue">Gaps</p><p class="mt-2 text-2xl font-black">{{ spd5_counts.not_implemented }}</p></div>
-    </div>
-    {% if spd5_scenario %}
-    <div class="mt-5 rounded-sm border border-latte-surface0 bg-latte-base p-4 dark:border-mocha-surface0 dark:bg-mocha-base">
-      <p class="text-xs font-black uppercase tracking-wide text-latte-blue dark:text-mocha-blue">Compliance scenario</p>
-      <strong class="mt-2 block">{{ spd5_scenario.title }}</strong>
-      <p class="mt-2 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ spd5_scenario.summary }}</p>
-    </div>
-    {% endif %}
-    {% else %}
-    <p class="mt-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">FARI itself stays claim-based and method-agnostic. When you need a recognizable control view for executive compliance conversations, initialize the SPD-5 companion and tie each control back to existing evidence.</p>
+    </aside>
     {% endif %}
   </div>
-  <aside class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Proceeding scenarios</p>
-    <h2 class="mt-1 text-xl font-black">How compliance can move forward</h2>
-    <ul class="mt-4 space-y-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">
-      <li>Evidence-backed alignment.</li>
-      <li>Partial alignment with planned completion.</li>
-      <li>Compensating controls accepted with rationale.</li>
-      <li>Inconclusive because scope or evidence is limited.</li>
-      <li>Supplier attestation pending validation.</li>
-      <li>Continuous assurance through retest, SBOM refresh, and monitoring.</li>
-    </ul>
-    <a href="{{ url_for('assessment_spd5_companion', assessment_id=assessment.id) }}" class="mt-5 inline-flex rounded-sm bg-latte-blue px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust">{{ 'Open companion profile' if spd5_profile else 'Set up companion profile' }}</a>
-  </aside>
 </section>
 
-<section id="inform" class="mt-14 scroll-mt-24 grid gap-5 xl:grid-cols-[1fr_360px]">
-  <div class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Inform</p>
-    <h2 class="mt-1 text-2xl font-black">Publish the consolidated decision</h2>
-    <p class="mt-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">The overall claim conclusion is derived from gating claims. Scenario dispositions remain visible separately so a plausible attack path is not hidden by claim wording or converted into a severity score.</p>
-    <div class="mt-5 rounded-sm border border-latte-blue/30 bg-latte-blue/10 p-4 text-sm dark:border-mocha-blue/30 dark:bg-mocha-blue/10"><strong>Before closing:</strong> confirm every gating investigation is immutable and its required action is understood.</div>
+<section id="acquire" class="mt-10 scroll-mt-24">
+  <div class="fari-section-title"><div><p class="fari-eyebrow">{{ _('phase.acquire') }} · {{ _('phase.relate') }}</p><h2>{{ _('page.investigations_claims') }}</h2></div><span class="text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.investigation_list_hint') }}</span></div>
+  <div class="mt-5 space-y-3">
+    {% if investigations %}{% for investigation in investigations %}
+    <article class="fari-card grid gap-4 p-5 md:grid-cols-[1fr_auto] md:items-center"><div><div class="flex flex-wrap gap-2"><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ investigation.fari_id }}</span><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ investigation.claim_id }}</span></div><a href="{{ url_for('investigation_detail', investigation_id=investigation.id) }}" class="block"><h3 class="mt-2 text-lg font-black hover:text-latte-blue dark:hover:text-mocha-blue">{{ investigation.title }}</h3><p class="mt-1 max-w-3xl text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ investigation.claim_description }}</p></a></div><div class="space-y-3 md:text-right"><div class="flex flex-wrap gap-2 md:justify-end">{{ lifecycle_badge(investigation.status) }}{{ conclusion_badge(investigation.conclusion) }}{{ scenario_badge(investigation.scenario_state) }}</div><div class="flex flex-wrap gap-2 md:justify-end"><a href="{{ url_for('investigation_detail', investigation_id=investigation.id) }}" class="fari-secondary-button px-3 py-2 text-xs">{{ _('page.open_claim') }}</a>{% if assessment.status != 'closed' and investigation.status != 'closed' %}<form method="post" action="{{ url_for('delete_investigation', investigation_id=investigation.id) }}" onsubmit="return confirm('{{ _('page.delete_claim') }} {{ investigation.fari_id }}?')"><button type="submit" class="fari-secondary-button px-3 py-2 text-xs text-latte-red dark:text-mocha-red">{{ _('page.delete_claim') }}</button></form>{% endif %}</div></div></article>
+    {% endfor %}{% else %}<div class="fari-card border-dashed p-8 text-center text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.no_investigations') }}</div>{% endif %}
   </div>
-  <aside class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <div class="flex items-center justify-between"><h2 class="text-lg font-black">Close report</h2>{{ lifecycle_badge(assessment.status) }}</div>
-    <div class="mt-4">{{ check_list(checks) }}</div>
-    <form method="post" action="{{ url_for('update_assessment_status', assessment_id=assessment.id) }}" class="mt-5" {% if assessment.status != 'closed' %}onsubmit="return confirm('Close this assessment permanently? It cannot be reopened or changed afterward.')"{% endif %}>
-      {% if assessment.status == 'closed' %}
-      <div class="w-full rounded-sm border border-latte-green/40 bg-latte-green/10 px-4 py-3 text-center text-sm font-extrabold text-latte-green dark:border-mocha-green/40 dark:bg-mocha-green/10 dark:text-mocha-green">Final and immutable</div>
-      {% else %}
-      <button name="action" value="close" class="w-full rounded-sm bg-latte-green px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-green dark:text-mocha-crust">Close permanently and publish final report</button>
-      {% endif %}
-    </form>
-  </aside>
+</section>
+
+<section id="inform" class="mt-10 scroll-mt-24 grid gap-5 xl:grid-cols-[1fr_360px]">
+  <div class="fari-card p-6"><p class="fari-eyebrow">{{ _('phase.inform') }}</p><h2 class="mt-1 text-2xl font-black">{{ _('page.publish_decision') }}</h2><p class="mt-3 max-w-3xl text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.publish_decision_description') }}</p><div class="mt-5 fari-workflow-note">{{ _('page.before_closing') }}</div><div class="mt-5 flex flex-wrap gap-2"><a href="{{ url_for('assessment_traceability', assessment_id=assessment.id) }}" class="fari-secondary-button">{{ _('page.review_versions') }}</a><a href="{{ url_for('consolidated_report', assessment_id=assessment.id) }}" class="fari-secondary-button">{{ _('page.preview_report') }}</a></div></div>
+  <aside class="fari-card p-6"><div class="flex items-center justify-between gap-3"><div><p class="fari-eyebrow">{{ _('page.close_report') }}</p><h2 class="mt-1 text-xl font-black">{{ _('page.closure_review') }}</h2></div>{{ lifecycle_badge(assessment.status) }}</div><div class="mt-5">{{ check_list(checks) }}</div><form method="post" action="{{ url_for('update_assessment_status', assessment_id=assessment.id) }}" class="mt-5" {% if assessment.status != 'closed' %}onsubmit="return confirm('{{ _('page.close_confirm') }}')"{% endif %}>{% if assessment.status == 'closed' %}<div class="rounded-xl border border-latte-green/40 bg-latte-green/10 px-4 py-3 text-center text-sm font-extrabold text-latte-green dark:border-mocha-green/40 dark:bg-mocha-green/10 dark:text-mocha-green">{{ _('page.final_immutable') }}</div>{% else %}<button name="action" value="close" class="fari-primary-button w-full bg-latte-green dark:bg-mocha-green">{{ _('page.close_report_button') }}</button>{% endif %}</form></aside>
 </section>
 {% endblock %}

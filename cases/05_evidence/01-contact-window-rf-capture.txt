@@ -1,0 +1,25 @@
+EVIDENCE ID: EVD-ORBIT-001
+TYPE: RF capture metadata and decoded command summary
+CAPTURE TIME: 2026-05-14T10:01:30Z
+CONTACT WINDOW: Scheduled operational LEO pass
+CAPTURE STATION: Ground Station Alpha
+TARGET: Operational LEO satellite, flight computer command receiver
+
+The captured frame has valid CCSDS packet structure. The APID is the command
+dictionary entry for flight-computer reset.
+
+Decoded frame summary:
+- CCSDS primary header: structurally valid
+- APID: 0x042 (flight-computer reset command)
+- Sequence flags: unsegmented packet
+- Packet length: consistent with the reset command payload
+- Cryptographic authentication field: absent
+- Message-integrity/authentication tag: absent
+- Anti-replay counter or freshness token: absent
+
+Representative captured bytes (hex, line-wrapped for evidence handling):
+18 42 C0 00 00 07 52 45 53 45 54 00 01 7A
+
+This artifact establishes the captured structure and the absence of an
+authentication or freshness field in the supplied frame. It does not identify
+the physical transmitter.

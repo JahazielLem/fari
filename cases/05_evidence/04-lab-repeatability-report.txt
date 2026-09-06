@@ -1,0 +1,20 @@
+EVIDENCE ID: EVD-ORBIT-004
+TYPE: Controlled laboratory repeatability report
+FIRMWARE: Same revision as the operational vehicle
+TARGET: Engineering model, not flight vehicle
+TEST DATE: 2026-05-15
+
+The laboratory team replayed a frame with the same CCSDS structure and APID
+0x042. The frame caused the engineering model flight computer to reset on every
+repetition in the supplied run set.
+
+Observed laboratory result:
+- Repeatability: reset reproduced on 5 of 5 attempts
+- Authentication control: no cryptographic validation observed
+- Replay control: no freshness/replay rejection observed
+- Flight hardware: not used
+- Operational RF path: not reproduced in the laboratory
+
+This evidence supports repeatability of the command effect with the same
+firmware, but it is not a substitute for flight-vehicle or complete RF-path
+validation.

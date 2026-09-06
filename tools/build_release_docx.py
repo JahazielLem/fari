@@ -65,11 +65,6 @@ CURRENT_MARKDOWN_SOURCES = {
         SPEC_CURRENT_ROOT / "specification" / "FARI-SPECIFICATION.md",
         ROOT / "docs" / "FARI-SPECIFICATION.md",
     ),
-    "specification/FARI-SPD5-COMPANION.md": _candidate_paths(
-        "specification/FARI-SPD5-COMPANION.md",
-        SPEC_CURRENT_ROOT / "specification" / "FARI-SPD5-COMPANION.md",
-        ROOT / "docs" / "FARI-SPD5-COMPANION.md",
-    ),
     "reports/FARI-SCENARIO-TEST-CATALOG.md": _candidate_paths(
         "reports/FARI-SCENARIO-TEST-CATALOG.md",
         SPEC_CURRENT_ROOT / "reports" / "FARI-SCENARIO-TEST-CATALOG.md",
@@ -187,12 +182,9 @@ def copy_sources() -> None:
             shutil.copy2(source, legacy_dir / source.name)
     combined = SOURCE_ROOT / "specification" / "FARI-SPECIFICATION-COMPLETE.md"
     spec = (SOURCE_ROOT / "specification" / "FARI-SPECIFICATION.md").read_text(encoding="utf-8").strip()
-    companion = (SOURCE_ROOT / "specification" / "FARI-SPD5-COMPANION.md").read_text(encoding="utf-8").strip()
     combined.write_text(
         spec
-        + "\n\n<!-- pagebreak -->\n\n"
-        + "## Appendix A: SPD-5 Companion Profile\n\n"
-        + companion,
+        + "\n",
         encoding="utf-8",
     )
     _build_catalog_release_markdown()
@@ -241,17 +233,15 @@ def _build_catalog_release_markdown() -> None:
         "",
     ]
     for row in table_rows:
-        if len(row) < 7:
+        if len(row) < 5:
             continue
-        assessment, result, disposition, companion, posture, versions, notes = row[:7]
+        assessment, result, disposition, versions, notes = row[:5]
         release_lines.extend(
             [
                 f"### {assessment}",
                 "",
                 f"- Current result: `{result}`",
                 f"- Scenario disposition: `{disposition}`",
-                f"- SPD-5 companion: `{companion}`",
-                f"- Posture: `{posture}`",
                 f"- Versions: {versions.replace('<br>', ' / ')}",
                 f"- Notes: {notes}",
                 "",
@@ -351,7 +341,7 @@ def build_specification_docx() -> Path:
         doc,
         "Framework Specification",
         f"Framework for Aerospace Research and Investigation {VERSION_TAG}",
-        "Canonical specification, glossary, workflow, companion profile, and release guidance",
+        "Canonical specification, glossary, workflow, and release guidance",
     )
     source = SOURCE_ROOT / "specification" / "FARI-SPECIFICATION-COMPLETE.md"
     markdown_to_doc(doc, source, page_break=False)

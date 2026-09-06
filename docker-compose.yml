@@ -13,6 +13,7 @@ services:
       - fari_data:/data
       - ./webapp:/app/webapp
       - ./tools:/app/tools
+      - ./cases:/app/cases:ro
       - ./spec:/app/spec
     depends_on:
       postgres:

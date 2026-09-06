@@ -350,7 +350,3 @@ Base64: AQAFAAgAAAcaAA==
 
 ## Findings
 La libreria cuenta con un DOS en varios paquetes
-
-## SPARTA
-
-- EX-0005.01 - Exploit Hardware/Firmware Corruption: Design Flaws

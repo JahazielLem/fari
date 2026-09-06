@@ -63,12 +63,6 @@ class Assessment(RecordMixin, db.Model):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    attack_flows = db.relationship(
-        "AttackFlow",
-        back_populates="assessment",
-        cascade="all, delete-orphan",
-        lazy="selectin",
-    )
     versions = db.relationship(
         "AssessmentVersion",
         back_populates="assessment",
@@ -76,12 +70,12 @@ class Assessment(RecordMixin, db.Model):
         lazy="selectin",
         order_by="AssessmentVersion.version_number",
     )
-    sbom_documents = db.relationship(
-        "SbomDocument",
+    asset_sources = db.relationship(
+        "AssetSource",
         back_populates="assessment",
         cascade="all, delete-orphan",
         lazy="selectin",
-        order_by="SbomDocument.uploaded_at",
+        order_by="AssetSource.uploaded_at",
     )
     inventory_components = db.relationship(
         "InventoryComponent",
@@ -90,14 +84,6 @@ class Assessment(RecordMixin, db.Model):
         lazy="selectin",
         order_by="InventoryComponent.fari_id",
     )
-    compliance_profiles = db.relationship(
-        "ComplianceProfile",
-        back_populates="assessment",
-        cascade="all, delete-orphan",
-        lazy="selectin",
-        order_by="ComplianceProfile.created_at",
-    )
-
 
 class Asset(RecordMixin, db.Model):
     __tablename__ = "assets"
@@ -116,7 +102,7 @@ class Asset(RecordMixin, db.Model):
 
     assessment = db.relationship("Assessment", back_populates="assets")
     investigations = db.relationship("Investigation", back_populates="asset")
-    sbom_documents = db.relationship("SbomDocument", back_populates="asset")
+    sources = db.relationship("AssetSource", back_populates="asset")
     inventory_components = db.relationship("InventoryComponent", back_populates="asset")
 
 
@@ -223,36 +209,15 @@ class Finding(RecordMixin, db.Model):
     condition_text = db.Column(db.Text, default="")
     observed_effect = db.Column(db.Text, default="")
     credible_impact = db.Column(db.Text, default="")
-    sparta_id = db.Column(db.String, default="")
-    sparta_name = db.Column(db.String, default="")
     mapping_state = db.Column(db.String, nullable=False, default="candidate")
     mapping_rationale = db.Column(db.Text, default="")
-    include_sparta_countermeasures = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.String, nullable=False, default=now_iso)
 
     investigation = db.relationship("Investigation", back_populates="findings")
 
 
-class AttackFlow(RecordMixin, db.Model):
-    __tablename__ = "attack_flows"
-
-    id = db.Column(db.Integer, primary_key=True)
-    assessment_id = db.Column(
-        db.Integer, db.ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False
-    )
-    fari_id = db.Column(db.String, nullable=False)
-    filename = db.Column(db.String, nullable=False)
-    stored_name = db.Column(db.String, nullable=False)
-    name = db.Column(db.String, nullable=False)
-    description = db.Column(db.Text, default="")
-    parsed_json = db.Column(db.Text, nullable=False)
-    uploaded_at = db.Column(db.String, nullable=False, default=now_iso)
-
-    assessment = db.relationship("Assessment", back_populates="attack_flows")
-
-
-class SbomDocument(RecordMixin, db.Model):
-    __tablename__ = "sbom_documents"
+class AssetSource(RecordMixin, db.Model):
+    __tablename__ = "asset_sources"
 
     id = db.Column(db.Integer, primary_key=True)
     assessment_id = db.Column(
@@ -265,11 +230,13 @@ class SbomDocument(RecordMixin, db.Model):
     file_format = db.Column(db.String, nullable=False, default="unknown")
     component_count = db.Column(db.Integer, nullable=False, default=0)
     sha256 = db.Column(db.String, nullable=False)
+    byte_size = db.Column(db.Integer, nullable=False, default=0)
+    mime_type = db.Column(db.String, nullable=False, default="")
     notes = db.Column(db.Text, default="")
     uploaded_at = db.Column(db.String, nullable=False, default=now_iso)
 
-    assessment = db.relationship("Assessment", back_populates="sbom_documents")
-    asset = db.relationship("Asset", back_populates="sbom_documents")
+    assessment = db.relationship("Assessment", back_populates="asset_sources")
+    asset = db.relationship("Asset", back_populates="sources")
     inventory_events = db.relationship("InventoryEvent", back_populates="document")
 
 
@@ -282,7 +249,7 @@ class InventoryComponent(RecordMixin, db.Model):
     )
     asset_id = db.Column(db.Integer, db.ForeignKey("assets.id", ondelete="SET NULL"))
     latest_document_id = db.Column(
-        db.Integer, db.ForeignKey("sbom_documents.id", ondelete="SET NULL")
+        db.Integer, db.ForeignKey("asset_sources.id", ondelete="SET NULL")
     )
     fari_id = db.Column(db.String, nullable=False)
     name = db.Column(db.String, nullable=False)
@@ -298,7 +265,7 @@ class InventoryComponent(RecordMixin, db.Model):
 
     assessment = db.relationship("Assessment", back_populates="inventory_components")
     asset = db.relationship("Asset", back_populates="inventory_components")
-    latest_document = db.relationship("SbomDocument")
+    latest_document = db.relationship("AssetSource")
     events = db.relationship(
         "InventoryEvent",
         back_populates="component",
@@ -317,7 +284,7 @@ class InventoryEvent(RecordMixin, db.Model):
         db.ForeignKey("inventory_components.id", ondelete="CASCADE"),
         nullable=False,
     )
-    document_id = db.Column(db.Integer, db.ForeignKey("sbom_documents.id", ondelete="SET NULL"))
+    document_id = db.Column(db.Integer, db.ForeignKey("asset_sources.id", ondelete="SET NULL"))
     fari_id = db.Column(db.String, nullable=False)
     event_type = db.Column(db.String, nullable=False, default="note")
     occurred_at = db.Column(db.String, nullable=False, default=now_iso)
@@ -330,72 +297,31 @@ class InventoryEvent(RecordMixin, db.Model):
     created_at = db.Column(db.String, nullable=False, default=now_iso)
 
     component = db.relationship("InventoryComponent", back_populates="events")
-    document = db.relationship("SbomDocument", back_populates="inventory_events")
-
-
-class ComplianceProfile(RecordMixin, db.Model):
-    __tablename__ = "compliance_profiles"
-
-    id = db.Column(db.Integer, primary_key=True)
-    assessment_id = db.Column(
-        db.Integer, db.ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False
-    )
-    fari_id = db.Column(db.String, nullable=False)
-    profile_key = db.Column(db.String, nullable=False)
-    title = db.Column(db.String, nullable=False)
-    framework_name = db.Column(db.String, nullable=False, default="")
-    framework_version = db.Column(db.String, nullable=False, default="")
-    scenario = db.Column(
-        db.String, nullable=False, default="inconclusive_scope_boundary"
-    )
-    posture = db.Column(db.String, nullable=False, default="not_started")
-    summary = db.Column(db.Text, default="")
-    notes = db.Column(db.Text, default="")
-    created_at = db.Column(db.String, nullable=False, default=now_iso)
-    updated_at = db.Column(db.String, nullable=False, default=now_iso)
-
-    assessment = db.relationship("Assessment", back_populates="compliance_profiles")
-    checks = db.relationship(
-        "ComplianceCheck",
-        back_populates="profile",
-        cascade="all, delete-orphan",
-        lazy="selectin",
-        order_by="ComplianceCheck.sort_order",
-    )
-
-
-class ComplianceCheck(RecordMixin, db.Model):
-    __tablename__ = "compliance_checks"
-
-    id = db.Column(db.Integer, primary_key=True)
-    profile_id = db.Column(
-        db.Integer,
-        db.ForeignKey("compliance_profiles.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-    fari_id = db.Column(db.String, nullable=False)
-    control_id = db.Column(db.String, nullable=False)
-    family = db.Column(db.String, nullable=False)
-    title = db.Column(db.String, nullable=False)
-    control_statement = db.Column(db.Text, default="")
-    spd5_alignment = db.Column(db.String, nullable=False, default="supporting")
-    principle_reference = db.Column(db.Text, default="")
-    recommended_artifacts = db.Column(db.Text, default="")
-    status = db.Column(db.String, nullable=False, default="not_verified")
-    evidence_refs = db.Column(db.Text, default="")
-    notes = db.Column(db.Text, default="")
-    sort_order = db.Column(db.Integer, nullable=False, default=0)
-    created_at = db.Column(db.String, nullable=False, default=now_iso)
-    updated_at = db.Column(db.String, nullable=False, default=now_iso)
-
-    profile = db.relationship("ComplianceProfile", back_populates="checks")
+    document = db.relationship("AssetSource", back_populates="inventory_events")
 
 
 def init_app(app) -> None:
     db.init_app(app)
     with app.app_context():
+        migrate_legacy_source_table()
         db.create_all()
         dialect = db.engine.dialect.name
+        source_columns = {
+            column["name"] for column in inspect(db.engine).get_columns("asset_sources")
+        }
+        if "byte_size" not in source_columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE asset_sources ADD COLUMN byte_size INTEGER NOT NULL DEFAULT 0"
+                )
+            )
+        if "mime_type" not in source_columns:
+            db.session.execute(
+                text(
+                    "ALTER TABLE asset_sources ADD COLUMN mime_type VARCHAR NOT NULL DEFAULT ''"
+                )
+            )
+        db.session.commit()
         assessment_columns = {
             column["name"] for column in inspect(db.engine).get_columns("assessments")
         }
@@ -404,16 +330,6 @@ def init_app(app) -> None:
                 text(
                     "ALTER TABLE assessments ADD COLUMN "
                     "revision_count INTEGER NOT NULL DEFAULT 0"
-                )
-            )
-            db.session.commit()
-        columns = {column["name"] for column in inspect(db.engine).get_columns("findings")}
-        if "include_sparta_countermeasures" not in columns:
-            boolean_default = "0" if dialect == "sqlite" else "false"
-            db.session.execute(
-                text(
-                    "ALTER TABLE findings ADD COLUMN "
-                    f"include_sparta_countermeasures BOOLEAN NOT NULL DEFAULT {boolean_default}"
                 )
             )
             db.session.commit()
@@ -428,6 +344,15 @@ def init_app(app) -> None:
                 )
             )
             db.session.commit()
+
+
+def migrate_legacy_source_table() -> None:
+    """Rename the legacy source table without discarding existing source files."""
+    tables = set(inspect(db.engine).get_table_names())
+    if "sbom_documents" not in tables or "asset_sources" in tables:
+        return
+    with db.engine.begin() as connection:
+        connection.execute(text("ALTER TABLE sbom_documents RENAME TO asset_sources"))
 
 
 def next_sequence(records, prefix: str) -> int:

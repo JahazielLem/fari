@@ -381,8 +381,5 @@ This is a memory-corruption primitive reachable from the command path. It should
 ## Findings
 La libreria cuenta con un DOS en el APID 0x06
 
-## SPARTA
-
-- `EX-0013.02 Erroneous Input`
 - `EX-0001.01 Command Packets`
 - `IA-0008.01 Rogue Ground Station`, when delivered over RF.

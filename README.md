@@ -21,11 +21,11 @@ FARI normalization, contextual completion, mapping, conclusion, and reporting.
 
 ## Core Documents
 
-- [FARI Specification PDF](spec/releases/v1.2.0/specification/FARI-Specification-v1.2.0.pdf) -
+- [FARI Specification PDF](spec/releases/v1.3.0/specification/FARI-Specification-v1.3.0.pdf) -
   finalized versioned specification bundle.
-- [FARI Manual Template PDF](spec/releases/v1.2.0/manual-template/FARI-Manual-Template-v1.2.0.pdf) -
+- [FARI Manual Template PDF](spec/releases/v1.3.0/manual-template/FARI-Manual-Template-v1.3.0.pdf) -
   finalized manual fill template.
-- [Scenario Test Catalog PDF](spec/releases/v1.2.0/reports/FARI-SCENARIO-TEST_CATALOG-v1.2.0.pdf) -
+- [Scenario Test Catalog PDF](spec/releases/v1.3.0/reports/FARI-SCENARIO-TEST_CATALOG-v1.3.0.pdf) -
   seeded validation portfolio for the framework.
 
 ## Examples
@@ -33,15 +33,16 @@ FARI normalization, contextual completion, mapping, conclusion, and reporting.
 1. [Minimal Source Review](examples/01-minimal-source-review.md)
 2. [Firmware Assessment with QEMU](examples/02-qemu-firmware-assessment.md)
 3. [Mission-Wide Multi-Team Assessment](examples/03-mission-wide-assessment.md)
+4. [Operational LEO Reset Command Replay](examples/04-operational-leo-reset-replay.md)
 
 ## Case Reports
 
-- [Versioned release reports](spec/releases/v1.2.0/reports)
+- [Versioned release reports](spec/releases/v1.3.0/reports)
 
 ## Quick Reference
 
 - Current editable framework sources live in `spec/current/`.
-- Versioned release artifacts live in `spec/releases/v1.2.0/`.
+- Versioned release artifacts live in `spec/releases/v1.3.0/`.
 - The web application reads the same specification sources through the internal
   wiki, help modal, resource downloads, and report generation.
 
@@ -55,27 +56,36 @@ spec/                  Canonical framework layer
 webapp/                Flask implementation of the guided workflow
 tools/                 Builders, release generators, and scenario seed scripts
 tests/                 Web and persistence tests
-sparta/                Local SPARTA catalog and AFB examples
 cases/                 Supplied evidence and raw test material
 ```
 
 The contract between framework and implementation is explicit in
 `spec/current/fari.manifest.yml`. Framework changes should start in `spec/current`
-and then be reflected in the web app, schema, and tests.
+and then be reflected in the web app, schema, and tests together. Run
+`python tools/check_spec_parity.py` to verify controlled values, source formats,
+specification copies, and removed integrations remain aligned.
 
 ## Web Application
 
 The Python web application implements the guided FARI Report Author workflow,
-evidence upload, configurable SQL persistence, attack-flow visualization, integrated
-wiki, assessment traceability with captured revisions, SBOM inventory
-timelines, versioned report generation, resource downloads, an SPD-5 companion
-checklist overlay, and consolidated report generation.
+evidence upload, configurable SQL persistence, integrated
+wiki, assessment traceability with captured revisions, and per-asset technical source inventory
+timelines, versioned report generation, resource downloads, consolidated report
+generation, and bilingual EN/ES interface and report output.
 
 - Run with `docker compose up --build`, then open `http://localhost:8081`.
 - Default local login is `fari` / `toor`. Change it with
   `FARI_LOGIN_USERNAME` and `FARI_LOGIN_PASSWORD`.
 - The workspace uses a collapsible sidebar, a resources section for manual
   templates, and an integrated help modal opened with `Ctrl/Cmd + K`.
+- Use the `EN` / `ES` selector in the header to change the session language.
+  Generated DOCX/PDF reports use the selected language for their labels.
+- The editable dictionaries are in `webapp/translations/en.json` and
+  `webapp/translations/es.json`. Review technical terms kept in English with
+  `webapp/translations/english_exceptions.json` and the protected review page
+  at `/language/dictionary`.
+- Set `FARI_DEFAULT_LANGUAGE=es` to start new sessions in Spanish. User-entered
+  content, evidence, identifiers, and canonical wiki text remain unchanged.
 - Docker Compose starts PostgreSQL by default and creates named volumes for
   uploaded evidence (`fari_data`) and database records (`fari_postgres_data`).
 
@@ -135,21 +145,19 @@ FARI_DATABASE_URL=sqlite:////data/fari.sqlite3 docker compose up --build
 flowchart TB
     FARI["FARI<br/>Frame, Acquire, Relate, Inform<br/>conclusion, assurance, executive reporting"]
 
-    SPARTA["SPARTA<br/>Space-cyber TTPs and countermeasures"]
     ATTACK["MITRE ATT&CK<br/>Enterprise and ground-system TTPs"]
     NIST["NIST / ISO / ECSS / organization controls<br/>Governance and compliance"]
 
     METHODS["Auditor-selected methods<br/>Firmware | RF | Hardware | Cloud | Web | Supply chain"]
 
     METHODS --> FARI
-    SPARTA --> FARI
     ATTACK --> FARI
     NIST --> FARI
 ```
 
-SPARTA is a key FARI integration and the required threat-language profile for
-spacecraft-relevant findings. It remains an independent framework maintained by
-The Aerospace Corporation.
+FARI is intentionally framework-neutral. External mappings may be recorded when
+an engagement requires them, but they never replace the evidence, claim, scope,
+or conclusion model.
 
 ## Status
 

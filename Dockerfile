@@ -11,11 +11,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY webapp ./webapp
 COPY tools ./tools
+COPY cases ./cases
 COPY tests ./tests
 COPY spec ./spec
-COPY sparta/sparta-attack-3.2.json ./sparta/sparta-attack-3.2.json
-
-RUN mkdir -p /data/evidence /data/attack_flows /data/sbom
+RUN mkdir -p /data/evidence /data/sources
 
 EXPOSE 8081
 
