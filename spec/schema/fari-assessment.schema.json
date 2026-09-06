@@ -26,7 +26,7 @@
         "id": {"type": "string", "pattern": "^ASM-"},
         "title": {"type": "string", "minLength": 1},
         "status": {
-          "enum": ["draft", "approved", "active", "closed", "superseded"]
+          "enum": ["draft", "closed"]
         },
         "report_maturity": {
           "enum": ["draft", "provisional", "final", "superseded"]
@@ -96,17 +96,13 @@
       "type": "array",
       "items": {"$ref": "#/$defs/assessmentVersion"}
     },
-    "sbom_documents": {
+    "asset_sources": {
       "type": "array",
-      "items": {"$ref": "#/$defs/sbomDocument"}
+      "items": {"$ref": "#/$defs/assetSource"}
     },
     "inventory_components": {
       "type": "array",
       "items": {"$ref": "#/$defs/inventoryComponent"}
-    },
-    "compliance_profiles": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/complianceProfile"}
     },
     "risks": {
       "type": "array",
@@ -119,6 +115,22 @@
     "assurance": {
       "type": "array",
       "items": {"$ref": "#/$defs/assurance"}
+    },
+    "generated_with": {
+      "type": "string"
+    },
+    "implementation": {
+      "type": "object",
+      "properties": {
+        "edition": {"type": "string"},
+        "database_id": {"type": "integer"},
+        "revision_count": {"type": "integer", "minimum": 0},
+        "languages": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": true
     }
   },
   "$defs": {
@@ -144,16 +156,18 @@
       "required": ["id", "name", "segment", "coverage"],
       "properties": {
         "id": {"type": "string", "pattern": "^AST-"},
+        "fari_id": {"type": "string", "pattern": "^AST-"},
         "name": {"type": "string"},
         "segment": {
-          "enum": ["space", "ground", "user", "link", "supply_chain", "cloud"]
+          "enum": ["space", "ground", "user", "link", "supply_chain", "cloud", "other"]
         },
         "access_model": {
-          "enum": ["white_box", "grey_box", "black_box", "mixed"]
+          "enum": ["private", "public", "other"]
         },
         "coverage": {
-          "enum": ["tested", "reviewed", "inferred", "not_assessed", "out_of_scope"]
+          "enum": ["not_assessed", "tested", "reviewed", "inferred", "out_of_scope"]
         },
+        "description": {"type": "string"},
         "mission_objectives": {
           "type": "array",
           "items": {"type": "string", "pattern": "^OBJ-"}
@@ -202,6 +216,7 @@
       ],
       "properties": {
         "id": {"type": "string", "pattern": "^INV-"},
+        "fari_id": {"type": "string", "pattern": "^INV-"},
         "title": {"type": "string"},
         "claim_ids": {
           "type": "array",
@@ -216,7 +231,16 @@
           "items": {"type": "string", "pattern": "^FND-"}
         },
         "conclusion_id": {"type": "string", "pattern": "^CON-"},
-        "report_reference": {"type": "string"}
+        "report_reference": {"type": "string"},
+        "method_run_id": {"type": "string", "pattern": "^RUN-"},
+        "evidence": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/evidence"}
+        },
+        "findings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/finding"}
+        }
       }
     },
     "assessmentVersion": {
@@ -233,16 +257,18 @@
         "snapshot_json": {"type": "string"}
       }
     },
-    "sbomDocument": {
+    "assetSource": {
       "type": "object",
-      "required": ["fari_id", "filename", "file_format", "component_count", "sha256"],
+      "required": ["fari_id", "filename", "file_format", "component_count", "sha256", "byte_size"],
       "properties": {
-        "fari_id": {"type": "string", "pattern": "^SBM-"},
+        "fari_id": {"type": "string", "pattern": "^SRC-"},
         "filename": {"type": "string"},
-        "file_format": {"enum": ["cyclonedx", "spdx", "package-lock", "dependency-map", "text-list", "unknown", "empty"]},
+        "file_format": {"enum": ["cyclonedx", "spdx", "package-lock", "dependency-map", "text-list", "jsonl", "jsonl-components", "sigmf-meta", "sigmf-data", "binary", "pcap", "pcapng", "elf", "hex", "csv", "tsv", "yaml", "xml", "pdf", "doc", "docx", "xls", "xlsx", "text", "json", "empty"]},
         "component_count": {"type": "integer", "minimum": 0},
         "sha256": {"type": "string"},
-        "asset_id": {"type": ["integer", "null"]},
+        "byte_size": {"type": "integer", "minimum": 0},
+        "mime_type": {"type": "string"},
+        "asset_id": {"type": ["string", "null"]},
         "notes": {"type": "string"},
         "uploaded_at": {"type": "string"}
       }
@@ -271,6 +297,7 @@
         "ecosystem": {"type": "string"},
         "current_version": {"type": "string"},
         "status": {"enum": ["tracked", "vulnerable", "update_in_progress", "fixed", "accepted", "not_affected"]},
+        "asset_id": {"type": ["string", "null"]},
         "purl": {"type": "string"},
         "component_type": {"type": "string"},
         "license_name": {"type": "string"},
@@ -280,73 +307,6 @@
         "events": {
           "type": "array",
           "items": {"$ref": "#/$defs/inventoryEvent"}
-        }
-      }
-    },
-    "complianceCheck": {
-      "type": "object",
-      "required": ["fari_id", "control_id", "family", "title", "status"],
-      "properties": {
-        "fari_id": {"type": "string", "pattern": "^CTL-"},
-        "control_id": {"type": "string"},
-        "family": {"type": "string"},
-        "title": {"type": "string"},
-        "control_statement": {"type": "string"},
-        "spd5_alignment": {"enum": ["direct", "supporting"]},
-        "principle_reference": {"type": "string"},
-        "recommended_artifacts": {"type": "string"},
-        "status": {
-          "enum": [
-            "not_verified",
-            "implemented",
-            "partially_implemented",
-            "planned",
-            "not_implemented",
-            "not_applicable"
-          ]
-        },
-        "evidence_refs": {"type": "string"},
-        "notes": {"type": "string"},
-        "sort_order": {"type": "integer", "minimum": 0},
-        "created_at": {"type": "string"},
-        "updated_at": {"type": "string"}
-      }
-    },
-    "complianceProfile": {
-      "type": "object",
-      "required": ["fari_id", "profile_key", "title", "posture", "scenario", "checks"],
-      "properties": {
-        "fari_id": {"type": "string", "pattern": "^CPF-"},
-        "profile_key": {"type": "string"},
-        "title": {"type": "string"},
-        "framework_name": {"type": "string"},
-        "framework_version": {"type": "string"},
-        "scenario": {
-          "enum": [
-            "evidence_backed_alignment",
-            "partial_alignment",
-            "compensating_controls",
-            "inconclusive_scope_boundary",
-            "supplier_attestation_pending",
-            "continuous_assurance"
-          ]
-        },
-        "posture": {
-          "enum": [
-            "not_started",
-            "aligned",
-            "partially_aligned",
-            "gap_identified",
-            "inconclusive"
-          ]
-        },
-        "summary": {"type": "string"},
-        "notes": {"type": "string"},
-        "created_at": {"type": "string"},
-        "updated_at": {"type": "string"},
-        "checks": {
-          "type": "array",
-          "items": {"$ref": "#/$defs/complianceCheck"}
         }
       }
     },
@@ -466,7 +426,7 @@
         "id": {"type": "string", "pattern": "^FND-"},
         "title": {"type": "string"},
         "state": {
-          "enum": ["observation", "candidate", "confirmed", "accepted_risk", "remediated", "verified_closed"]
+          "enum": ["candidate", "confirmed", "observation", "remediated", "verified_closed"]
         },
         "asset_ids": {
           "type": "array",
@@ -480,6 +440,11 @@
         "confidence": {"enum": ["high", "medium", "low"]},
         "fari_conclusion": {"$ref": "#/$defs/conclusionValue"},
         "required_action": {"$ref": "#/$defs/requiredAction"},
+        "condition_text": {"type": "string"},
+        "observed_effect": {"type": "string"},
+        "credible_impact": {"type": "string"},
+        "mapping_state": {"enum": ["candidate", "confirmed", "not_applicable"]},
+        "mapping_rationale": {"type": "string"},
         "mappings": {
           "type": "array",
           "items": {"$ref": "#/$defs/mapping"}

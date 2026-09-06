@@ -1,0 +1,17 @@
+EVIDENCE ID: EVD-ORBIT-003
+TYPE: Operations-plan and ground-station reconciliation
+EVENT TIME: 2026-05-14T10:01:30Z
+
+Approved operations plan: no flight-computer reset command scheduled in the
+contact window.
+Primary Ground Station Alpha transmission log: no matching APID 0x042 command.
+Backup Ground Station Bravo log: not provided.
+Backup Ground Station Charlie log: not provided.
+Cross-station RF source attribution: unavailable from the single supplied RF
+capture.
+
+Evidence boundary:
+- The command is inconsistent with the approved plan and primary-station log.
+- The absence of all backup-station records prevents complete reconciliation.
+- A single RF capture demonstrates reception at the satellite but cannot prove
+  the physical transmitter location or identity.

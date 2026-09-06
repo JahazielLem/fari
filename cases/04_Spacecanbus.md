@@ -74,9 +74,6 @@ Replay demonstrates why timing alone is not a security control. A bus that accep
 ## Findings
 La libreria cuenta con un DOS en el APID 0x06
 
-## SPARTA
-
-- `EX-0014.02 Bus Traffic Spoofing`
 - `DE-0002.03 Inhibit Spacecraft Functionality`, if false telemetry hides a fault or drives bad operator action.
 - `REC-0005.01 Uplink Intercept Eavesdropping`, for the original capture.
 - `EX-0014.02 Bus Traffic Spoofing`, for replay on the bus.

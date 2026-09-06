@@ -42,8 +42,8 @@ Use it for:
 - assets
 - investigations
 - findings
-- SPD-5 checklist state
-- SBOM component metadata
+- local framework-mapping metadata
+- Per-asset source files and normalized component metadata
 - local evidence metadata
 
 Pros:
@@ -102,7 +102,10 @@ Use:
 - `Import assessment bundle`
 - `Delete local workspace`
 
-The exported bundle can match `spec/schema/fari-assessment.schema.json`.
+The normalized exported bundle must match `spec/schema/fari-assessment.schema.json`.
+Asset source files remain attached to their asset in the bundle through the
+`asset_sources` collection; binary and SigMF sources are preserved as metadata
+and integrity references rather than being decoded as dependency components.
 
 ### Encrypted Export Bundle
 
@@ -131,4 +134,6 @@ Keep two editions:
 - **FARI Static**: GitHub Pages + IndexedDB + JSON import/export, for demos,
   public education, and low-sensitivity local drafting.
 
-Both editions should consume the same `spec/` folder and schema.
+Both editions should consume the same `spec/` folder, manifest contract, and
+schema. The operational web edition additionally preserves original source
+bytes in server-side storage.

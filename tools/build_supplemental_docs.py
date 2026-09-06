@@ -118,7 +118,7 @@ def build_document(source, output, label, title, subtitle, image_paths):
     doc.core_properties.title = f"FARI {label}: {title}"
     doc.core_properties.subject = label
     doc.core_properties.author = "FARI Project"
-    doc.core_properties.keywords = "FARI, space cybersecurity, reporting, SPARTA"
+    doc.core_properties.keywords = "FARI, space cybersecurity, reporting"
     doc.save(output)
     print(output)
 

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ _('language.dictionary_title') }} | FARI{% endblock %}
+{% block content %}
+<section class="rounded-sm bg-latte-crust p-7 shadow-soft dark:bg-mocha-crust sm:p-10">
+  <p class="text-xs font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-blue">{{ _('language.dictionary') }}</p>
+  <h1 class="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{{ _('language.dictionary_title') }}</h1>
+  <p class="mt-4 max-w-4xl text-latte-subtext0 dark:text-mocha-subtext0">{{ _('language.dictionary_intro') }}</p>
+  <p class="mt-3 rounded-sm border border-latte-blue/30 bg-latte-blue/10 px-4 py-3 text-sm text-latte-subtext0 dark:border-mocha-blue/30 dark:bg-mocha-blue/10 dark:text-mocha-subtext0">{{ _('language.dictionary_edit_hint') }}</p>
+  {% if exceptions['keys'] %}<div class="mt-4 rounded-sm border border-latte-yellow/30 bg-latte-yellow/10 px-4 py-3 text-sm text-latte-subtext0 dark:border-mocha-yellow/30 dark:bg-mocha-yellow/10 dark:text-mocha-subtext0"><strong>{{ _('language.english_exception') }}:</strong> {{ exceptions['description'] }}<div class="mt-2 flex flex-wrap gap-2">{% for key in exceptions['keys'] %}<code class="rounded bg-latte-base px-2 py-1 text-xs dark:bg-mocha-base">{{ key }}</code>{% endfor %}</div></div>{% endif %}
+</section>
+
+<section class="mt-8 overflow-hidden rounded-sm border border-latte-surface0 bg-latte-mantle dark:border-mocha-surface0 dark:bg-mocha-mantle">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-latte-surface0 text-sm dark:divide-mocha-surface0">
+      <thead class="bg-latte-crust dark:bg-mocha-crust">
+        <tr class="text-left text-xs font-black uppercase tracking-[.16em] text-latte-subtext0 dark:text-mocha-subtext0">
+          <th class="px-5 py-4">{{ _('language.dictionary_key') }}</th>
+          <th class="px-5 py-4">{{ _('language.dictionary_source') }}</th>
+          <th class="px-5 py-4">{{ _('language.dictionary_selected') }}</th>
+          <th class="px-5 py-4">{{ _('language.dictionary_status') }}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-latte-surface0 dark:divide-mocha-surface0">
+        {% for item in dictionary %}
+        <tr class="align-top">
+          <td class="px-5 py-4 font-mono text-xs">{{ item.key }}</td>
+          <td class="px-5 py-4">{{ item.english }}</td>
+          <td class="px-5 py-4">{{ item.selected }}</td>
+          <td class="px-5 py-4">
+            {% if item.english_exception %}<span class="rounded-lg bg-latte-yellow/25 px-2 py-1 text-xs font-bold text-latte-yellow">{{ _('language.english_exception') }}</span>
+            {% elif item.translated %}<span class="rounded-lg bg-latte-green/20 px-2 py-1 text-xs font-bold text-latte-green">{{ _('language.translated') }}</span>
+            {% else %}<span class="rounded-lg bg-latte-surface0 px-2 py-1 text-xs font-bold text-latte-subtext0">{{ _('language.fallback') }}</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

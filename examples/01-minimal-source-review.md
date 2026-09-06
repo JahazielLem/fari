@@ -37,7 +37,7 @@ Evidence:
   corruption.
 - **State:** Confirmed.
 - **Observed effect:** Memory overwrite in a host unit-test build.
-- **SPARTA candidate:** `EX-0009 Exploit Code Flaws`.
+- **Framework mapping:** None selected; the evidence is retained without forcing an external classification.
 - **Mapping state:** Candidate, because spacecraft execution and effect were not
   demonstrated.
 - **Risk:** High-consequence potential, but likelihood and actual mission

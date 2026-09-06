@@ -32,7 +32,7 @@ flowchart LR
 ```
 
 The FARI assessment owner defines common asset IDs, gating claims, evidence
-handling, SPARTA access date, conclusion rules, and consolidated-report
+handling, optional mapping rules, conclusion rules, and consolidated-report
 requirements. Each technical team retains its own test procedure and does not
 need to use FARI.
 
@@ -65,10 +65,10 @@ Example cross-framework relationships:
 
 - Ground identity and cloud behavior: MITRE ATT&CK mappings selected by the
   ground team.
-- Spacecraft-facing path: SPARTA `IA-0007 Compromise Ground System` as a
+- Spacecraft-facing path: an optional external reference may be recorded as a
   candidate relationship until end-to-end execution is demonstrated.
-- Flight-build dependency risk: SPARTA `IA-0001.01 Software Dependencies &
-  Development Tools`.
+- Flight-build dependency risk: retain the supplied engineering evidence and
+  validate any external mapping separately.
 - Mission risk: Unauthorized command execution could violate `OBJ-001` and
   `OBJ-003`.
 

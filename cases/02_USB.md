@@ -102,16 +102,9 @@ millis() - previous > interval
 
 This is a logic-level denial of service against the mission loop.
 
-**SPARTA Mapping:**
-
-- `EX-0001.01 Command Packets`
 - `DE-0002.03 Inhibit Spacecraft Functionality`
 
 
 
 ## Findings
 La libreria cuenta con un DOS en varios paquetes
-
-## SPARTA
-
-- EX-0005.01 - Exploit Hardware/Firmware Corruption: Design Flaws

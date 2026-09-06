@@ -1,50 +1,66 @@
 {% extends "base.html" %}
-{% from "_macros.html" import phase_timeline %}
-{% macro help_text(text, example='') -%}
-<p class="mt-2 text-xs leading-5 text-latte-subtext0 dark:text-mocha-subtext0">{{ text }}{% if example %} Example: <span class="font-semibold">{{ example }}</span>{% endif %}</p>
-{%- endmacro %}
-{% block title %}Create Frame | FARI{% endblock %}
+{% block title %}{{ _('page.create_frame') }} | FARI{% endblock %}
 {% block content %}
-<div id="frame" class="mb-8 scroll-mt-24">
-  <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Step 1 · Frame</p>
-  <h1 class="mt-2 text-4xl font-black tracking-tight">Create an assessment Frame</h1>
-  <p class="mt-3 max-w-3xl text-latte-subtext0 dark:text-mocha-subtext0">Define the client, mission context, and boundaries that give every later conclusion meaning. A strong Frame reads like a defensible assessment brief, not just an internal note.</p>
-</div>
-{{ phase_timeline(phases) }}
+<section class="fari-hero p-6 sm:p-8">
+  <p class="fari-eyebrow">{{ _('phase.frame') }}</p>
+  <h1 class="mt-2 text-4xl font-black tracking-tight">{{ _('page.create_frame_title') }}</h1>
+  <p class="mt-3 max-w-3xl text-base leading-7 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.create_frame_description') }}</p>
+</section>
 
-<form method="post" class="space-y-5">
-  <section class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle sm:p-8">
-    <h2 class="text-xl font-black">Client and assessment</h2>
-    <div class="mt-5 grid gap-5 md:grid-cols-2">
-      <div>
-        <label class="text-xs font-bold uppercase tracking-wide">Client name <input name="client_name" required value="{{ form_value('client_name') }}" placeholder="Orbital Dynamics S.A. de C.V." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue"></label>
-        {{ help_text('Use the exact organization or mission-owner name that should appear in the final report.', 'Constellation Operations Program Office') }}
+<div class="mt-7">
+  <aside class="fari-stepper" aria-label="{{ _('phase.assessment_workflow') }}">
+    <div class="fari-stepper-heading"><div><p class="fari-eyebrow">{{ _('phase.assessment_workflow') }}</p><p class="mt-1 text-sm font-bold">{{ _('page.frame_step_1_hint') }}</p></div><span class="fari-stepper-progress">1 / 3</span></div>
+    <div class="fari-stepper-track">
+    {% for title, detail in [(_('page.frame_step_1'), _('page.frame_step_1_hint')), (_('page.frame_step_2'), _('page.frame_step_2_hint')), (_('page.frame_step_3'), _('page.frame_step_3_hint'))] %}
+    <button type="button" data-step="{{ loop.index }}" class="{% if loop.first %}is-active{% endif %}"><span class="fari-step-number">{{ loop.index }}</span><span class="fari-step-copy"><strong>{{ title }}</strong><small>{{ detail }}</small></span></button>
+    {% endfor %}
+    </div>
+  </aside>
+
+  <form method="post" class="mt-6 space-y-5" data-step-form>
+    <section class="fari-form-panel" data-step-panel="1">
+      <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="fari-eyebrow">{{ _('page.frame_step_1') }}</p><h2 class="mt-1 text-2xl font-black">{{ _('page.client_and_assessment') }}</h2></div><span class="text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.step_of', current=1, total=3) }}</span></div>
+      <p class="mt-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.frame_step_1_hint') }}</p>
+      <div class="mt-6 grid gap-5 md:grid-cols-2">
+        <label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.client_name') }}<input name="client_name" required value="{{ form_value('client_name') }}" placeholder="Orbital Dynamics S.A. de C.V." class="fari-form-control mt-2"><span class="fari-form-help">{{ _('page.client_name_help') }}</span></label>
+        <label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.assessment_title') }}<input name="title" required value="{{ form_value('title') }}" placeholder="Ground telemetry API and mission ops workflow assessment" class="fari-form-control mt-2"><span class="fari-form-help">{{ _('page.assessment_title_help') }}</span></label>
       </div>
-      <div>
-        <label class="text-xs font-bold uppercase tracking-wide">Assessment title <input name="title" required value="{{ form_value('title') }}" placeholder="Ground telemetry API and mission ops workflow assessment" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue"></label>
-        {{ help_text('Keep it short but specific about the system and focus area.', 'SpaceCAN replay resistance review') }}
-      </div>
-    </div>
-    <div class="mt-5">
-      <label class="block text-xs font-bold uppercase tracking-wide">Mission or infrastructure context<textarea name="mission_context" rows="4" placeholder="Describe what the assessed system supports, where it operates, and why the result matters." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">{{ form_value('mission_context') }}</textarea></label>
-      {{ help_text('Mention mission role, operational environment, and consequence of failure. This is the field that tells an executive why the assessment exists.', 'Pre-launch validation of the hosted telemetry API used by mission operations during spacecraft bus integration.') }}
-    </div>
-    <div class="mt-5">
-      <label class="block text-xs font-bold uppercase tracking-wide">Scope<textarea name="scope" rows="4" placeholder="List exact assets, environments, interfaces, data paths, and known access limits included in this assessment." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">{{ form_value('scope') }}</textarea></label>
-      {{ help_text('Be concrete. A good scope says what was touched and under what limits, so conclusions cannot be overstated later.', 'Hosted telemetry API, operator web console, and backend broker in staging; excludes production spacecraft commanding and RF uplink.') }}
-    </div>
-  </section>
-  <section class="rounded-sm border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle sm:p-8">
-    <h2 class="text-xl font-black">Boundaries and authorization</h2>
-    <div class="mt-5">
-      <label class="block text-xs font-bold uppercase tracking-wide">Authorization and safety constraints<textarea name="authorization" rows="4" placeholder="Record approvals, rules of engagement, stop conditions, prohibited actions, and safety limits." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">{{ form_value('authorization') }}</textarea></label>
-      {{ help_text('Capture what made the work legitimate and what conditions would have stopped or constrained it.', 'Authorized staging-only testing approved by mission IT; no RF transmission, no credential reset, and stop if operator workflows are disrupted.') }}
-    </div>
-    <div class="mt-5">
-      <label class="block text-xs font-bold uppercase tracking-wide">Explicit exclusions<textarea name="exclusions" rows="4" placeholder="State what this assessment must not be interpreted as covering." class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">{{ form_value('exclusions') }}</textarea></label>
-      {{ help_text('Use this to prevent a reader from treating the report as broader proof than the evidence supports.', 'No on-orbit behavior, no actuator response validation, and no supplier internal network assessment.') }}
-    </div>
-  </section>
-  <div class="flex justify-end gap-3"><a class="rounded-sm border border-latte-surface1 px-5 py-3 text-sm font-bold dark:border-mocha-surface1" href="{{ url_for('index') }}">Cancel</a><button class="rounded-sm bg-latte-blue px-5 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust" type="submit">Create Frame</button></div>
-</form>
+      <label class="mt-5 block text-xs font-bold uppercase tracking-wide">{{ _('page.mission_context') }}<textarea name="mission_context" rows="5" placeholder="Describe what the assessed system supports, where it operates, and why the result matters." class="fari-form-control mt-2">{{ form_value('mission_context') }}</textarea><span class="fari-form-help">{{ _('page.mission_context_help') }}</span></label>
+      <div class="fari-form-footer mt-6"><span class="text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.frame_save_hint') }}</span><button type="button" data-step-next="2" class="fari-primary-button">{{ _('page.next_step') }} <span class="ml-2">→</span></button></div>
+    </section>
+
+    <section class="fari-form-panel" data-step-panel="2" hidden>
+      <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="fari-eyebrow">{{ _('page.frame_step_2') }}</p><h2 class="mt-1 text-2xl font-black">{{ _('page.scope') }}</h2></div><span class="text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.step_of', current=2, total=3) }}</span></div>
+      <p class="mt-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.frame_step_2_hint') }}</p>
+      <label class="mt-6 block text-xs font-bold uppercase tracking-wide">{{ _('page.scope') }}<textarea name="scope" rows="7" placeholder="List exact assets, environments, interfaces, data paths, and known access limits included in this assessment." class="fari-form-control mt-2">{{ form_value('scope') }}</textarea><span class="fari-form-help">{{ _('page.scope_help') }}</span></label>
+      <div class="fari-form-footer mt-6"><button type="button" data-step-prev="1" class="fari-secondary-button">← {{ _('page.previous_step') }}</button><button type="button" data-step-next="3" class="fari-primary-button">{{ _('page.next_step') }} <span class="ml-2">→</span></button></div>
+    </section>
+
+    <section class="fari-form-panel" data-step-panel="3" hidden>
+      <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="fari-eyebrow">{{ _('page.frame_step_3') }}</p><h2 class="mt-1 text-2xl font-black">{{ _('page.boundaries_authorization') }}</h2></div><span class="text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.step_of', current=3, total=3) }}</span></div>
+      <p class="mt-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.frame_step_3_hint') }}</p>
+      <div class="mt-6 space-y-5"><label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.authorization') }}<textarea name="authorization" rows="6" placeholder="Record approvals, rules of engagement, stop conditions, prohibited actions, and safety limits." class="fari-form-control mt-2">{{ form_value('authorization') }}</textarea><span class="fari-form-help">{{ _('page.authorization_help') }}</span></label><label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.exclusions') }}<textarea name="exclusions" rows="6" placeholder="State what this assessment must not be interpreted as covering." class="fari-form-control mt-2">{{ form_value('exclusions') }}</textarea><span class="fari-form-help">{{ _('page.exclusions_help') }}</span></label></div>
+      <div class="fari-workflow-note mt-6">{{ _('page.frame_ready_note') }}</div>
+      <div class="fari-form-footer mt-6"><button type="button" data-step-prev="2" class="fari-secondary-button">← {{ _('page.previous_step') }}</button><div class="flex gap-2"><a class="fari-secondary-button" href="{{ url_for('index') }}">{{ _('page.cancel') }}</a><button class="fari-primary-button" type="submit">{{ _('page.create_frame') }}</button></div></div>
+    </section>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  (() => {
+    const form = document.querySelector('[data-step-form]');
+    if (!form) return;
+    const panels = [...form.querySelectorAll('[data-step-panel]')];
+    const tabs = [...document.querySelectorAll('[data-step]')];
+    function show(step) {
+      panels.forEach(panel => { panel.hidden = panel.dataset.stepPanel !== String(step); });
+      tabs.forEach(tab => tab.classList.toggle('is-active', tab.dataset.step === String(step)));
+      window.scrollTo({ top: form.offsetTop - 90, behavior: 'smooth' });
+    }
+    tabs.forEach(tab => tab.addEventListener('click', () => show(tab.dataset.step)));
+    form.querySelectorAll('[data-step-next]').forEach(button => button.addEventListener('click', () => show(button.dataset.stepNext)));
+    form.querySelectorAll('[data-step-prev]').forEach(button => button.addEventListener('click', () => show(button.dataset.stepPrev)));
+  })();
+</script>
 {% endblock %}

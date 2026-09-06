@@ -1,142 +1,80 @@
 {% extends "base.html" %}
 {% from "_macros.html" import conclusion_badge, lifecycle_badge %}
-{% block title %}FARI Assessments{% endblock %}
+{% block title %}{{ _('nav.assessments') }} | FARI{% endblock %}
 {% block content %}
-<section class="overflow-hidden rounded-sm bg-latte-crust p-7 dark:bg-mocha-crust sm:p-10">
-  <div class="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+<section class="fari-hero p-6 sm:p-8 lg:p-10">
+  <div class="grid gap-7 lg:grid-cols-[1fr_360px] lg:items-end">
     <div>
-      <p class="text-xs font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-blue">Framework for Aerospace Research and Investigation</p>
-      <h1 class="mt-3 max-w-4xl text-4xl font-black tracking-tight sm:text-5xl">Assessment workspace</h1>
-      <p class="mt-4 max-w-3xl text-latte-subtext0 dark:text-mocha-subtext0">Review the most recent assessments first, filter by lifecycle and overall conclusion, and move from Frame to final consolidated reporting without losing traceability.</p>
+      <p class="fari-eyebrow">{{ _('page.assessment_workspace') }}</p>
+      <h1 class="mt-3 max-w-4xl text-4xl font-black tracking-tight sm:text-5xl">{{ _('page.assessment_workspace_title') }}</h1>
+      <p class="mt-4 max-w-3xl text-base leading-7 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.assessment_workspace_description') }}</p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="{{ url_for('new_assessment') }}" class="fari-primary-button">{{ _('page.create_frame') }} <span class="ml-2 text-lg leading-none">+</span></a>
+        <a href="#assessment-list" class="fari-secondary-button">{{ _('page.recent_assessments') }}</a>
+      </div>
     </div>
-    <a class="inline-flex justify-center rounded-sm bg-latte-blue px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-latte-blue/20 hover:opacity-90 dark:bg-mocha-blue dark:text-mocha-crust" href="{{ url_for('new_assessment') }}">Create Frame</a>
-  </div>
-</section>
-
-<section class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Assessment summary">
-  <article class="rounded-sm bg-latte-mantle p-5 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.18em] text-latte-subtext0 dark:text-mocha-subtext0">Portfolio</p>
-    <p class="mt-3 text-3xl font-black">{{ stats.total }}</p>
-    <p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ stats.total }} total assessments</p>
-  </article>
-  <article class="rounded-sm bg-latte-mantle p-5 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.18em] text-latte-subtext0 dark:text-mocha-subtext0">Draft</p>
-    <p class="mt-3 text-3xl font-black">{{ stats.draft }}</p>
-    <p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Open assessments still in workflow</p>
-  </article>
-  <article class="rounded-sm bg-latte-mantle p-5 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.18em] text-latte-subtext0 dark:text-mocha-subtext0">Closed</p>
-    <p class="mt-3 text-3xl font-black">{{ stats.closed }}</p>
-    <p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Immutable assessments with final reports</p>
-  </article>
-  <article class="rounded-sm bg-latte-mantle p-5 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.18em] text-latte-subtext0 dark:text-mocha-subtext0">View</p>
-    <p class="mt-3 text-3xl font-black">{{ stats.filtered }}</p>
-    <p class="mt-1 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Filtered matches sorted by latest activity</p>
-  </article>
-</section>
-
-<section class="mt-8 rounded-sm bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Assessment list</p>
-      <h2 class="mt-2 text-3xl font-black">Recent assessments</h2>
-      <p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Newest activity first. Filter by lifecycle, executive outcome, and list size.</p>
-    </div>
-    <p class="text-sm text-latte-subtext0 dark:text-mocha-subtext0">Showing {{ summaries|length }} of {{ stats.filtered }} filtered assessments</p>
-  </div>
-
-  <form method="get" class="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_180px_auto] lg:items-end">
-    <label class="block text-sm font-bold">Status
-      <select name="status" class="mt-2 w-full rounded-sm bg-latte-base px-4 py-3 text-sm outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">
-        <option value="all" {% if filters.status == 'all' %}selected{% endif %}>All</option>
-        <option value="draft" {% if filters.status == 'draft' %}selected{% endif %}>Draft</option>
-        <option value="closed" {% if filters.status == 'closed' %}selected{% endif %}>Closed</option>
-      </select>
-    </label>
-    <label class="block text-sm font-bold">Overall conclusion
-      <select name="result" class="mt-2 w-full rounded-sm bg-latte-base px-4 py-3 text-sm outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">
-        <option value="all" {% if filters.result == 'all' %}selected{% endif %}>All</option>
-        <option value="meets" {% if filters.result == 'meets' %}selected{% endif %}>Meets</option>
-        <option value="does_not_meet" {% if filters.result == 'does_not_meet' %}selected{% endif %}>Does Not Meet</option>
-        <option value="inconclusive" {% if filters.result == 'inconclusive' %}selected{% endif %}>Inconclusive</option>
-        <option value="not_assessed" {% if filters.result == 'not_assessed' %}selected{% endif %}>Not Assessed</option>
-      </select>
-    </label>
-    <label class="block text-sm font-bold">Rows
-      <select name="limit" class="mt-2 w-full rounded-sm bg-latte-base px-4 py-3 text-sm outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">
-        {% for value in [10, 25, 50, 100] %}
-        <option value="{{ value }}" {% if filters.limit == value %}selected{% endif %}>{{ value }}</option>
+    <div class="fari-card p-5">
+      <p class="fari-eyebrow">{{ _('page.workflow_at_a_glance') }}</p>
+      <div class="fari-workflow-strip mt-5">
+        {% for label, detail, number in [(_('phase.frame'), _('page.workflow_frame_hint'), '01'), (_('phase.acquire'), _('page.workflow_acquire_hint'), '02'), (_('phase.inform'), _('page.workflow_inform_hint'), '03')] %}
+        <div class="fari-workflow-step"><span class="fari-workflow-number">{{ number }}</span><div><strong>{{ label }}</strong><span>{{ detail }}</span></div></div>
         {% endfor %}
-      </select>
-    </label>
-    <div class="flex gap-3">
-      <button type="submit" class="inline-flex items-center justify-center rounded-sm bg-latte-blue px-4 py-3 text-sm font-extrabold text-white hover:opacity-90 dark:bg-mocha-blue dark:text-mocha-crust">Apply filters</button>
-      <a href="{{ url_for('index') }}" class="inline-flex items-center justify-center rounded-sm px-4 py-3 text-sm font-bold hover:border-latte-blue dark:border-mocha-surface1 dark:hover:border-mocha-blue">Reset</a>
+      </div>
     </div>
+  </div>
+</section>
+
+<section class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="{{ _('page.portfolio') }}">
+  <article class="fari-kpi"><p class="fari-eyebrow">{{ _('page.portfolio') }}</p><strong>{{ stats.total }}</strong><small>{{ _('page.total_assessments', count=stats.total) }}</small></article>
+  <article class="fari-kpi"><p class="fari-eyebrow">{{ _('page.draft') }}</p><strong>{{ stats.draft }}</strong><small>{{ _('page.open_assessments') }}</small></article>
+  <article class="fari-kpi"><p class="fari-eyebrow">{{ _('page.closed') }}</p><strong>{{ stats.closed }}</strong><small>{{ _('page.immutable_assessments') }}</small></article>
+  <article class="fari-kpi"><p class="fari-eyebrow">{{ _('page.view') }}</p><strong>{{ summaries|length }}</strong><small>{{ _('page.filtered_matches') }}</small></article>
+</section>
+
+<section id="assessment-list" class="mt-9">
+  <div class="fari-section-title">
+    <div><p class="fari-eyebrow">{{ _('page.assessment_list') }}</p><h2>{{ _('page.recent_assessments') }}</h2><p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.assessment_list_description') }}</p></div>
+    <span class="hidden text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0 sm:block">{{ _('page.showing', shown=summaries|length, total=stats.total) }}</span>
+  </div>
+
+  <form method="get" class="fari-card mt-5 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_120px_auto] lg:items-end">
+    <label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.status') }}
+      <select name="status" class="fari-form-control mt-2"><option value="">{{ _('page.all') }}</option><option value="draft" {% if filters.status == 'draft' %}selected{% endif %}>{{ _('human.draft') }}</option><option value="closed" {% if filters.status == 'closed' %}selected{% endif %}>{{ _('human.closed') }}</option></select>
+    </label>
+    <label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.overall_conclusion') }}
+      <select name="result" class="fari-form-control mt-2"><option value="">{{ _('page.all') }}</option><option value="meets" {% if filters.result == 'meets' %}selected{% endif %}>{{ _('human.meets') }}</option><option value="does_not_meet" {% if filters.result == 'does_not_meet' %}selected{% endif %}>{{ _('human.does_not_meet') }}</option><option value="inconclusive" {% if filters.result == 'inconclusive' %}selected{% endif %}>{{ _('human.inconclusive') }}</option><option value="not_assessed" {% if filters.result == 'not_assessed' %}selected{% endif %}>{{ _('human.not_assessed') }}</option></select>
+    </label>
+    <label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.rows') }}
+      <select name="limit" class="fari-form-control mt-2">{% for value in [10, 25, 50, 100] %}<option value="{{ value }}" {% if filters.limit == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+    </label>
+    <div class="text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.filtered_matches') }}</div>
+    <div class="flex gap-2"><button type="submit" class="fari-primary-button">{{ _('page.apply_filters') }}</button><a href="{{ url_for('index') }}" class="fari-secondary-button">{{ _('page.reset') }}</a></div>
   </form>
 </section>
 
 {% if summaries %}
-<section class="mt-6 overflow-hidden rounded-sm border border-latte-surface0 bg-latte-mantle shadow-sm dark:border-mocha-surface0 dark:bg-mocha-mantle">
+<section class="fari-table-wrap mt-5">
   <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-latte-surface0 text-sm dark:divide-mocha-surface0">
-      <thead class="bg-latte-crust dark:bg-mocha-crust">
-        <tr class="text-left text-xs font-black uppercase tracking-[.16em] text-latte-subtext0 dark:text-mocha-subtext0">
-          <th class="px-5 py-4">Assessment</th>
-          <th class="px-5 py-4">Client</th>
-          <th class="px-5 py-4">State</th>
-          <th class="px-5 py-4">Overall</th>
-          <th class="px-5 py-4">Coverage</th>
-          <th class="px-5 py-4">Updated</th>
-          <th class="px-5 py-4 text-right">Actions</th>
-        </tr>
-      </thead>
+    <table class="min-w-full text-sm">
+      <thead><tr class="text-left text-xs font-black uppercase tracking-[.14em] text-latte-subtext0 dark:text-mocha-subtext0"><th class="px-5 py-4">{{ _('page.assessment') }}</th><th class="px-5 py-4">{{ _('page.client') }}</th><th class="px-5 py-4">{{ _('page.state') }}</th><th class="px-5 py-4">{{ _('page.overall') }}</th><th class="px-5 py-4">{{ _('page.coverage') }}</th><th class="px-5 py-4">{{ _('page.updated') }}</th><th class="px-5 py-4 text-right">{{ _('page.actions') }}</th></tr></thead>
       <tbody class="divide-y divide-latte-surface0 dark:divide-mocha-surface0">
-  {% for summary in summaries %}
-  {% set assessment = summary.assessment %}
-        <tr class="align-top">
-          <td class="px-5 py-4">
-            <a href="{{ url_for('assessment_detail', assessment_id=assessment.id) }}" class="block rounded-sm outline-none hover:text-latte-blue focus:text-latte-blue dark:hover:text-mocha-blue dark:focus:text-mocha-blue">
-              <div class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.fari_id }}</div>
-              <div class="mt-2 text-base font-black">{{ assessment.title }}</div>
-            </a>
-          </td>
-          <td class="px-5 py-4 text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.client_name }}</td>
-          <td class="px-5 py-4">{{ lifecycle_badge(assessment.status) }}</td>
-          <td class="px-5 py-4">{{ conclusion_badge(summary.result) }}</td>
-          <td class="px-5 py-4 text-latte-subtext0 dark:text-mocha-subtext0">
-            <div>{{ summary.asset_count }} assets</div>
-            <div>{{ summary.investigation_count }} investigations</div>
-            <div>{{ summary.closed_count }} closed / {{ summary.open_count }} open</div>
-          </td>
-          <td class="px-5 py-4 text-latte-subtext0 dark:text-mocha-subtext0">
-            <div>{{ summary.updated_at[:10] }}</div>
-            <div class="text-xs">{{ summary.updated_at[11:19] if 'T' in summary.updated_at else summary.updated_at }}</div>
-            <div class="mt-2 text-xs font-bold">{{ summary.revision_label }}</div>
-          </td>
-          <td class="px-5 py-4">
-            <div class="flex justify-end gap-3">
-              <a href="{{ url_for('assessment_detail', assessment_id=assessment.id) }}" class="inline-flex items-center rounded-sm px-3 py-2 text-xs font-bold hover:border-latte-blue dark:border-mocha-surface1 dark:hover:border-mocha-blue">Open</a>
-              {% if assessment.status == 'closed' %}
-              <a href="{{ url_for('consolidated_report_pdf', assessment_id=assessment.id) }}" class="inline-flex items-center rounded-sm px-3 py-2 text-xs font-bold hover:border-latte-blue dark:border-mocha-surface1 dark:hover:border-mocha-blue">PDF</a>
-              {% else %}
-              <form method="post" action="{{ url_for('delete_assessment', assessment_id=assessment.id) }}" onsubmit="return confirm('Delete {{ assessment.fari_id }} and all of its open working data? This cannot be undone.')">
-                <button type="submit" class="rounded-sm border border-latte-red px-3 py-2 text-xs font-bold text-latte-red dark:border-mocha-red dark:text-mocha-red">Delete</button>
-              </form>
-              {% endif %}
-            </div>
-          </td>
-        </tr>
-  {% endfor %}
+      {% for summary in summaries %}
+      {% set assessment = summary.assessment %}
+      <tr class="align-top">
+        <td class="px-5 py-5"><a href="{{ url_for('assessment_detail', assessment_id=assessment.id) }}" class="block min-w-[220px]"><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.fari_id }}</span><strong class="mt-2 block text-base font-black hover:text-latte-blue dark:hover:text-mocha-blue">{{ assessment.title }}</strong></a></td>
+        <td class="px-5 py-5 text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.client_name }}</td>
+        <td class="px-5 py-5">{{ lifecycle_badge(assessment.status) }}</td>
+        <td class="px-5 py-5">{{ conclusion_badge(summary.result) }}</td>
+        <td class="px-5 py-5 text-xs leading-6 text-latte-subtext0 dark:text-mocha-subtext0"><div>{{ _('page.assets_count', count=summary.asset_count) }}</div><div>{{ _('page.investigations_count', count=summary.investigation_count) }}</div><div>{{ _('page.closed_open', closed=summary.closed_count, open=summary.open_count) }}</div></td>
+        <td class="whitespace-nowrap px-5 py-5 text-xs text-latte-subtext0 dark:text-mocha-subtext0"><div>{{ summary.updated_at[:10] }}</div><div>{{ summary.revision_label }}</div></td>
+        <td class="px-5 py-5"><div class="flex justify-end gap-2"><a href="{{ url_for('assessment_detail', assessment_id=assessment.id) }}" class="fari-secondary-button px-3 py-2 text-xs">{{ _('page.open') }}</a>{% if assessment.status == 'closed' %}<a href="{{ url_for('consolidated_report_pdf', assessment_id=assessment.id) }}" class="fari-secondary-button px-3 py-2 text-xs">PDF</a>{% else %}<form method="post" action="{{ url_for('delete_assessment', assessment_id=assessment.id) }}" onsubmit="return confirm('{{ _('page.delete_assessment') }} {{ assessment.fari_id }}?')"><button type="submit" class="fari-secondary-button px-3 py-2 text-xs text-latte-red dark:text-mocha-red">{{ _('page.delete') }}</button></form>{% endif %}</div></td>
+      </tr>
+      {% endfor %}
       </tbody>
     </table>
   </div>
 </section>
 {% else %}
-<section class="rounded-sm border border-dashed border-latte-surface1 bg-latte-mantle p-12 text-center dark:border-mocha-surface1 dark:bg-mocha-mantle">
-  <h2 class="text-2xl font-black">No assessments match the current filters</h2>
-  <p class="mt-2 text-latte-subtext0 dark:text-mocha-subtext0">Reset the filters or create the first Frame. FARI will generate stable identifiers and guide the report to closure.</p>
-</section>
+<section class="fari-card mt-5 p-10 text-center sm:p-14"><div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-latte-blue/10 text-2xl text-latte-blue dark:bg-mocha-blue/15 dark:text-mocha-blue">+</div><h2 class="mt-5 text-2xl font-black">{{ _('page.no_assessments') }}</h2><p class="mx-auto mt-2 max-w-xl text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.no_assessments_description') }}</p><a href="{{ url_for('new_assessment') }}" class="fari-primary-button mt-6">{{ _('page.create_frame') }}</a></section>
 {% endif %}
 {% endblock %}

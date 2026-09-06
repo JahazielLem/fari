@@ -1,168 +1,21 @@
 {% extends "base.html" %}
 {% from "_macros.html" import lifecycle_badge, traceability_badge, phase_timeline %}
-{% block title %}{{ assessment.fari_id }} Traceability | FARI{% endblock %}
+{% block title %}{{ assessment.fari_id }} {{ _('page.traceability') }} | FARI{% endblock %}
 {% block content %}
-<section class="grid gap-7 rounded-3xl bg-latte-crust p-7 shadow-soft dark:bg-mocha-crust lg:grid-cols-[1fr_320px] lg:items-center sm:p-9">
-  <div>
-    <div class="flex flex-wrap gap-2"><span class="font-mono text-xs font-bold text-latte-sky dark:text-mocha-sky">{{ assessment.fari_id }}</span>{{ lifecycle_badge(assessment.status) }}</div>
-    <p class="mt-5 text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Traceability</p>
-    <h1 class="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Assessment versions</h1>
-    <p class="mt-4 max-w-3xl text-latte-subtext0 dark:text-mocha-subtext0">Compare captured revisions against the current working state or against prior snapshots. This is the executive audit trail for how the assessment moved from draft to conclusion.</p>
-  </div>
-  <div class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-    <p class="text-xs font-black uppercase tracking-[.18em] text-latte-blue dark:text-mocha-blue">Revision state</p>
-    <strong class="mt-3 block text-3xl font-black">v{{ assessment.revision_count }}</strong>
-    <span class="mt-2 block text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ versions|length }} captured snapshot{{ '' if versions|length == 1 else 's' }}</span>
-  </div>
+<section class="fari-hero p-6 sm:p-8">
+  <div class="grid gap-7 lg:grid-cols-[1fr_260px] lg:items-center"><div><div class="flex flex-wrap items-center gap-2"><span class="font-mono text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.fari_id }}</span>{{ lifecycle_badge(assessment.status) }}</div><p class="mt-5 fari-eyebrow">{{ _('page.traceability') }}</p><h1 class="mt-2 text-4xl font-black tracking-tight sm:text-5xl">{{ _('page.assessment_versions') }}</h1><p class="mt-4 max-w-3xl text-base leading-7 text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.traceability_description') }}</p></div><div class="fari-card p-5"><p class="fari-eyebrow">{{ _('page.revision_state') }}</p><strong class="mt-2 block text-4xl font-black">v{{ assessment.revision_count }}</strong><span class="mt-2 block text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.captured_versions', count=versions|length, s='' if versions|length == 1 else 's') }}</span></div></div>
 </section>
 {{ phase_timeline(phases) }}
 
-<nav class="mt-5 flex flex-wrap justify-end gap-3">
-  <a class="rounded-xl border border-latte-surface1 bg-latte-mantle px-4 py-3 text-sm font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle" href="{{ url_for('assessment_detail', assessment_id=assessment.id) }}">Back to assessment</a>
-</nav>
+<nav class="fari-actionbar mt-5 flex flex-wrap gap-2"><a class="fari-secondary-button" href="{{ url_for('assessment_detail', assessment_id=assessment.id) }}">{{ _('page.back_to_assessment') }}</a><a class="fari-primary-button" href="{{ url_for('consolidated_report', assessment_id=assessment.id) }}">{{ _('page.preview_report') }}</a></nav>
 
-<section class="mt-10 grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+<section class="mt-8 grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
   <aside class="space-y-5 xl:sticky xl:top-24 xl:self-start">
-    <section class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-      <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Compare states</p>
-      <form method="get" class="mt-5 space-y-4">
-        <label class="block text-xs font-bold uppercase tracking-wide">Base state
-          <select name="base" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">
-            {% for option in compare_options %}
-            <option value="{{ option.id }}" {% if base_version and base_version.id == option.id %}selected{% endif %}>{{ option.label }}</option>
-            {% endfor %}
-          </select>
-        </label>
-        <label class="block text-xs font-bold uppercase tracking-wide">Target state
-          <select name="target" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-3 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base">
-            {% for option in compare_options %}
-            <option value="{{ option.id }}" {% if target_version and target_version.id == option.id %}selected{% endif %}>{{ option.label }}</option>
-            {% endfor %}
-          </select>
-        </label>
-        <button class="w-full rounded-xl bg-latte-blue px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-blue dark:text-mocha-crust" type="submit">Show differences</button>
-      </form>
-    </section>
-
-    <section class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Captured versions</p>
-          <h2 class="mt-1 text-xl font-black">Timeline</h2>
-        </div>
-      </div>
-      {% if assessment.status != 'closed' or not versions %}
-      <form method="post" action="{{ url_for('capture_version', assessment_id=assessment.id) }}" class="mt-5 space-y-4">
-        <label class="block text-xs font-bold uppercase tracking-wide">Snapshot note<textarea name="summary" rows="3" class="mt-2 w-full rounded-xl border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case dark:border-mocha-surface1 dark:bg-mocha-base" placeholder="Why this revision matters: new evidence, normalized findings, pre-close review, SBOM refresh..."></textarea></label>
-        <button class="w-full rounded-xl bg-latte-green px-4 py-3 text-sm font-extrabold text-white dark:bg-mocha-green dark:text-mocha-crust" type="submit">Capture revision</button>
-      </form>
-      {% endif %}
-      <div class="mt-5 space-y-3">
-        <article class="rounded-xl border border-latte-surface0 bg-latte-base p-4 dark:border-mocha-surface0 dark:bg-mocha-base">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <strong>Current working state</strong>
-            {{ traceability_badge('live_state') }}
-          </div>
-          <p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.updated_at }}</p>
-        </article>
-        {% if versions %}
-          {% for version in versions %}
-          <article class="rounded-xl border border-latte-surface0 bg-latte-base p-4 dark:border-mocha-surface0 dark:bg-mocha-base">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <strong>{{ version.label }}</strong>
-                <p class="mt-1 font-mono text-[11px] text-latte-subtext0 dark:text-mocha-subtext0">{{ version.fari_id }}</p>
-              </div>
-              {{ traceability_badge(version.trigger) }}
-            </div>
-            <p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ version.created_at }}</p>
-            {% if version.summary %}<p class="mt-3 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ version.summary }}</p>{% endif %}
-          </article>
-          {% endfor %}
-        {% else %}
-        <p class="text-sm text-latte-subtext0 dark:text-mocha-subtext0">No captured versions yet.</p>
-        {% endif %}
-      </div>
-    </section>
+    <section class="fari-card p-5"><div class="fari-section-title"><div><p class="fari-eyebrow">{{ _('page.timeline') }}</p><h2>{{ _('page.captured_versions_title') }}</h2></div><span class="text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ versions|length }}</span></div>{% if assessment.status != 'closed' or not versions %}<form method="post" action="{{ url_for('capture_version', assessment_id=assessment.id) }}" class="mt-5 space-y-4"><label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.snapshot_note') }}<textarea name="summary" rows="3" class="fari-form-control mt-2" placeholder="{{ _('page.snapshot_placeholder') }}"></textarea></label><button class="fari-primary-button w-full" type="submit">{{ _('page.capture_revision') }}</button></form>{% endif %}<div class="mt-5 space-y-3"><article class="rounded-xl border border-latte-blue/30 bg-latte-blue/5 p-4 dark:border-mocha-blue/30 dark:bg-mocha-blue/10"><div class="flex items-center justify-between gap-3"><strong>{{ _('page.current_working_state') }}</strong>{{ traceability_badge('live_state') }}</div><p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ assessment.updated_at }}</p></article>{% for version in versions %}<article class="rounded-xl border border-latte-surface0 bg-latte-base p-4 dark:border-mocha-surface0 dark:bg-mocha-base"><div class="flex items-center justify-between gap-3"><div><strong>{{ version.label }}</strong><p class="mt-1 font-mono text-[11px] text-latte-subtext0 dark:text-mocha-subtext0">{{ version.fari_id }}</p></div>{{ traceability_badge(version.trigger) }}</div><p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ version.created_at }}</p>{% if version.summary %}<p class="mt-3 text-sm leading-6 text-latte-subtext0 dark:text-mocha-subtext0">{{ version.summary }}</p>{% endif %}</article>{% else %}<p class="text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.no_traceability_versions') }}</p>{% endfor %}</div></section>
+    <section class="fari-card p-5"><p class="fari-eyebrow">{{ _('page.compare_states') }}</p><h2 class="mt-1 text-xl font-black">{{ _('page.selected_comparison') }}</h2><form method="get" class="mt-5 space-y-4"><label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.base_state') }}<select name="base" class="fari-form-control mt-2">{% for option in compare_options %}<option value="{{ option.id }}" {% if base_version and base_version.id == option.id %}selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></label><label class="block text-xs font-bold uppercase tracking-wide">{{ _('page.target_state') }}<select name="target" class="fari-form-control mt-2">{% for option in compare_options %}<option value="{{ option.id }}" {% if target_version and target_version.id == option.id %}selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></label><button class="fari-secondary-button w-full" type="submit">{{ _('page.show_differences') }}</button></form></section>
   </aside>
 
-  <div class="space-y-5">
-    <section class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-      <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Selected comparison</p>
-      <div class="mt-4 grid gap-4 md:grid-cols-2">
-        <article class="rounded-xl bg-latte-base p-4 dark:bg-mocha-base">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <strong>{{ base_version.label if base_version else 'No base selected' }}</strong>
-            {% if base_version %}{{ traceability_badge(base_version.trigger) }}{% endif %}
-          </div>
-          {% if base_version %}
-          <p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ base_version.created_at }}</p>
-          {% if base_version.summary %}<p class="mt-3 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ base_version.summary }}</p>{% endif %}
-          {% endif %}
-        </article>
-        <article class="rounded-xl bg-latte-base p-4 dark:bg-mocha-base">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <strong>{{ target_version.label if target_version else 'No target selected' }}</strong>
-            {% if target_version %}{{ traceability_badge(target_version.trigger) }}{% endif %}
-          </div>
-          {% if target_version %}
-          <p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ target_version.created_at }}</p>
-          {% if target_version.summary %}<p class="mt-3 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ target_version.summary }}</p>{% endif %}
-          {% endif %}
-        </article>
-      </div>
-    </section>
-
-    <section class="rounded-2xl border border-latte-surface0 bg-latte-mantle p-6 dark:border-mocha-surface0 dark:bg-mocha-mantle">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p class="text-xs font-black uppercase tracking-[.2em] text-latte-blue dark:text-mocha-blue">Difference view</p>
-          <h2 class="mt-1 text-2xl font-black">What changed</h2>
-        </div>
-        {% if diff %}
-        <span class="rounded-xl bg-latte-base px-4 py-2 text-sm font-bold dark:bg-mocha-base">{{ diff.total_changes }} change{{ '' if diff.total_changes == 1 else 's' }}</span>
-        {% endif %}
-      </div>
-      {% if not base_version or not target_version %}
-      <p class="mt-5 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Select two states to compare.</p>
-      {% elif base_version.id == target_version.id %}
-      <p class="mt-5 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Choose two different states to compare.</p>
-      {% elif diff and diff.groups %}
-      <div class="mt-6 space-y-5">
-        {% for group in diff.groups %}
-        <section class="rounded-2xl bg-latte-base p-5 dark:bg-mocha-base">
-          <div class="flex items-center justify-between gap-3">
-            <h3 class="text-lg font-black">{{ group.title }}</h3>
-            <span class="text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ group.changes|length }} change{{ '' if group.changes|length == 1 else 's' }}</span>
-          </div>
-          <div class="mt-4 space-y-3">
-            {% for change in group.changes %}
-            <article class="rounded-xl border border-latte-surface0 p-4 dark:border-mocha-surface0">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <strong>{{ change.item }}</strong>
-                <span class="rounded-lg bg-latte-surface0 px-2 py-1 text-[11px] font-bold uppercase tracking-wide dark:bg-mocha-surface0">{{ change.kind|human }}</span>
-              </div>
-              <p class="mt-2 text-xs font-bold uppercase tracking-wide text-latte-subtext0 dark:text-mocha-subtext0">{{ change.field|human }}</p>
-              <div class="mt-3 grid gap-3 lg:grid-cols-2">
-                <div class="rounded-lg bg-latte-mantle px-4 py-3 dark:bg-mocha-mantle">
-                  <p class="text-[11px] font-bold uppercase tracking-wide text-latte-subtext0 dark:text-mocha-subtext0">Base</p>
-                  <p class="mt-2 whitespace-pre-wrap text-sm">{{ change.before }}</p>
-                </div>
-                <div class="rounded-lg bg-latte-crust px-4 py-3 dark:bg-mocha-crust">
-                  <p class="text-[11px] font-bold uppercase tracking-wide text-latte-subtext0 dark:text-mocha-subtext0">Target</p>
-                  <p class="mt-2 whitespace-pre-wrap text-sm">{{ change.after }}</p>
-                </div>
-              </div>
-            </article>
-            {% endfor %}
-          </div>
-        </section>
-        {% endfor %}
-      </div>
-      {% else %}
-      <p class="mt-5 text-sm text-latte-subtext0 dark:text-mocha-subtext0">No differences were found between the selected states.</p>
-      {% endif %}
-    </section>
-  </div>
+  <div class="space-y-5"><section class="fari-card p-6"><div class="fari-section-title"><div><p class="fari-eyebrow">{{ _('page.selected_comparison') }}</p><h2>{{ _('page.what_changed') }}</h2></div>{% if diff %}<span class="rounded-full bg-latte-blue/10 px-3 py-1 text-xs font-bold text-latte-blue dark:bg-mocha-blue/15 dark:text-mocha-blue">{{ diff.total_changes }} {{ _('page.changes') }}</span>{% endif %}</div><div class="mt-5 grid gap-4 md:grid-cols-2"><article class="rounded-xl bg-latte-base p-4 dark:bg-mocha-base"><p class="fari-eyebrow">{{ _('page.base') }}</p><strong class="mt-2 block">{{ base_version.label if base_version else _('page.no_base_selected') }}</strong>{% if base_version %}<p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ base_version.created_at }}</p>{% endif %}</article><article class="rounded-xl bg-latte-base p-4 dark:bg-mocha-base"><p class="fari-eyebrow">{{ _('page.target') }}</p><strong class="mt-2 block">{{ target_version.label if target_version else _('page.no_target_selected') }}</strong>{% if target_version %}<p class="mt-2 text-xs text-latte-subtext0 dark:text-mocha-subtext0">{{ target_version.created_at }}</p>{% endif %}</article></div></section>
+  <section class="fari-card p-6">{% if not base_version or not target_version %}<p class="text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.select_two_states') }}</p>{% elif base_version.id == target_version.id %}<p class="text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.choose_different_states') }}</p>{% elif diff and diff.groups %}<div class="space-y-5">{% for group in diff.groups %}<section class="rounded-xl bg-latte-base p-5 dark:bg-mocha-base"><div class="flex items-center justify-between gap-3"><h3 class="text-lg font-black">{{ group.title }}</h3><span class="text-xs font-bold text-latte-subtext0 dark:text-mocha-subtext0">{{ group.changes|length }} {{ _('page.changes') }}</span></div><div class="mt-4 space-y-3">{% for change in group.changes %}<article class="rounded-xl border border-latte-surface0 p-4 dark:border-mocha-surface0"><div class="flex flex-wrap items-center justify-between gap-3"><strong>{{ change.item }}</strong><span class="rounded-full bg-latte-blue/10 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-latte-blue dark:bg-mocha-blue/15 dark:text-mocha-blue">{{ change.kind|human }}</span></div><p class="mt-2 text-xs font-bold uppercase tracking-wide text-latte-subtext0 dark:text-mocha-subtext0">{{ change.field|human }}</p><div class="mt-3 grid gap-3 lg:grid-cols-2"><div class="rounded-xl bg-latte-mantle px-4 py-3 dark:bg-mocha-mantle"><p class="fari-eyebrow">{{ _('page.base') }}</p><p class="mt-2 whitespace-pre-wrap text-sm">{{ change.before }}</p></div><div class="rounded-xl bg-latte-crust px-4 py-3 dark:bg-mocha-crust"><p class="fari-eyebrow">{{ _('page.target') }}</p><p class="mt-2 whitespace-pre-wrap text-sm">{{ change.after }}</p></div></div></article>{% endfor %}</div></section>{% endfor %}</div>{% else %}<p class="text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('page.no_differences') }}</p>{% endif %}</section></div>
 </section>
 {% endblock %}

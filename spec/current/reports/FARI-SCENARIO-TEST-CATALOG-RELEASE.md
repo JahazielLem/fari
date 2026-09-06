@@ -2,93 +2,83 @@
 
 Seeded workspace catalog for the local FARI demo database.
 
-This release edition keeps the same portfolio coverage as the canonical source,
-but restructures the assessment list for easier executive reading in PDF form.
+This release edition keeps the canonical scenario coverage while presenting
+each assessment as a compact executive record.
 
 ## Coverage summary
 
-- `Does Not Meet`: present in current state and in initial mitigation snapshots.
-- `Meets`: present in clean success, mitigation-success, and compensating-control cases.
-- `Inconclusive`: present as a closed replay-characterization case.
-- `Not Assessed`: present as a draft non-gating intake case.
-- `Demonstrated`, `Plausible`, `Not Demonstrated`, and `Not Evaluated` are all represented.
-- Every seeded case includes an SPD-5 companion profile.
+- `Does Not Meet`, `Meets`, `Inconclusive`, and `Not Assessed` are represented.
+- `Demonstrated`, `Plausible`, `Not Demonstrated`, and `Not Evaluated` are represented.
+- Traceability examples include mitigation and asset-source lifecycle revisions.
 
 ## Assessment portfolio
 
-### `ASM-2026-0001` Command Auth Fallback Review
+### ASM-2026-0001 Command Auth Fallback Review
 
-- Current result: ``does_not_meet``
-- Scenario disposition: ``demonstrated``
-- SPD-5 companion: ``Partial alignment``
-- Posture: ``partially_aligned``
-- Versions: v1: Initial confirmed bypass on the legacy bridge. / v2: RF path fixed, residual maintenance bridge keeps the finding open.
-- Notes: Covers a realistic partial mitigation where the executive result remains Does Not Meet.
+- Current result: `does_not_meet`
+- Scenario disposition: `demonstrated`
+- Versions: v1: Initial confirmed bypass / v2: Residual maintenance bridge remains open
+- Notes: Partial mitigation that still fails.
 
-### `ASM-2026-0002` Privileged Operator MFA Rollout
+### ASM-2026-0002 Privileged Operator MFA Rollout
 
-- Current result: ``meets``
-- Scenario disposition: ``not_demonstrated``
-- SPD-5 companion: ``Evidence-backed alignment``
-- Posture: ``aligned``
-- Versions: v1: Password-only privileged access confirmed. / v2: MFA enforced and retested successfully.
-- Notes: Canonical mitigation example that ends in Meets with a clear audit trail.
+- Current result: `meets`
+- Scenario disposition: `not_demonstrated`
+- Versions: v1: Password-only access / v2: MFA enforced and retested
+- Notes: Clean mitigation success.
 
-### `ASM-2026-0003` Replay Window Characterization
+### ASM-2026-0003 Replay Window Characterization
 
-- Current result: ``inconclusive``
-- Scenario disposition: ``plausible``
-- SPD-5 companion: ``Inconclusive due to scope``
-- Posture: ``inconclusive``
-- Versions: v1: Short-window replay retest only; full freshness coverage still pending.
-- Notes: Reference case for Inconclusive plus Plausible and an inconclusive SPD-5 overlay.
+- Current result: `inconclusive`
+- Scenario disposition: `plausible`
+- Versions: v1: Short-window replay retest only
+- Notes: Longer-window validation remains pending.
 
-### `ASM-2026-0004` Telemetry API RBAC Review
+### ASM-2026-0004 Telemetry API RBAC Review
 
-- Current result: ``meets``
-- Scenario disposition: ``not_demonstrated``
-- SPD-5 companion: ``Evidence-backed alignment``
-- Posture: ``aligned``
-- Versions: v1: RBAC and audit controls confirmed on the telemetry API path.
-- Notes: Primary cloud reference for a clean success case.
+- Current result: `meets`
+- Scenario disposition: `not_demonstrated`
+- Versions: v1: RBAC and audit controls confirmed
+- Notes: Cloud reference success case.
 
-### `ASM-2026-0005` Third-Party Firmware Intake
+### ASM-2026-0005 Third-Party Firmware Intake
 
-- Current result: ``not_assessed``
-- Scenario disposition: ``not_evaluated``
-- SPD-5 companion: ``Supplier attestation pending``
-- Posture: ``inconclusive``
-- Versions: v1: Intake-only snapshot with a real Not Assessed outcome.
-- Notes: Non-gating draft case used to exercise the Not Assessed portfolio state and supplier-pending overlay.
+- Current result: `not_assessed`
+- Scenario disposition: `not_evaluated`
+- Versions: v1: Intake-only snapshot
+- Notes: Non-gating draft intake.
 
-### `ASM-2026-0006` SBOM Vulnerability Lifecycle
+### ASM-2026-0006 Asset Source Vulnerability Lifecycle
 
-- Current result: ``meets``
-- Scenario disposition: ``not_demonstrated``
-- SPD-5 companion: ``Continuous assurance``
-- Posture: ``aligned``
-- Versions: v1: Baseline image contains libfoo 1.4.2 with an open advisory. / v2: SBOM refresh confirms libfoo 1.4.5 and closes the claim.
-- Notes: Primary continuous-assurance example using SBOM, inventory events, and mitigation traceability.
+- Current result: `meets`
+- Scenario disposition: `not_demonstrated`
+- Versions: v1: Vulnerable baseline / v2: Fixed dependency confirmed
+- Notes: Asset-source and inventory-event traceability example.
 
-### `ASM-2026-0007` Command-Link Confidentiality Rehearsal
+### ASM-2026-0007 Command-Link Confidentiality Rehearsal
 
-- Current result: ``meets``
-- Scenario disposition: ``plausible``
-- SPD-5 companion: ``Compensating controls``
-- Posture: ``aligned``
-- Versions: v1: Scoped confidentiality result based on compensating controls.
-- Notes: Reference case for Meets plus Plausible and the compensating-controls companion scenario.
+- Current result: `meets`
+- Scenario disposition: `plausible`
+- Versions: v1: Scoped result based on compensating controls
+- Notes: Meets result with an explicit boundary.
+
+### ASM-2026-0008 Operational LEO Reset Command Replay
+
+- Current result: `does_not_meet`
+- Scenario disposition: `demonstrated`
+- Versions: v1: Initial event and evidence intake / v2: Execution, telemetry impact, and unresolved attribution recorded
+- Notes: Operational LEO example combining strong execution evidence with missing backup-station records and incomplete physical transmitter attribution.
 
 ## Filter expectations
 
 - Portfolio filters should show closed assessments in `meets`, `does_not_meet`, and `inconclusive`.
-- The draft intake case should keep a genuine `not_assessed` overall state because its investigation is non-gating.
-- Traceability comparisons should be most interesting on the MFA rollout, auth fallback, and SBOM lifecycle cases.
+- The draft intake case should keep a genuine `not_assessed` overall state.
 
 ## Suggested demo order
 
 1. `ASM-2026-0001` for a partial mitigation that still fails.
 2. `ASM-2026-0002` for a clean mitigation success.
 3. `ASM-2026-0003` for a defensible inconclusive result.
-4. `ASM-2026-0005` for a true draft intake and supplier-pending view.
-5. `ASM-2026-0006` for SBOM-driven continuous assurance.
+4. `ASM-2026-0005` for a true draft intake.
+5. `ASM-2026-0006` for asset-source-driven continuous assurance.
+6. `ASM-2026-0008` for demonstrated operational effect with incomplete source attribution.

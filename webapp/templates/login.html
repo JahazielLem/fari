@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ fari_language() }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign In | FARI</title>
+  <title>{{ _('auth.sign_in') }} | FARI</title>
   <script>
     if (localStorage.getItem('fari-theme') === 'dark' ||
         (!localStorage.getItem('fari-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -11,29 +11,36 @@
     }
   </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='tailwind.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='fari.css') }}?v={{ fari_version }}">
 </head>
 <body class="fari-shell min-h-screen bg-latte-base text-latte-text antialiased transition-colors dark:bg-mocha-base dark:text-mocha-text">
   <header class="border-b border-latte-surface0 bg-latte-base/85 backdrop-blur dark:border-mocha-surface0 dark:bg-mocha-base/85">
     <div class="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
       <a class="text-lg font-black tracking-[.22em] text-latte-blue dark:text-mocha-blue" href="{{ url_for('login') }}">FARI</a>
-      <button id="theme-toggle-auth" type="button" class="rounded-sm border border-latte-surface1 bg-latte-mantle px-3 py-2 text-xs font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle">Theme</button>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 rounded-sm border border-latte-surface1 bg-latte-mantle px-2 py-1 text-xs font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle" aria-label="{{ _('language.switch') }}">
+          <span class="text-latte-subtext0 dark:text-mocha-subtext0">{{ _('language.label') }}:</span>
+          {% for code, label in fari_language_options %}<a href="{{ url_for('set_language', language=code, next=request.full_path) }}" class="rounded px-1.5 py-1 {% if fari_language() == code %}bg-latte-blue text-white dark:bg-mocha-blue dark:text-mocha-crust{% else %}text-latte-subtext0 hover:text-latte-blue dark:text-mocha-subtext0 dark:hover:text-mocha-blue{% endif %}">{{ code|upper }}</a>{% endfor %}
+        </div>
+        <button id="theme-toggle-auth" type="button" class="rounded-sm border border-latte-surface1 bg-latte-mantle px-3 py-2 text-xs font-bold dark:border-mocha-surface1 dark:bg-mocha-mantle">{{ _('auth.theme') }}</button>
+      </div>
     </div>
   </header>
 
   <main class="mx-auto flex min-h-[calc(100vh-65px)] max-w-6xl items-center justify-center px-4 py-10 sm:px-6">
     <div class="grid w-full max-w-5xl gap-8 lg:grid-cols-[1.1fr_420px] lg:items-center">
       <section class="hidden rounded-sm border border-latte-surface0 bg-latte-mantle p-8 shadow-soft dark:border-mocha-surface0 dark:bg-mocha-mantle lg:block">
-        <p class="text-xs font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-blue">Workspace access</p>
-        <h1 class="mt-3 text-4xl font-black tracking-tight">FARI report-author workspace</h1>
-        <p class="mt-4 max-w-2xl text-latte-subtext0 dark:text-mocha-subtext0">Create Frames, manage assets and claims, preserve evidence, normalize supplied material, track SBOM history, and publish executive reports from one place.</p>
+        <p class="text-xs font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-blue">{{ _('auth.workspace_access') }}</p>
+        <h1 class="mt-3 text-4xl font-black tracking-tight">{{ _('auth.workspace_title') }}</h1>
+        <p class="mt-4 max-w-2xl text-latte-subtext0 dark:text-mocha-subtext0">{{ _('auth.workspace_description') }}</p>
         <div class="mt-6 grid gap-4 sm:grid-cols-2">
           <article class="rounded-sm border border-latte-surface0 bg-latte-base p-5 dark:border-mocha-surface0 dark:bg-mocha-base">
-            <strong class="block text-sm font-black">Quick start</strong>
-            <p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Default local credentials are <code class="dark:text-mocha-sky">fari</code> / <code>toor</code>. Change them with <code>FARI_LOGIN_USERNAME</code> and <code>FARI_LOGIN_PASSWORD</code>.</p>
+            <strong class="block text-sm font-black">{{ _('auth.quick_start') }}</strong>
+            <p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('auth.credentials') }}</p>
           </article>
           <article class="rounded-sm border border-latte-surface0 bg-latte-base p-5 dark:border-mocha-surface0 dark:bg-mocha-base">
-            <strong class="block text-sm font-black">Report author</strong>
-            <p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Authentication controls workspace access only. Generated reports still list <code>Fari-Agent</code> as the report author.</p>
+            <strong class="block text-sm font-black">{{ _('auth.report_author') }}</strong>
+            <p class="mt-2 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('auth.report_author_description') }}</p>
           </article>
         </div>
       </section>
@@ -44,18 +51,18 @@
             <div class="mb-5 rounded-sm border px-4 py-3 text-sm font-semibold {% if category == 'error' %}border-latte-red/30 bg-latte-red/10 text-latte-red dark:border-mocha-red/30 dark:bg-mocha-red/10 dark:text-mocha-red{% else %}border-latte-green/30 bg-latte-green/10 text-latte-green dark:border-mocha-green/30 dark:bg-mocha-green/10 dark:text-mocha-green{% endif %}">{{ message }}</div>
           {% endfor %}
         {% endwith %}
-        <p class="text-xs font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-blue">Sign in</p>
-        <h2 class="mt-2 text-3xl font-black">Access the workspace</h2>
-        <p class="mt-3 text-sm text-latte-subtext0 dark:text-mocha-subtext0">Use the workspace credentials to continue into assessments, resources, and the internal FARI wiki.</p>
+        <p class="text-xs font-black uppercase tracking-[.22em] text-latte-blue dark:text-mocha-blue">{{ _('auth.sign_in') }}</p>
+        <h2 class="mt-2 text-3xl font-black">{{ _('auth.access_workspace') }}</h2>
+        <p class="mt-3 text-sm text-latte-subtext0 dark:text-mocha-subtext0">{{ _('auth.access_description') }}</p>
         <form method="post" class="mt-6 space-y-4">
           <input type="hidden" name="next" value="{{ next_target }}">
-          <label class="block text-xs font-bold uppercase tracking-wide">Username
+          <label class="block text-xs font-bold uppercase tracking-wide">{{ _('auth.username') }}
             <input name="username" required autocomplete="username" value="{{ request.form.get('username', '') }}" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">
           </label>
-          <label class="block text-xs font-bold uppercase tracking-wide">Password
+          <label class="block text-xs font-bold uppercase tracking-wide">{{ _('auth.password') }}
             <input name="password" type="password" required autocomplete="current-password" class="mt-2 w-full rounded-sm border border-latte-surface1 bg-latte-base px-4 py-3 text-sm normal-case outline-none focus:border-latte-blue dark:border-mocha-surface1 dark:bg-mocha-base dark:focus:border-mocha-blue">
           </label>
-          <button type="submit" class="w-full rounded-sm bg-latte-blue px-4 py-3 text-sm font-extrabold text-white shadow-lg shadow-latte-blue/20 hover:opacity-90 dark:bg-mocha-blue dark:text-mocha-crust">Open workspace</button>
+          <button type="submit" class="w-full rounded-sm bg-latte-blue px-4 py-3 text-sm font-extrabold text-white shadow-lg shadow-latte-blue/20 hover:opacity-90 dark:bg-mocha-blue dark:text-mocha-crust">{{ _('auth.open_workspace') }}</button>
         </form>
       </section>
     </div>

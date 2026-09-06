@@ -1,0 +1,124 @@
+:root {
+  --fari-ink: #24243a;
+  --fari-muted: #6c6f85;
+  --fari-line: #d9dce5;
+  --fari-card: rgba(255, 255, 255, 0.82);
+  --fari-soft: #f3f5f8;
+  --fari-brand: #1e66f5;
+  --fari-brand-soft: rgba(30, 102, 245, 0.1);
+  --fari-shadow: 0 16px 40px rgba(36, 36, 58, 0.07);
+}
+
+.dark {
+  --fari-ink: #cdd6f4;
+  --fari-muted: #a6adc8;
+  --fari-line: #34364d;
+  --fari-card: rgba(30, 30, 46, 0.88);
+  --fari-soft: #24243a;
+  --fari-brand: #89b4fa;
+  --fari-brand-soft: rgba(137, 180, 250, 0.14);
+  --fari-shadow: 0 16px 40px rgba(17, 17, 27, 0.25);
+}
+
+body { letter-spacing: -0.01em; }
+.rounded-sm, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl { border-radius: 14px !important; }
+.fari-shell { background-attachment: fixed; }
+.fari-topbar { box-shadow: 0 1px 0 rgba(36, 36, 58, 0.03); }
+.fari-brand-mark { color: var(--fari-brand); font-size: 1.1rem; font-weight: 950; letter-spacing: .24em; }
+.fari-icon-button { display: inline-flex; height: 2.5rem; width: 2.5rem; align-items: center; justify-content: center; border: 1px solid var(--fari-line); border-radius: 12px; background: var(--fari-card); color: var(--fari-ink); transition: .18s ease; }
+.fari-icon-button:hover { border-color: var(--fari-brand); color: var(--fari-brand); transform: translateY(-1px); }
+.fari-topbar-action, .fari-primary-button { display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--fari-brand); color: #fff; padding: .7rem 1rem; font-size: .8rem; font-weight: 800; box-shadow: 0 8px 20px rgba(30, 102, 245, .18); transition: .18s ease; }
+.fari-topbar-action:hover, .fari-primary-button:hover { filter: brightness(1.04); transform: translateY(-1px); }
+.dark .fari-topbar-action, .dark .fari-primary-button { color: #11111b; }
+.fari-language-switch { display: flex; align-items: center; gap: .2rem; border: 1px solid var(--fari-line); border-radius: 12px; background: var(--fari-card); padding: .25rem; }
+.fari-language-switch a { border-radius: 8px; padding: .35rem .5rem; color: var(--fari-muted); font-size: .7rem; font-weight: 850; }
+.fari-language-switch a:hover, .fari-language-switch a.is-active { background: var(--fari-brand-soft); color: var(--fari-brand); }
+.fari-sidebar { background: rgba(245, 247, 250, .94); box-shadow: 12px 0 35px rgba(36, 36, 58, .04); }
+.dark .fari-sidebar { background: rgba(24, 24, 37, .96); box-shadow: 12px 0 35px rgba(17, 17, 27, .2); }
+.fari-sidebar-user { display: flex; align-items: center; gap: .75rem; border: 1px solid var(--fari-line); border-radius: 16px; background: var(--fari-card); padding: .85rem; }
+.fari-avatar { display: grid; height: 2.6rem; width: 2.6rem; flex: 0 0 auto; place-items: center; border-radius: 13px; background: var(--fari-brand-soft); color: var(--fari-brand); font-size: 1rem; font-weight: 900; }
+.fari-eyebrow { color: var(--fari-brand); font-size: .65rem; font-weight: 900; letter-spacing: .16em; line-height: 1.2; text-transform: uppercase; }
+.fari-sidebar-cta { display: flex; align-items: center; gap: .75rem; margin-top: 1rem; border-radius: 16px; background: linear-gradient(135deg, #1e66f5, #04a5e5); color: #fff; padding: .85rem; box-shadow: 0 12px 25px rgba(30, 102, 245, .18); transition: .18s ease; }
+.fari-sidebar-cta:hover { transform: translateY(-1px); box-shadow: 0 16px 30px rgba(30, 102, 245, .24); }
+.fari-sidebar-cta small { display: block; margin-top: .15rem; color: rgba(255, 255, 255, .78); font-size: .68rem; line-height: 1.35; }
+.fari-nav-link { display: flex; align-items: center; gap: .7rem; border: 1px solid transparent; border-radius: 12px; padding: .75rem .8rem; color: var(--fari-muted); font-size: .85rem; font-weight: 800; transition: .18s ease; }
+.fari-nav-link svg { height: 1.1rem; width: 1.1rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fari-nav-link:hover { background: var(--fari-brand-soft); color: var(--fari-brand); }
+.fari-nav-link.is-active { border-color: rgba(30, 102, 245, .16); background: var(--fari-brand-soft); color: var(--fari-brand); }
+.fari-nav-logout { color: #d20f39; justify-content: center; }
+.fari-sidebar-note { margin-top: 1rem; border-top: 1px solid var(--fari-line); padding: 1rem .75rem 0; }
+.fari-page { max-width: 1480px; }
+.fari-flash { display: flex; align-items: flex-start; gap: .65rem; border: 1px solid rgba(64, 160, 43, .3); border-radius: 14px; background: rgba(64, 160, 43, .08); padding: .8rem 1rem; color: #278a25; font-size: .84rem; font-weight: 650; }
+.fari-flash.is-error { border-color: rgba(210, 15, 57, .3); background: rgba(210, 15, 57, .08); color: #c50f39; }
+.fari-flash > span { display: grid; height: 1.25rem; width: 1.25rem; flex: 0 0 auto; place-items: center; border-radius: 999px; background: currentColor; color: white; font-size: .7rem; font-weight: 900; }
+.fari-footer { border-top: 1px solid var(--fari-line); }
+.fari-card { border: 1px solid var(--fari-line); border-radius: 18px; background: var(--fari-card); box-shadow: var(--fari-shadow); }
+.fari-hero { border: 1px solid rgba(30, 102, 245, .14); border-radius: 22px; background: linear-gradient(135deg, rgba(30, 102, 245, .12), rgba(4, 165, 229, .04) 52%, var(--fari-card)); box-shadow: var(--fari-shadow); }
+.fari-section-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--fari-line); padding-bottom: .85rem; }
+.fari-section-title h2 { margin-top: .25rem; font-size: 1.3rem; font-weight: 900; letter-spacing: -.025em; }
+.fari-kpi { border: 1px solid var(--fari-line); border-radius: 16px; background: var(--fari-card); padding: 1rem; box-shadow: 0 8px 20px rgba(36, 36, 58, .04); }
+.fari-kpi strong { display: block; margin-top: .45rem; font-size: 1.8rem; font-weight: 950; letter-spacing: -.06em; }
+.fari-kpi small { display: block; margin-top: .15rem; color: var(--fari-muted); font-size: .72rem; line-height: 1.4; }
+.fari-input { width: 100%; border: 1px solid var(--fari-line); border-radius: 12px; background: var(--fari-card); padding: .72rem .85rem; color: var(--fari-ink); outline: none; transition: .18s ease; }
+.fari-input:focus { border-color: var(--fari-brand); box-shadow: 0 0 0 4px var(--fari-brand-soft); }
+textarea.fari-input { min-height: 7rem; resize: vertical; }
+.fari-secondary-button { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--fari-line); border-radius: 12px; background: var(--fari-card); padding: .68rem .9rem; font-size: .78rem; font-weight: 800; transition: .18s ease; }
+.fari-secondary-button:hover { border-color: var(--fari-brand); color: var(--fari-brand); }
+.fari-modal { border: 1px solid var(--fari-line); border-radius: 20px; box-shadow: 0 30px 80px rgba(17, 17, 27, .28); }
+.fari-help-result { border: 1px solid var(--fari-line); border-radius: 14px; background: var(--fari-card); padding: 1rem; }
+.fari-stepper { overflow-x: auto; border: 1px solid var(--fari-line); border-radius: 18px; background: var(--fari-card); padding: 1rem 1.1rem; box-shadow: var(--fari-shadow); }
+.fari-stepper-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.fari-stepper-heading > div { min-width: 0; }
+.fari-stepper-progress { flex: 0 0 auto; color: var(--fari-muted); font-size: .72rem; font-weight: 850; }
+.fari-stepper-track { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; min-width: 620px; margin-top: 1rem; }
+.fari-stepper-track::before { position: absolute; top: .95rem; right: 2.2rem; left: 2.2rem; height: 2px; background: var(--fari-line); content: ''; }
+.fari-stepper button { position: relative; z-index: 1; display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: .5rem; border-radius: 13px; padding: .15rem .25rem .3rem; text-align: left; color: var(--fari-muted); transition: .18s ease; }
+.fari-stepper button:hover .fari-step-copy, .fari-stepper button.is-active .fari-step-copy { color: var(--fari-brand); }
+.fari-stepper button > .fari-step-number { display: grid; height: 1.9rem; width: 1.9rem; place-items: center; border: 4px solid var(--fari-card); border-radius: 999px; background: var(--fari-soft); box-shadow: 0 0 0 1px var(--fari-line); font-size: .7rem; font-weight: 900; }
+.fari-stepper button.is-active > .fari-step-number { background: var(--fari-brand); box-shadow: 0 0 0 1px var(--fari-brand); color: white; }
+.dark .fari-stepper button.is-active > .fari-step-number { color: #11111b; }
+.fari-step-copy { display: block; min-width: 0; width: 100%; }
+.fari-step-copy strong, .fari-step-copy small { display: block; overflow-wrap: anywhere; }
+.fari-step-copy strong { font-size: .82rem; line-height: 1.25; }
+.fari-step-copy small { margin-top: .25rem; color: var(--fari-muted); font-size: .7rem; font-weight: 400; line-height: 1.45; }
+.fari-workflow-strip { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.fari-workflow-strip::before { position: absolute; top: 1rem; right: 1.25rem; left: 1.25rem; height: 2px; background: var(--fari-line); content: ''; }
+.fari-workflow-step { position: relative; z-index: 1; display: flex; min-width: 0; flex-direction: column; gap: .45rem; align-items: flex-start; }
+.fari-workflow-number { display: grid; height: 2rem; width: 2rem; place-items: center; border: 4px solid var(--fari-card); border-radius: 999px; background: var(--fari-brand-soft); box-shadow: 0 0 0 1px var(--fari-line); color: var(--fari-brand); font-size: .65rem; font-weight: 900; }
+.fari-workflow-step strong, .fari-workflow-step span:last-child { display: block; overflow-wrap: anywhere; }
+.fari-workflow-step strong { font-size: .8rem; line-height: 1.25; }
+.fari-workflow-step span:last-child { margin-top: .2rem; color: var(--fari-muted); font-size: .68rem; line-height: 1.4; }
+.fari-form-panel { border: 1px solid var(--fari-line); border-radius: 18px; background: var(--fari-card); padding: 1.25rem; box-shadow: var(--fari-shadow); }
+.fari-form-panel[hidden] { display: none; }
+.fari-form-panel label { color: var(--fari-ink); }
+.fari-form-panel input:not([type=file]), .fari-form-panel select, .fari-form-panel textarea, .fari-form-control { width: 100%; border: 1px solid var(--fari-line); border-radius: 12px; background: var(--fari-card); padding: .72rem .85rem; color: var(--fari-ink); outline: none; transition: .18s ease; }
+.fari-form-panel input:focus, .fari-form-panel select:focus, .fari-form-panel textarea:focus, .fari-form-control:focus { border-color: var(--fari-brand); box-shadow: 0 0 0 4px var(--fari-brand-soft); }
+.fari-form-panel textarea { resize: vertical; }
+.fari-form-panel input::placeholder, .fari-form-panel textarea::placeholder { color: var(--fari-muted); opacity: .78; }
+.fari-form-help { margin-top: .45rem; color: var(--fari-muted); font-size: .72rem; line-height: 1.55; }
+.fari-form-footer { display: flex; align-items: center; justify-content: space-between; gap: .75rem; border-top: 1px solid var(--fari-line); padding-top: 1rem; }
+.fari-workflow-note { border-left: 3px solid var(--fari-brand); border-radius: 0 12px 12px 0; background: var(--fari-brand-soft); padding: .8rem 1rem; color: var(--fari-muted); font-size: .78rem; line-height: 1.55; }
+.fari-phase-timeline { overflow-x: auto; border: 1px solid var(--fari-line); border-radius: 18px; background: var(--fari-card); padding: 1rem 1.1rem; box-shadow: var(--fari-shadow); }
+.fari-phase-list { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; min-width: 760px; list-style: none; }
+.fari-phase-list::before { position: absolute; top: .95rem; right: 2.15rem; left: 2.15rem; height: 2px; background: var(--fari-line); content: ''; }
+.fari-phase-item { position: relative; min-width: 0; background: transparent; }
+.fari-phase-item > a, .fari-phase-item > div { position: relative; z-index: 1; display: flex; min-height: 0; flex-direction: column; align-items: flex-start; gap: .45rem; padding: .15rem .25rem .2rem; }
+.fari-phase-item > a:hover .fari-phase-copy { color: var(--fari-brand); }
+.fari-phase-number { display: grid; height: 1.9rem; width: 1.9rem; flex: 0 0 auto; place-items: center; border: 4px solid var(--fari-card); border-radius: 999px; background: var(--fari-soft); box-shadow: 0 0 0 1px var(--fari-line); color: var(--fari-muted); font-size: .7rem; font-weight: 900; }
+.fari-phase-copy { display: block; min-width: 0; }
+.fari-phase-copy strong, .fari-phase-copy small { display: block; overflow-wrap: anywhere; }
+.fari-phase-copy strong { margin-top: .2rem; font-size: .82rem; line-height: 1.25; }
+.fari-phase-copy small { max-width: 14rem; margin-top: .2rem; color: var(--fari-muted); font-size: .68rem; line-height: 1.4; }
+.fari-phase-item.is-complete .fari-phase-number { background: #40a02b; color: #fff; }
+.fari-phase-item.is-complete .fari-phase-copy { color: #278a25; }
+.fari-phase-item.is-current .fari-phase-number { background: var(--fari-brand); color: #fff; }
+.fari-phase-item.is-current .fari-phase-copy { color: var(--fari-brand); }
+.dark .fari-phase-item.is-current .fari-phase-number { color: #11111b; }
+.fari-phase-state { display: block; color: var(--fari-muted); font-size: .62rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.fari-phase-item.is-complete .fari-phase-state { color: #40a02b; }.fari-phase-item.is-current .fari-phase-state { color: var(--fari-brand); }
+.fari-phase-item strong { display: block; margin-top: .2rem; font-size: .82rem; font-weight: 900; }.fari-phase-item small { display: block; margin-top: .2rem; color: var(--fari-muted); font-size: .68rem; line-height: 1.35; }
+.fari-table-wrap { overflow-x: auto; border: 1px solid var(--fari-line); border-radius: 18px; background: var(--fari-card); box-shadow: var(--fari-shadow); }
+.fari-table-wrap table thead { background: var(--fari-soft); }
+.fari-table-wrap tbody tr { transition: .16s ease; }
+.fari-table-wrap tbody tr:hover { background: var(--fari-brand-soft); }
+@media (max-width: 640px) { .fari-page { padding-top: 1.2rem; } .fari-hero { border-radius: 18px; } .fari-form-footer { align-items: stretch; flex-direction: column-reverse; } .fari-form-footer > * { width: 100%; } .fari-workflow-strip { min-width: 520px; } }

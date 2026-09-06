@@ -1,0 +1,8 @@
+{
+  "description": "Terms intentionally preserved in English when Spanish is selected. Review this list whenever the dictionaries change.",
+  "keys": [
+    "language.english",
+    "page.create_frame",
+    "page.asset_sources"
+  ]
+}

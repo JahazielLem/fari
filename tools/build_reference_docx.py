@@ -283,7 +283,7 @@ def add_cover(doc):
     labels = [
         ("FRAME", "Mission, scope, authorization"),
         ("ACQUIRE", "Evidence intake and sufficiency"),
-        ("RELATE", "SPARTA, findings, conclusions"),
+        ("RELATE", "Findings, mappings, conclusions"),
         ("INFORM", "Result cards, consolidation, action"),
     ]
     for idx, (label, detail) in enumerate(labels):
@@ -558,7 +558,6 @@ def build():
 
     for path, title in (
         (SPEC_CURRENT_ROOT / "specification" / "FARI-SPECIFICATION.md", None),
-        (SPEC_CURRENT_ROOT / "specification" / "FARI-SPD5-COMPANION.md", "Appendix A: SPD-5 Companion Profile"),
         (ROOT / "examples" / "01-minimal-source-review.md", "Appendix C: Progressive Examples"),
         (ROOT / "examples" / "02-qemu-firmware-assessment.md", None),
         (ROOT / "examples" / "03-mission-wide-assessment.md", None),
@@ -567,9 +566,9 @@ def build():
         markdown_to_doc(doc, path, title_override=title, page_break=path.name != "FARI-METHODOLOGY.md")
 
     doc.core_properties.title = "FARI Framework for Aerospace Research and Investigation"
-    doc.core_properties.subject = "Methodology, SPARTA integration, examples, process validation, and web requirements"
+    doc.core_properties.subject = "Methodology, examples, process validation, and web requirements"
     doc.core_properties.author = "FARI Project"
-    doc.core_properties.keywords = "FARI, space cybersecurity, SPARTA, assurance, qualitative conclusion"
+    doc.core_properties.keywords = "FARI, space cybersecurity, assurance, qualitative conclusion"
     doc.save(OUTPUT)
     print(OUTPUT)
 

@@ -16,41 +16,30 @@ from flask import (
     Flask,
     abort,
     flash,
+    g,
     jsonify,
     redirect,
     render_template,
     request,
     send_file,
+    session,
     url_for,
 )
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from werkzeug.utils import secure_filename
 
-from webapp.attack_flow import AttackFlowError, parse_attack_flow
-from webapp.compliance import (
-    SPD5_COMPANION_KEY,
-    SPD5_COMPANION_REFERENCE_URL,
-    SPD5_SCENARIOS,
-    SPD5_STATUS_OPTIONS,
-    family_groups_for_profile,
-    find_profile_by_key,
-    scenario_by_slug,
-    seed_spd5_companion,
-    status_counts,
-    sync_profile_posture,
-)
+from webapp.i18n import TranslationCatalog, load_catalog
 from webapp.db import (
     Assessment,
     AssessmentVersion,
     Asset,
-    AttackFlow,
     Evidence,
     Finding,
     InventoryComponent,
     InventoryEvent,
     Investigation,
-    SbomDocument,
+    AssetSource,
     db,
     init_app as init_db,
     next_sequence,
@@ -65,8 +54,8 @@ from webapp.reporting import (
     human,
     overall_conclusion,
 )
-from webapp.sbom import parse_sbom_bytes
-from webapp.sparta_parser import countermeasures_for, load_sparta_catalog, search_ttps
+from webapp.asset_sources import parse_asset_source
+from webapp.contract import CONCLUSION_ACTIONS, CONTRACT
 from webapp.traceability import (
     capture_assessment_version,
     current_snapshot_reference,
@@ -114,8 +103,6 @@ FINDING_FIELDS = [
     "condition_text",
     "observed_effect",
     "credible_impact",
-    "sparta_id",
-    "sparta_name",
     "mapping_state",
     "mapping_rationale",
 ]
@@ -127,7 +114,7 @@ SPEC_SCHEMA_ROOT = SPEC_ROOT / "schema"
 RELEASE_ROOT = SPEC_RELEASES_ROOT / f"v{FARI_VERSION}"
 login_manager = LoginManager()
 login_manager.login_view = "login"
-login_manager.login_message = "Sign in to continue working in FARI."
+login_manager.login_message = None
 login_manager.login_message_category = "error"
 
 
@@ -155,19 +142,20 @@ def create_app(test_config=None):
         if database_url
         else None,
         UPLOAD_DIR=str(data_dir / "evidence"),
-        ATTACK_FLOW_DIR=str(data_dir / "attack_flows"),
-        SBOM_DIR=str(data_dir / "sbom"),
+        ASSET_SOURCE_DIR=str(data_dir / "sources"),
         FARI_LOGIN_USERNAME=os.environ.get("FARI_LOGIN_USERNAME", "fari"),
         FARI_LOGIN_PASSWORD=os.environ.get("FARI_LOGIN_PASSWORD", "toor"),
         FARI_REPOSITORY_URL=os.environ.get("FARI_REPOSITORY_URL", ""),
         FARI_BRAND_IMAGE_URL=os.environ.get("FARI_BRAND_IMAGE_URL", ""),
-        MAX_CONTENT_LENGTH=50 * 1024 * 1024,
+        FARI_DEFAULT_LANGUAGE=os.environ.get("FARI_DEFAULT_LANGUAGE", "en"),
+        FARI_TRANSLATIONS_DIR=str(PROJECT_ROOT / "webapp" / "translations"),
+        MAX_CONTENT_LENGTH=int(os.environ.get("FARI_MAX_UPLOAD_MB", "250")) * 1024 * 1024,
     )
     if test_config:
         app.config.update(test_config)
         database_parent = Path(app.config["DATABASE"]).parent
-        if "SBOM_DIR" not in test_config:
-            app.config["SBOM_DIR"] = str(database_parent / "sbom")
+        if "ASSET_SOURCE_DIR" not in test_config:
+            app.config["ASSET_SOURCE_DIR"] = str(database_parent / "sources")
         if "DATABASE" in test_config and "SQLALCHEMY_DATABASE_URI" not in test_config:
             app.config["SQLALCHEMY_DATABASE_URI"] = None
     if not app.config.get("SQLALCHEMY_DATABASE_URI"):
@@ -179,22 +167,42 @@ def create_app(test_config=None):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config.setdefault("SQLALCHEMY_ENGINE_OPTIONS", {"pool_pre_ping": True})
     Path(app.config["UPLOAD_DIR"]).mkdir(parents=True, exist_ok=True)
-    Path(app.config["ATTACK_FLOW_DIR"]).mkdir(parents=True, exist_ok=True)
-    Path(app.config["SBOM_DIR"]).mkdir(parents=True, exist_ok=True)
+    Path(app.config["ASSET_SOURCE_DIR"]).mkdir(parents=True, exist_ok=True)
+    catalog: TranslationCatalog = load_catalog(app.config["FARI_TRANSLATIONS_DIR"])
+    app.config["FARI_DEFAULT_LANGUAGE"] = catalog.normalize(
+        app.config["FARI_DEFAULT_LANGUAGE"]
+    )
     init_db(app)
     login_manager.init_app(app)
 
-    app.jinja_env.filters["human"] = human
+    def language() -> str:
+        return catalog.normalize(session.get("language", app.config["FARI_DEFAULT_LANGUAGE"]))
+
+    def translate(key: str, **values):
+        return catalog.get(key, language(), **values)
+
+    app.jinja_env.filters["human"] = lambda value: catalog.human(value, language())
+    app.jinja_env.globals["_"] = translate
+    app.jinja_env.globals["fari_language"] = language
+    app.jinja_env.globals["fari_language_options"] = catalog.language_options()
     app.jinja_env.globals["fari_generated_with"] = FARI_GENERATED_WITH
     app.jinja_env.globals["fari_version"] = FARI_VERSION
     app.jinja_env.globals["fari_repository_url"] = app.config["FARI_REPOSITORY_URL"]
     app.jinja_env.globals["fari_brand_image_url"] = app.config["FARI_BRAND_IMAGE_URL"]
+    app.jinja_env.globals["format_bytes"] = format_bytes
+    app.jinja_env.globals["fari_contract"] = CONTRACT
     app.jinja_env.globals["form_value"] = lambda name, default="": (
         request.form.get(name, default) if request.method == "POST" else default
     )
     app.jinja_env.globals["form_checked"] = lambda name, default=False: (
         name in request.form if request.method == "POST" else default
     )
+
+    @app.before_request
+    def set_language_context():
+        g.fari_catalog = catalog
+        g.fari_language = language()
+        return None
 
     def release_file(*parts: str) -> Path:
         current = RELEASE_ROOT.joinpath(*parts)
@@ -212,38 +220,31 @@ def create_app(test_config=None):
     resource_catalog = [
         {
             "slug": "specification",
-            "label": "FARI specification",
-            "description": "Versioned PDF specification with workflow, glossary, examples, and the SPD-5 companion appendix.",
+            "label_key": "resource.specification.label",
+            "description_key": "resource.specification.description",
             "path": release_file("specification", f"FARI-Specification-v{FARI_VERSION}.pdf"),
             "download_name": f"FARI-Specification-v{FARI_VERSION}.pdf",
         },
         {
             "slug": "manual-template",
-            "label": "Manual fill template",
-            "description": "Versioned PDF template aligned with the finalized workflow and field names.",
+            "label_key": "resource.manual.label",
+            "description_key": "resource.manual.description",
             "path": release_file("manual-template", f"FARI-Manual-Template-v{FARI_VERSION}.pdf"),
             "download_name": f"FARI-Manual-Template-v{FARI_VERSION}.pdf",
         },
         {
             "slug": "scenario-catalog",
-            "label": "Scenario test catalog",
-            "description": "Versioned PDF catalog of seeded FARI and SPD-5 companion scenarios used to validate the framework.",
+            "label_key": "resource.catalog.label",
+            "description_key": "resource.catalog.description",
             "path": release_file("reports", f"FARI-SCENARIO-TEST_CATALOG-v{FARI_VERSION}.pdf"),
             "download_name": f"FARI-SCENARIO-TEST_CATALOG-v{FARI_VERSION}.pdf",
         },
         {
             "slug": "schema",
-            "label": "Assessment JSON schema",
-            "description": "Machine-readable contract for exports and integrations.",
+            "label_key": "resource.schema.label",
+            "description_key": "resource.schema.description",
             "path": SPEC_SCHEMA_ROOT / "fari-assessment.schema.json",
             "download_name": "fari-assessment.schema.json",
-        },
-        {
-            "slug": "spd5-companion",
-            "label": "SPD-5 companion profile",
-            "description": "Compliance overlay guidance, scenarios, and control families tied back to FARI evidence.",
-            "path": release_file("_sources", "specification", "FARI-SPD5-COMPANION.md"),
-            "download_name": "FARI-SPD5-COMPANION.md",
         },
     ]
     resources_by_slug = {item["slug"]: item for item in resource_catalog}
@@ -259,14 +260,29 @@ def create_app(test_config=None):
             return value
         return url_for("index")
 
+    @app.get("/language")
+    def set_language():
+        selected = catalog.normalize(request.args.get("language"))
+        session["language"] = selected
+        return redirect(safe_redirect_target(request.args.get("next")))
+
+    @app.get("/language/dictionary")
+    def language_dictionary():
+        return render_template(
+            "language_dictionary.html",
+            dictionary=catalog.review(language()),
+            exceptions=catalog.exceptions,
+        )
+
     @login_manager.unauthorized_handler
     def unauthorized():
+        flash(translate("auth.sign_in_to_continue"), "error")
         return redirect(url_for("login", next=request.full_path if request.query_string else request.path))
 
     @app.before_request
     def require_workspace_login():
         endpoint = request.endpoint or ""
-        if endpoint in {"login", "static"}:
+        if endpoint in {"login", "static", "set_language"}:
             return None
         if current_user.is_authenticated:
             return None
@@ -288,15 +304,15 @@ def create_app(test_config=None):
             )
             if valid_username and valid_password:
                 login_user(FariUser(username))
-                flash("Workspace access granted.", "success")
+                flash(translate("flash.workspace_granted"), "success")
                 return redirect(safe_redirect_target(next_target))
-            flash("Invalid credentials.", "error")
+            flash(translate("flash.invalid_credentials"), "error")
         return render_template("login.html", next_target=safe_redirect_target(next_target))
 
     @app.post("/logout")
     def logout():
         logout_user()
-        flash("Signed out from the workspace.", "success")
+        flash(translate("flash.signed_out"), "success")
         return redirect(url_for("login"))
 
     @app.get("/")
@@ -304,15 +320,9 @@ def create_app(test_config=None):
         status_filter = request.args.get("status", "all").strip().lower()
         result_filter = request.args.get("result", "all").strip().lower()
         limit = _integer_or_none(request.args.get("limit")) or 25
-        if status_filter not in {"all", "draft", "closed"}:
+        if status_filter not in {"all", *CONTRACT["assessment_statuses"]}:
             status_filter = "all"
-        if result_filter not in {
-            "all",
-            "meets",
-            "does_not_meet",
-            "inconclusive",
-            "not_assessed",
-        }:
+        if result_filter not in {"all", *CONTRACT["conclusions"]}:
             result_filter = "all"
         if limit not in {10, 25, 50, 100}:
             limit = 25
@@ -403,22 +413,19 @@ def create_app(test_config=None):
     def assessment_detail(assessment_id):
         assessment = get_assessment(assessment_id)
         checks = assessment_checks(assessment)
-        spd5_profile = find_profile_by_key(assessment, SPD5_COMPANION_KEY)
         return render_template(
             "assessment_detail.html",
             assessment=assessment,
             assets=assessment.assets,
             investigations=assessment.investigations,
-            attack_flows=assessment.attack_flows,
-            sbom_documents=assessment.sbom_documents,
-            inventory_components=assessment.inventory_components,
+            asset_source_count=sum(len(asset.sources) for asset in assessment.assets),
+            asset_component_count=sum(
+                len(asset.inventory_components) for asset in assessment.assets
+            ),
             overall=overall_conclusion(assessment.investigations),
             checks=checks,
             phases=assessment_phases(assessment),
             revision_label=latest_revision_label(assessment),
-            spd5_profile=spd5_profile,
-            spd5_counts=status_counts(spd5_profile.checks) if spd5_profile else {},
-            spd5_scenario=scenario_by_slug(spd5_profile.scenario) if spd5_profile else None,
         )
 
     @app.get("/assessments/<int:assessment_id>/traceability")
@@ -465,79 +472,6 @@ def create_app(test_config=None):
             phases=assessment_phases(assessment),
         )
 
-    @app.post("/assessments/<int:assessment_id>/compliance/spd5-companion/create")
-    def create_spd5_companion(assessment_id):
-        assessment = get_assessment(assessment_id)
-        ensure_assessment_open(assessment)
-        profile = find_profile_by_key(assessment, SPD5_COMPANION_KEY)
-        if profile is None:
-            profile = seed_spd5_companion(assessment)
-            db.session.add(profile)
-            touch_assessment(assessment)
-            db.session.commit()
-            flash(
-                "SPD-5 companion profile created. Map controls to FARI evidence as needed.",
-                "success",
-            )
-        return redirect(url_for("assessment_spd5_companion", assessment_id=assessment_id))
-
-    @app.route(
-        "/assessments/<int:assessment_id>/compliance/spd5-companion",
-        methods=["GET", "POST"],
-    )
-    def assessment_spd5_companion(assessment_id):
-        assessment = get_assessment(assessment_id)
-        profile = find_profile_by_key(assessment, SPD5_COMPANION_KEY)
-        if profile is None:
-            return render_template(
-                "compliance_profile.html",
-                assessment=assessment,
-                profile=None,
-                groups=[],
-                counts={option: 0 for option in SPD5_STATUS_OPTIONS},
-                scenarios=SPD5_SCENARIOS,
-                status_options=SPD5_STATUS_OPTIONS,
-                reference_url=SPD5_COMPANION_REFERENCE_URL,
-                phases=assessment_phases(assessment),
-            )
-        if request.method == "POST":
-            ensure_assessment_open(assessment)
-            submitted_scenario = request.form.get("scenario", "").strip()
-            if scenario_by_slug(submitted_scenario):
-                profile.scenario = submitted_scenario
-            profile.summary = request.form.get("summary", "").strip()
-            profile.notes = request.form.get("notes", "").strip()
-            for check in profile.checks:
-                submitted_status = request.form.get(f"status_{check.id}", "").strip()
-                check.status = (
-                    submitted_status
-                    if submitted_status in SPD5_STATUS_OPTIONS
-                    else "not_verified"
-                )
-                check.evidence_refs = request.form.get(
-                    f"evidence_refs_{check.id}", ""
-                ).strip()
-                check.notes = request.form.get(f"notes_{check.id}", "").strip()
-                check.updated_at = now_iso()
-            sync_profile_posture(profile)
-            touch_assessment(assessment)
-            db.session.commit()
-            flash("SPD-5 companion checklist saved.", "success")
-            return redirect(
-                url_for("assessment_spd5_companion", assessment_id=assessment_id)
-            )
-        return render_template(
-            "compliance_profile.html",
-            assessment=assessment,
-            profile=profile,
-            groups=family_groups_for_profile(profile),
-            counts=status_counts(profile.checks),
-            scenarios=SPD5_SCENARIOS,
-            status_options=SPD5_STATUS_OPTIONS,
-            reference_url=SPD5_COMPANION_REFERENCE_URL,
-            phases=assessment_phases(assessment),
-        )
-
     @app.post("/assessments/<int:assessment_id>/versions/capture")
     def capture_version(assessment_id):
         assessment = get_assessment(assessment_id)
@@ -560,11 +494,12 @@ def create_app(test_config=None):
         ensure_assessment_open(assessment)
         fari_id = assessment.fari_id
         investigation_ids = [item.fari_id for item in assessment.investigations]
+        source_root = Path(app.config["ASSET_SOURCE_DIR"]) / assessment.fari_id
         db.session.delete(assessment)
         db.session.commit()
         for investigation_id in investigation_ids:
             shutil.rmtree(Path(app.config["UPLOAD_DIR"]) / investigation_id, ignore_errors=True)
-        shutil.rmtree(Path(app.config["ATTACK_FLOW_DIR"]) / fari_id, ignore_errors=True)
+        shutil.rmtree(source_root, ignore_errors=True)
         flash(f"Assessment {fari_id} and its open working data were deleted.", "success")
         return redirect(url_for("index"))
 
@@ -618,6 +553,20 @@ def create_app(test_config=None):
         flash(f"Asset {asset.fari_id} added.", "success")
         return redirect(url_for("assessment_detail", assessment_id=assessment_id))
 
+    @app.get("/assets/<int:asset_id>")
+    def asset_detail(asset_id):
+        asset = get_record(Asset, asset_id)
+        assessment = asset.assessment
+        return render_template(
+            "asset_detail.html",
+            asset=asset,
+            assessment=assessment,
+            sources=asset.sources,
+            inventory_components=asset.inventory_components,
+            investigations=asset.investigations,
+            phases=assessment_phases(assessment),
+        )
+
     @app.post("/assets/<int:asset_id>/delete")
     def delete_asset(asset_id):
         asset = get_record(Asset, asset_id)
@@ -627,8 +576,8 @@ def create_app(test_config=None):
         fari_id = asset.fari_id
         for investigation in list(asset.investigations):
             investigation.asset_id = None
-        for document in list(asset.sbom_documents):
-            document.asset_id = None
+        for source in list(asset.sources):
+            source.asset_id = None
         for component in list(asset.inventory_components):
             component.asset_id = None
         db.session.delete(asset)
@@ -866,7 +815,7 @@ def create_app(test_config=None):
                     setattr(finding, field, value)
                 touch_investigation(finding.investigation)
                 db.session.commit()
-                flash(f"Finding {finding.fari_id} and its SPARTA mapping were updated.", "success")
+                flash(f"Finding {finding.fari_id} was updated.", "success")
                 return redirect(
                     url_for("investigation_detail", investigation_id=finding.investigation_id)
                 )
@@ -878,118 +827,40 @@ def create_app(test_config=None):
             phases=assessment_phases(finding.investigation.assessment),
         )
 
-    @app.post("/assessments/<int:assessment_id>/attack-flows")
-    def add_attack_flow(assessment_id):
-        assessment = get_assessment(assessment_id)
+    @app.post("/assets/<int:asset_id>/sources")
+    def upload_asset_source(asset_id):
+        asset = get_record(Asset, asset_id)
+        assessment = asset.assessment
         ensure_assessment_open(assessment)
         uploaded = request.files.get("file")
         if not uploaded or not uploaded.filename:
-            flash("Select an AFB file.", "error")
-            return redirect(url_for("assessment_detail", assessment_id=assessment_id))
-        original_name = secure_filename(uploaded.filename) or "attack-flow.afb"
-        if not original_name.lower().endswith(".afb"):
-            flash("Attack Flow uploads must use the .afb extension.", "error")
-            return redirect(url_for("assessment_detail", assessment_id=assessment_id))
+            flash(translate("flash.select_asset_source"), "error")
+            return redirect(url_for("asset_detail", asset_id=asset_id))
+        original_name = secure_filename(uploaded.filename) or "asset-source.bin"
         raw = uploaded.read()
         try:
-            parsed = parse_attack_flow(raw)
-        except AttackFlowError as exc:
-            flash(str(exc), "error")
-            return redirect(url_for("assessment_detail", assessment_id=assessment_id))
-        sequence = next_sequence(assessment.attack_flows, "AFB")
-        fari_id = f"AFB-{assessment_id:04d}-{sequence:03d}"
-        stored_name = f"{fari_id}-{original_name}"
-        target = Path(app.config["ATTACK_FLOW_DIR"]) / assessment.fari_id / stored_name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(raw)
-        attack_flow = AttackFlow(
-            assessment=assessment,
-            fari_id=fari_id,
-            filename=original_name,
-            stored_name=stored_name,
-            name=parsed["name"],
-            description=parsed["description"],
-            parsed_json=json.dumps(parsed),
-        )
-        db.session.add(attack_flow)
-        touch_assessment(assessment)
-        db.session.commit()
-        flash(f"Attack Flow {fari_id} imported for read-only visualization.", "success")
-        return redirect(url_for("attack_flow_detail", attack_flow_id=attack_flow.id))
-
-    @app.post("/attack-flows/<int:attack_flow_id>/delete")
-    def delete_attack_flow(attack_flow_id):
-        attack_flow = get_record(AttackFlow, attack_flow_id)
-        assessment = attack_flow.assessment
-        ensure_assessment_open(assessment)
-        assessment_id = assessment.id
-        fari_id = attack_flow.fari_id
-        target = (
-            Path(app.config["ATTACK_FLOW_DIR"])
-            / assessment.fari_id
-            / attack_flow.stored_name
-        )
-        if target.exists():
-            target.unlink()
-        db.session.delete(attack_flow)
-        touch_assessment(assessment)
-        db.session.commit()
-        flash(f"Attack Flow {fari_id} deleted.", "success")
-        return redirect(url_for("assessment_detail", assessment_id=assessment_id))
-
-    @app.get("/attack-flows/<int:attack_flow_id>")
-    def attack_flow_detail(attack_flow_id):
-        attack_flow = get_record(AttackFlow, attack_flow_id)
-        graph = json.loads(attack_flow.parsed_json)
-        if "groups" not in graph:
-            source = (
-                Path(app.config["ATTACK_FLOW_DIR"])
-                / attack_flow.assessment.fari_id
-                / attack_flow.stored_name
-            )
-            if source.exists():
-                graph = parse_attack_flow(source.read_bytes())
-        nodes_by_id = {node["id"]: node for node in graph["nodes"]}
-        return render_template(
-            "attack_flow_detail.html",
-            attack_flow=attack_flow,
-            assessment=attack_flow.assessment,
-            graph=graph,
-            nodes_by_id=nodes_by_id,
-            phases=assessment_phases(attack_flow.assessment),
-        )
-
-    @app.post("/assessments/<int:assessment_id>/sbom")
-    def upload_sbom(assessment_id):
-        assessment = get_assessment(assessment_id)
-        ensure_assessment_open(assessment)
-        uploaded = request.files.get("file")
-        if not uploaded or not uploaded.filename:
-            flash("Select an SBOM or dependency inventory file.", "error")
-            return redirect(url_for("assessment_detail", assessment_id=assessment_id))
-        original_name = secure_filename(uploaded.filename) or "inventory.json"
-        raw = uploaded.read()
-        try:
-            parsed = parse_sbom_bytes(original_name, raw)
+            parsed = parse_asset_source(original_name, raw)
         except (ValueError, json.JSONDecodeError) as exc:
             flash(str(exc), "error")
-            return redirect(url_for("assessment_detail", assessment_id=assessment_id))
+            return redirect(url_for("asset_detail", asset_id=asset_id))
 
-        sequence = next_sequence(assessment.sbom_documents, "SBM")
-        fari_id = f"SBM-{assessment_id:04d}-{sequence:03d}"
+        sequence = next_sequence(asset.sources, "SRC")
+        fari_id = f"SRC-{assessment.id:04d}-{sequence:03d}"
         stored_name = f"{fari_id}-{original_name}"
-        target = sbom_path(assessment, stored_name)
+        target = asset_source_path(asset, stored_name)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
-        document = SbomDocument(
+        document = AssetSource(
             assessment=assessment,
-            asset_id=_integer_or_none(request.form.get("asset_id")),
+            asset=asset,
             fari_id=fari_id,
             filename=original_name,
             stored_name=stored_name,
             file_format=parsed["format"],
             component_count=len(parsed["components"]),
             sha256=hashlib.sha256(raw).hexdigest(),
+            byte_size=len(raw),
+            mime_type=uploaded.mimetype or "application/octet-stream",
             notes=request.form.get("notes", "").strip(),
         )
         db.session.add(document)
@@ -1002,7 +873,7 @@ def create_app(test_config=None):
                 assessment,
                 document,
                 component_data,
-                document.asset_id,
+                asset.id,
             )
             if event_type == "imported":
                 imported += 1
@@ -1012,15 +883,22 @@ def create_app(test_config=None):
         touch_assessment(assessment)
         db.session.commit()
         flash(
-            f"SBOM {document.fari_id} ingested. {imported} components added, {updated} versions changed.",
+            translate(
+                "flash.asset_source_summary",
+                id=document.fari_id,
+                imported=imported,
+                updated=updated,
+            ),
             "success",
         )
-        return redirect(url_for("assessment_detail", assessment_id=assessment_id))
+        return redirect(url_for("asset_detail", asset_id=asset_id))
 
-    @app.get("/sbom-documents/<int:document_id>/download")
-    def download_sbom(document_id):
-        document = get_record(SbomDocument, document_id)
-        path = sbom_path(document.assessment, document.stored_name)
+    @app.get("/asset-sources/<int:source_id>/download")
+    def download_asset_source(source_id):
+        document = get_record(AssetSource, source_id)
+        if not document.asset:
+            abort(404)
+        path = asset_source_path(document.asset, document.stored_name)
         if not path.exists():
             abort(404)
         return send_file(path, as_attachment=True, download_name=document.filename)
@@ -1072,26 +950,6 @@ def create_app(test_config=None):
     def help_search():
         return jsonify({"items": search_definitions(request.args.get("q", ""))})
 
-    @app.get("/sparta/ttps")
-    def sparta_ttps():
-        try:
-            catalog = load_sparta_catalog()
-            return jsonify(
-                {
-                    "items": search_ttps(request.args.get("q", "")),
-                    "version": catalog["version"],
-                }
-            )
-        except (OSError, json.JSONDecodeError) as exc:
-            return jsonify({"items": [], "error": str(exc)}), 503
-
-    @app.get("/sparta/ttps/<path:ttp_id>/countermeasures")
-    def sparta_countermeasures(ttp_id):
-        try:
-            return jsonify({"items": countermeasures_for(ttp_id)})
-        except (OSError, json.JSONDecodeError) as exc:
-            return jsonify({"items": [], "error": str(exc)}), 503
-
     @app.get("/investigations/<int:investigation_id>/report.docx")
     def investigation_report(investigation_id):
         investigation = get_investigation(investigation_id)
@@ -1101,6 +959,7 @@ def create_app(test_config=None):
             investigation.asset,
             investigation.evidence,
             investigation.findings,
+            language=language(),
         )
         return send_file(
             output,
@@ -1124,6 +983,7 @@ def create_app(test_config=None):
             investigation.asset,
             investigation.evidence,
             investigation.findings,
+            language=language(),
         )
         return send_file(
             output,
@@ -1136,7 +996,7 @@ def create_app(test_config=None):
     def consolidated_report(assessment_id):
         assessment = get_assessment(assessment_id)
         output = build_consolidated_report(
-            assessment, assessment.assets, assessment.investigations
+            assessment, assessment.assets, assessment.investigations, language=language()
         )
         return send_file(
             output,
@@ -1155,7 +1015,7 @@ def create_app(test_config=None):
         if assessment.status != "closed":
             abort(409, description="Consolidated PDF is available only after closure.")
         output = build_consolidated_pdf(
-            assessment, assessment.assets, assessment.investigations
+            assessment, assessment.assets, assessment.investigations, language=language()
         )
         return send_file(
             output,
@@ -1167,37 +1027,7 @@ def create_app(test_config=None):
     @app.get("/assessments/<int:assessment_id>/export.json")
     def export_assessment(assessment_id):
         assessment = get_assessment(assessment_id)
-        investigations = []
-        for item in assessment.investigations:
-            exported = item.to_dict()
-            exported["evidence"] = [record.to_dict() for record in item.evidence]
-            exported["findings"] = [record.to_dict() for record in item.findings]
-            investigations.append(exported)
-        inventory = []
-        for component in assessment.inventory_components:
-            exported = component.to_dict()
-            exported["events"] = [record.to_dict() for record in component.events]
-            inventory.append(exported)
-        compliance_profiles = []
-        for profile in assessment.compliance_profiles:
-            exported = profile.to_dict()
-            exported["checks"] = [record.to_dict() for record in profile.checks]
-            compliance_profiles.append(exported)
-        payload = {
-            "assessment": assessment.to_dict(),
-            "assets": [item.to_dict() for item in assessment.assets],
-            "investigations": investigations,
-            "attack_flows": [item.to_dict() for item in assessment.attack_flows],
-            "versions": [
-                {**item.to_dict(), "snapshot": parse_version_snapshot(item)}
-                for item in assessment.versions
-            ],
-            "sbom_documents": [item.to_dict() for item in assessment.sbom_documents],
-            "inventory_components": inventory,
-            "compliance_profiles": compliance_profiles,
-            "overall_conclusion": overall_conclusion(assessment.investigations),
-            "generated_with": FARI_GENERATED_WITH,
-        }
+        payload = build_export_payload(assessment)
         output = BytesIO(json.dumps(payload, indent=2).encode("utf-8"))
         return send_file(
             output,
@@ -1221,8 +1051,13 @@ def create_app(test_config=None):
     def evidence_path(investigation, stored_name):
         return Path(app.config["UPLOAD_DIR"]) / investigation.fari_id / stored_name
 
-    def sbom_path(assessment, stored_name):
-        return Path(app.config["SBOM_DIR"]) / assessment.fari_id / stored_name
+    def asset_source_path(asset, stored_name):
+        return (
+            Path(app.config["ASSET_SOURCE_DIR"])
+            / asset.assessment.fari_id
+            / asset.fari_id
+            / stored_name
+        )
 
     def ensure_assessment_open(assessment):
         if assessment.status == "closed":
@@ -1242,13 +1077,346 @@ def _integer_or_none(value):
         return None
 
 
-def finding_values(form) -> dict:
+def format_bytes(value: int | None) -> str:
+    amount = max(int(value or 0), 0)
+    units = ("B", "KB", "MB", "GB")
+    size = float(amount)
+    for unit in units:
+        if size < 1024 or unit == units[-1]:
+            return f"{size:.1f} {unit}" if unit != "B" else f"{amount} B"
+        size /= 1024
+    return f"{amount} B"
+
+
+def _date_only(value: str) -> str:
+    return (value or "")[:10]
+
+
+def _lines(value: str) -> list[str]:
+    return [line.strip() for line in (value or "").splitlines() if line.strip()]
+
+
+def _asset_source_material(source: AssetSource) -> dict:
+    asset = source.asset
+    asset_label = asset.fari_id if asset else "unassigned"
     return {
-        **{field: form.get(field, "").strip() for field in FINDING_FIELDS},
-        "include_sparta_countermeasures": bool(
-            form.get("include_sparta_countermeasures")
-        ),
+        "id": source.fari_id,
+        "description": source.notes or f"Technical source file {source.filename} for {asset_label}.",
+        "source": asset_label,
+        "received_date": _date_only(source.uploaded_at),
+        "original_format": source.file_format,
+        "controlled_reference": f"asset-sources/{asset_label}/{source.stored_name}",
+        "integrity": f"sha256:{source.sha256}",
+        "limitations": [],
     }
+
+
+def _evidence_source_material(evidence: Evidence) -> dict:
+    source_id = f"SRC-{evidence.fari_id}"
+    return {
+        "id": source_id,
+        "description": evidence.description or f"Evidence file {evidence.filename}.",
+        "source": "web workspace upload",
+        "received_date": _date_only(evidence.uploaded_at),
+        "original_format": evidence.mime_type or "unknown",
+        "controlled_reference": f"evidence/{evidence.investigation.fari_id}/{evidence.stored_name}",
+        "integrity": f"sha256:{evidence.sha256}",
+        "limitations": [],
+    }
+
+
+def _canonical_asset(asset: Asset) -> dict:
+    return {
+        "id": asset.fari_id,
+        "fari_id": asset.fari_id,
+        "name": asset.name,
+        "segment": asset.segment,
+        "access_model": asset.access_model,
+        "coverage": asset.coverage,
+        "description": asset.description or "",
+        "mission_objectives": [],
+    }
+
+
+def _canonical_finding(finding: Finding, investigation: Investigation) -> dict:
+    asset_ids = [investigation.asset.fari_id] if investigation.asset else []
+    evidence_ids = [item.fari_id for item in investigation.evidence]
+    return {
+        "id": finding.fari_id,
+        "title": finding.title,
+        "state": finding.state,
+        "asset_ids": asset_ids,
+        "evidence_ids": evidence_ids,
+        "confidence": investigation.confidence,
+        "fari_conclusion": investigation.conclusion,
+        "required_action": investigation.required_action,
+        "condition_text": finding.condition_text,
+        "observed_effect": finding.observed_effect,
+        "credible_impact": finding.credible_impact,
+        "mapping_state": finding.mapping_state,
+        "mapping_rationale": finding.mapping_rationale,
+        "mappings": [],
+        "limitations": _lines(investigation.gaps),
+    }
+
+
+def _canonical_inventory_event(event: InventoryEvent) -> dict:
+    return {
+        "fari_id": event.fari_id,
+        "event_type": event.event_type,
+        "occurred_at": event.occurred_at,
+        "from_version": event.from_version or "",
+        "to_version": event.to_version or "",
+        "vulnerability_id": event.vulnerability_id or "",
+        "severity": event.severity or "",
+        "summary": event.summary or "",
+        "status_after": event.status_after or "",
+    }
+
+
+def _investigation_source_ids(investigation: Investigation) -> list[str]:
+    ids = []
+    if investigation.asset:
+        ids.extend(source.fari_id for source in investigation.asset.sources)
+    ids.extend(f"SRC-{item.fari_id}" for item in investigation.evidence)
+    return list(dict.fromkeys(ids))
+
+
+def build_export_payload(assessment: Assessment) -> dict:
+    """Build the normalized bundle described by the current FARI schema."""
+
+    assets = [_canonical_asset(asset) for asset in assessment.assets]
+    claims = []
+    source_materials = []
+    investigations = []
+    method_runs = []
+    evidence = []
+    evidence_reviews = []
+    findings = []
+    conclusions = []
+    assurance = []
+
+    for source in assessment.asset_sources:
+        source_materials.append(_asset_source_material(source))
+
+    for investigation in assessment.investigations:
+        claim_id = investigation.claim_id
+        asset_ids = [investigation.asset.fari_id] if investigation.asset else []
+        source_ids = _investigation_source_ids(investigation)
+        run_id = f"RUN-{investigation.fari_id}"
+        conclusion_id = f"CON-{investigation.fari_id}"
+        claims.append(
+            {
+                "id": claim_id,
+                "statement": investigation.claim_description,
+                "gating": investigation.gating,
+                "conclusion": investigation.conclusion,
+                "asset_ids": asset_ids,
+            }
+        )
+
+        for item in investigation.evidence:
+            source_materials.append(_evidence_source_material(item))
+            evidence.append(
+                {
+                    "id": item.fari_id,
+                    "description": item.description or item.filename,
+                    "method_run_id": run_id,
+                    "source_material_id": f"SRC-{item.fari_id}",
+                    "integrity": f"sha256:{item.sha256}",
+                    "controlled_reference": f"evidence/{investigation.fari_id}/{item.stored_name}",
+                }
+            )
+
+        canonical_findings = [
+            _canonical_finding(item, investigation) for item in investigation.findings
+        ]
+        findings.extend(canonical_findings)
+        investigations.append(
+            {
+                "id": investigation.fari_id,
+                "fari_id": investigation.fari_id,
+                "title": investigation.title,
+                "claim_ids": [claim_id],
+                "source_material_ids": source_ids,
+                "finding_ids": [item["id"] for item in canonical_findings],
+                "conclusion_id": conclusion_id,
+                "report_reference": f"reports/{investigation.fari_id}",
+                "method_run_id": run_id,
+                "evidence": [item for item in evidence if item["method_run_id"] == run_id],
+                "findings": canonical_findings,
+            }
+        )
+        method_runs.append(
+            {
+                "id": run_id,
+                "method": investigation.method,
+                "environment": investigation.environment,
+                "status": {
+                    "draft": "planned",
+                    "ready": "active",
+                    "closed": "complete",
+                }.get(investigation.status, "planned"),
+                "source_material_ids": source_ids,
+                "limitations": _lines(investigation.gaps),
+            }
+        )
+        evidence_reviews.append(
+            {
+                "id": f"EIR-{investigation.fari_id}",
+                "method_run_ids": [run_id],
+                "source_material_ids": source_ids,
+                "review_date": _date_only(investigation.updated_at),
+                "technical_condition_sufficiency": investigation.technical_sufficiency,
+                "reachability_sufficiency": investigation.reachability_sufficiency,
+                "mission_consequence_sufficiency": investigation.mission_sufficiency,
+                "evidence_backed_facts": _lines(investigation.facts),
+                "producer_assertions": _lines(investigation.assertions),
+                "report_author_inferences": _lines(investigation.inferences),
+                "assumptions": _lines(investigation.assumptions),
+                "contradictions": _lines(investigation.contradictions),
+                "evidence_gaps": _lines(investigation.gaps),
+            }
+        )
+        conclusions.append(
+            {
+                "id": conclusion_id,
+                "level": "investigation",
+                "value": investigation.conclusion,
+                "scenario_disposition": investigation.scenario_state,
+                "confidence": investigation.confidence,
+                "required_action": investigation.required_action,
+                "priority": investigation.priority,
+                "scope_boundary": investigation.scope_boundary,
+                "rationale": investigation.rationale,
+                "gating_claim_ids": [claim_id] if investigation.gating else [],
+            }
+        )
+        assurance.append(
+            {
+                "id": f"ASR-{investigation.fari_id}",
+                "claim_id": claim_id,
+                "conclusion": investigation.conclusion,
+                "confidence": investigation.confidence,
+                "limitations": _lines(investigation.gaps),
+            }
+        )
+
+    overall = overall_conclusion(assessment.investigations)
+    gating_investigations = [item for item in assessment.investigations if item.gating]
+    overall_scenario = "not_evaluated"
+    if any(item.scenario_state == "demonstrated" for item in gating_investigations):
+        overall_scenario = "demonstrated"
+    elif any(item.scenario_state == "plausible" for item in gating_investigations):
+        overall_scenario = "plausible"
+    elif any(item.scenario_state == "not_demonstrated" for item in gating_investigations):
+        overall_scenario = "not_demonstrated"
+    assessment_conclusion_id = f"CON-{assessment.fari_id}"
+    conclusions.append(
+        {
+            "id": assessment_conclusion_id,
+            "level": "assessment",
+            "value": overall,
+            "scenario_disposition": overall_scenario,
+            "confidence": "medium" if assessment.investigations else "low",
+            "required_action": {
+                "meets": "accept",
+                "does_not_meet": "remediate",
+                "inconclusive": "extend_investigation",
+                "not_assessed": "extend_investigation",
+            }[overall],
+            "priority": "immediate" if overall == "does_not_meet" else "planned",
+            "scope_boundary": assessment.scope,
+            "rationale": f"Derived from {sum(item.gating for item in assessment.investigations)} gating investigation(s).",
+            "gating_claim_ids": [item.claim_id for item in assessment.investigations if item.gating],
+            "aggregation_rule": "Does Not Meet when any gating investigation Does Not Meet; otherwise Inconclusive when any gating investigation is Inconclusive or Not Assessed; otherwise Meets.",
+        }
+    )
+
+    inventory_components = []
+    for component in assessment.inventory_components:
+        inventory_components.append(
+            {
+                "fari_id": component.fari_id,
+                "name": component.name,
+                "ecosystem": component.ecosystem,
+                "current_version": component.current_version,
+                "status": component.status,
+                "asset_id": component.asset.fari_id if component.asset else None,
+                "purl": component.purl,
+                "component_type": component.component_type,
+                "license_name": component.license_name,
+                "notes": component.notes,
+                "first_seen_at": component.first_seen_at,
+                "last_seen_at": component.last_seen_at,
+                "events": [_canonical_inventory_event(item) for item in component.events],
+            }
+        )
+
+    return {
+        "assessment": {
+            "id": assessment.fari_id,
+            "title": assessment.title,
+            "status": assessment.status,
+            "report_maturity": assessment.maturity,
+            "framework_profiles": [],
+            "scope_summary": assessment.scope,
+            "conclusion_id": assessment_conclusion_id,
+            "roles": {"report_author": assessment.report_author},
+            "limitations": _lines(assessment.exclusions),
+        },
+        "mission_objectives": [],
+        "assets": assets,
+        "claims": claims,
+        "source_materials": source_materials,
+        "investigations": investigations,
+        "method_runs": method_runs,
+        "evidence": evidence,
+        "evidence_intake_reviews": evidence_reviews,
+        "findings": findings,
+        "versions": [
+            {
+                "fari_id": item.fari_id,
+                "version_number": item.version_number,
+                "label": item.label,
+                "trigger": item.trigger,
+                "summary": item.summary,
+                "created_at": item.created_at,
+                "snapshot": parse_version_snapshot(item),
+            }
+            for item in assessment.versions
+        ],
+        "asset_sources": [
+            {
+                "fari_id": item.fari_id,
+                "filename": item.filename,
+                "file_format": item.file_format,
+                "component_count": item.component_count,
+                "sha256": item.sha256,
+                "byte_size": item.byte_size,
+                "mime_type": item.mime_type,
+                "asset_id": item.asset.fari_id if item.asset else None,
+                "notes": item.notes,
+                "uploaded_at": item.uploaded_at,
+            }
+            for item in assessment.asset_sources
+        ],
+        "inventory_components": inventory_components,
+        "risks": [],
+        "conclusions": conclusions,
+        "assurance": assurance,
+        "generated_with": FARI_GENERATED_WITH,
+        "implementation": {
+            "edition": "web",
+            "database_id": assessment.id,
+            "revision_count": assessment.revision_count,
+            "languages": ["en", "es"],
+        },
+    }
+
+
+def finding_values(form) -> dict:
+    return {field: form.get(field, "").strip() for field in FINDING_FIELDS}
 
 
 def validate_investigation_form(form) -> str | None:
@@ -1298,13 +1466,7 @@ def assessment_checks(assessment: Assessment) -> list[dict]:
 
 
 def result_action_valid(conclusion: str, required_action: str) -> bool:
-    valid = {
-        "meets": {"accept", "no_action", "extend_investigation", "retest"},
-        "does_not_meet": {"remediate", "extend_investigation", "retest"},
-        "inconclusive": {"extend_investigation", "retest"},
-        "not_assessed": {"extend_investigation", "no_action"},
-    }
-    return required_action in valid.get(conclusion, set())
+    return required_action in CONCLUSION_ACTIONS.get(conclusion, frozenset())
 
 
 def default_traceability_refs(assessment: Assessment, versions: list[AssessmentVersion]) -> tuple[str, str]:
@@ -1355,7 +1517,7 @@ def find_inventory_component(
 
 def upsert_inventory_component(
     assessment: Assessment,
-    document: SbomDocument,
+    document: AssetSource,
     component_data: dict,
     asset_id: int | None,
 ) -> str:
@@ -1420,7 +1582,7 @@ def upsert_inventory_component(
                 occurred_at=document.uploaded_at,
                 from_version=previous_version,
                 to_version=new_version,
-                summary=f"SBOM refresh {document.fari_id} updated the recorded component version.",
+                summary=f"Asset source {document.fari_id} refreshed the recorded component version.",
                 status_after=component.status,
             )
         )
@@ -1462,14 +1624,14 @@ def assessment_phases(assessment: Assessment) -> list[dict]:
     )
     base = url_for("assessment_detail", assessment_id=assessment.id)
     steps = [
-        ("01", "Frame", "Client, scope, assets, and claims", bool(assessment.scope.strip() and assessment.assets), f"{base}#frame"),
-        ("02", "Acquire", "Evidence, inventory, and sufficiency", acquired, f"{base}#acquire"),
-        ("03", "Relate", "Findings, SBOM state, scenarios, and SPARTA", related, f"{base}#relate"),
-        ("04", "Inform", "Close and publish consolidated reports", assessment.status == "closed", f"{base}#inform"),
+        ("01", "phase.frame", "phase.frame_detail", bool(assessment.scope.strip() and assessment.assets), f"{base}#frame"),
+        ("02", "phase.acquire", "phase.acquire_detail", acquired, f"{base}#acquire"),
+        ("03", "phase.relate", "phase.relate_detail", related, f"{base}#relate"),
+        ("04", "phase.inform", "phase.inform_detail", assessment.status == "closed", f"{base}#inform"),
     ]
     current_found = False
     phases = []
-    for number, name, copy, done, href in steps:
+    for number, name_key, detail_key, done, href in steps:
         if done:
             state = "complete"
         elif not current_found:
@@ -1478,17 +1640,17 @@ def assessment_phases(assessment: Assessment) -> list[dict]:
         else:
             state = "pending"
         phases.append(
-            {"number": number, "name": name, "detail": copy, "state": state, "href": href}
+            {"number": number, "name_key": name_key, "detail_key": detail_key, "state": state, "href": href}
         )
     return phases
 
 
 def new_assessment_phases() -> list[dict]:
     return [
-        {"number": "01", "name": "Frame", "detail": "Client, scope, assets, and claims", "state": "current", "href": "#frame"},
-        {"number": "02", "name": "Acquire", "detail": "Evidence, inventory, and sufficiency", "state": "pending", "href": "#"},
-        {"number": "03", "name": "Relate", "detail": "Findings, SBOM state, scenarios, and SPARTA", "state": "pending", "href": "#"},
-        {"number": "04", "name": "Inform", "detail": "Close and publish consolidated reports", "state": "pending", "href": "#"},
+        {"number": "01", "name_key": "phase.frame", "detail_key": "phase.frame_detail", "state": "current", "href": "#frame"},
+        {"number": "02", "name_key": "phase.acquire", "detail_key": "phase.acquire_detail", "state": "pending", "href": "#"},
+        {"number": "03", "name_key": "phase.relate", "detail_key": "phase.relate_detail", "state": "pending", "href": "#"},
+        {"number": "04", "name_key": "phase.inform", "detail_key": "phase.inform_detail", "state": "pending", "href": "#"},
     ]
 
 

@@ -2,23 +2,34 @@ framework:
   id: fari
   name: Framework for Aerospace Research and Investigation
   short_name: FARI
-  version: 1.2.0
+version: 1.3.0
 
 canonical_sources:
   specification: specification/FARI-SPECIFICATION.md
   complete_specification: specification/FARI-SPECIFICATION-COMPLETE.md
-  spd5_companion: specification/FARI-SPD5-COMPANION.md
   manual_template: templates/FARI-Manual-Template.md
   scenario_catalog: reports/FARI-SCENARIO-TEST-CATALOG.md
   schema: ../schema/fari-assessment.schema.json
 
 release:
-  path: ../releases/v1.2.0
-  specification_pdf: ../releases/v1.2.0/specification/FARI-Specification-v1.2.0.pdf
-  manual_template_pdf: ../releases/v1.2.0/manual-template/FARI-Manual-Template-v1.2.0.pdf
-  scenario_catalog_pdf: ../releases/v1.2.0/reports/FARI-SCENARIO-TEST_CATALOG-v1.2.0.pdf
+  path: ../releases/v1.3.0
+  specification_pdf: ../releases/v1.3.0/specification/FARI-Specification-v1.3.0.pdf
+  manual_template_pdf: ../releases/v1.3.0/manual-template/FARI-Manual-Template-v1.3.0.pdf
+  scenario_catalog_pdf: ../releases/v1.3.0/reports/FARI-SCENARIO-TEST_CATALOG-v1.3.0.pdf
 
 web_contract:
+  assessment_statuses:
+    - draft
+    - closed
+  maturity_values:
+    - draft
+    - provisional
+    - final
+    - superseded
+  investigation_statuses:
+    - draft
+    - ready
+    - closed
   conclusions:
     - meets
     - does_not_meet
@@ -41,8 +52,91 @@ web_contract:
     - private
     - public
     - other
+  coverage_values:
+    - not_assessed
+    - tested
+    - reviewed
+    - inferred
+    - out_of_scope
+  sufficiency_values:
+    - sufficient
+    - partial
+    - insufficient
+  confidence_values:
+    - high
+    - medium
+    - low
+  required_actions:
+    - accept
+    - remediate
+    - extend_investigation
+    - retest
+    - no_action
+  priority_values:
+    - immediate
+    - planned
+    - routine
+    - none
+  finding_states:
+    - candidate
+    - confirmed
+    - observation
+    - remediated
+    - verified_closed
+  mapping_states:
+    - candidate
+    - confirmed
+    - not_applicable
+  inventory_statuses:
+    - tracked
+    - vulnerable
+    - update_in_progress
+    - fixed
+    - accepted
+    - not_affected
+  inventory_event_types:
+    - imported
+    - vulnerability_detected
+    - version_updated
+    - fix_verified
+    - status_changed
+    - note
+  severity_values:
+    - critical
+    - high
+    - medium
+    - low
+    - info
+    - unknown
+  asset_source_formats:
+    - cyclonedx
+    - spdx
+    - package-lock
+    - dependency-map
+    - text-list
+    - jsonl
+    - jsonl-components
+    - sigmf-meta
+    - sigmf-data
+    - binary
+    - pcap
+    - pcapng
+    - elf
+    - hex
+    - csv
+    - tsv
+    - yaml
+    - xml
+    - pdf
+    - doc
+    - docx
+    - xls
+    - xlsx
+    - text
+    - json
+    - empty
 
 implementation_notes:
   web_app: ../../webapp
   tools: ../../tools
-  generated_with: FARI v1.2.0
+  generated_with: FARI v1.3.0
